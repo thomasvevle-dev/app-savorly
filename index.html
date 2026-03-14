@@ -29,7 +29,7 @@ margin-bottom:10px;
 #card-stack{
 position:relative;
 width:340px;
-height:440px;
+height:460px;
 }
 
 .card{
@@ -51,6 +51,11 @@ object-fit:cover;
 
 .info{
 padding:15px;
+}
+
+.rating{
+color:#FFD700;
+margin-top:5px;
 }
 
 .buttons{
@@ -96,12 +101,11 @@ color:white;
 
 <div id="card-stack"></div>
 
-<p id="favorites"></p>
-
 <script>
 
+localStorage.removeItem("favorites")
+
 let places=[]
-let favorites=JSON.parse(localStorage.getItem("favorites"))||[]
 
 async function loadPlaces(){
 
@@ -134,11 +138,21 @@ lat:p.lat,
 
 lon:p.lon,
 
+rating:generateRating(),
+
 image:getImage()
 
 }))
 
 renderCards()
+
+}
+
+function generateRating(){
+
+let r=(Math.random()*1.2+3.8).toFixed(1)
+
+return "⭐ "+r
 
 }
 
@@ -180,7 +194,7 @@ card.innerHTML=`
 
 <h3>${place.name}</h3>
 
-<p>Vinbar / Cocktailbar • Oslo</p>
+<div class="rating">${place.rating}</div>
 
 <div class="buttons">
 
@@ -190,7 +204,7 @@ card.innerHTML=`
 
 </div>
 
-<button class="map-btn">📍 Veibeskrivelse</button>
+<button class="map-btn">📍 Naviger hit</button>
 
 </div>
 `
@@ -200,8 +214,6 @@ addSwipe(card,place)
 stack.appendChild(card)
 
 })
-
-showFavorites()
 
 }
 
@@ -228,13 +240,6 @@ let moveX=e.changedTouches[0].clientX-startX
 
 if(moveX>120){
 
-favorites.push(place.name)
-
-localStorage.setItem(
-"favorites",
-JSON.stringify(favorites)
-)
-
 card.remove()
 
 }
@@ -251,8 +256,6 @@ card.style.transform="translateX(0)"
 
 }
 
-showFavorites()
-
 })
 
 card.querySelector(".map-btn")
@@ -263,13 +266,6 @@ window.open(
 )
 
 }
-
-}
-
-function showFavorites(){
-
-document.getElementById("favorites")
-.innerText="Favoritter: "+favorites.join(", ")
 
 }
 
