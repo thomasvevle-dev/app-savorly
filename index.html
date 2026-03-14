@@ -2,16 +2,14 @@
 <html lang="no">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Savorly</title>
 
 <style>
 
 body{
-font-family: Arial, sans-serif;
+font-family: Arial;
 background:#111;
 color:white;
 display:flex;
@@ -19,6 +17,7 @@ justify-content:center;
 align-items:center;
 height:100vh;
 margin:0;
+overflow:hidden;
 }
 
 .container{
@@ -31,15 +30,13 @@ background:#222;
 border-radius:20px;
 padding:20px;
 box-shadow:0 10px 25px rgba(0,0,0,0.4);
+touch-action:none;
+position:relative;
 }
 
 .card img{
 width:100%;
 border-radius:15px;
-}
-
-h2{
-margin:10px 0;
 }
 
 .category{
@@ -51,12 +48,6 @@ margin-bottom:6px;
 color:#FFD700;
 font-size:18px;
 margin-bottom:10px;
-}
-
-.arrows{
-margin-top:10px;
-font-size:26px;
-opacity:0.7;
 }
 
 .buttons{
@@ -91,30 +82,30 @@ border:none;
 cursor:pointer;
 color:white;
 font-size:16px;
+width:100%;
+}
+
+.favorites{
+margin-top:20px;
+font-size:14px;
 }
 
 </style>
-
 </head>
-
 
 <body>
 
 <div class="container">
 
-<div class="card">
+<div class="card" id="card">
 
-<img id="image" src="">
+<img id="image">
 
 <h2 id="name"></h2>
 
 <div class="category" id="category"></div>
 
 <div class="rating" id="rating"></div>
-
-<div class="arrows">
-⬅️ Swipe left | Swipe right ➡️
-</div>
 
 <div class="buttons">
 
@@ -129,6 +120,8 @@ font-size:16px;
 </button>
 
 </div>
+
+<div class="favorites" id="favorites"></div>
 
 </div>
 
@@ -178,95 +171,60 @@ maps:"https://www.google.com/maps/search/Bar+Boca+Oslo"
 },
 
 {
-name:"Andre Til Høyre",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.4",
-image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-maps:"https://www.google.com/maps/search/Andre+Til+Høyre+Oslo"
-},
-
-{
-name:"Oslo Vinkontor",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.5",
-image:"https://images.unsplash.com/photo-1510812431401-41d2bd2722f3",
-maps:"https://www.google.com/maps/search/Oslo+Vinkontor+Oslo"
-},
-
-{
-name:"Becco",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.6",
-image:"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
-maps:"https://www.google.com/maps/search/Becco+Oslo"
-},
-
-{
 name:"Himkok",
 category:"Cocktailbar • Oslo",
 rating:"⭐ 4.8",
 image:"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
 maps:"https://www.google.com/maps/search/Himkok+Oslo"
-},
-
-{
-name:"Vesper Bar",
-category:"Cocktailbar • Oslo",
-rating:"⭐ 4.6",
-image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-maps:"https://www.google.com/maps/search/Vesper+Bar+Oslo"
 }
 
 ]
 
-
 let index = 0
+let favorites = JSON.parse(localStorage.getItem("favorites")) || []
 
+const card = document.getElementById("card")
 
 function showPlace(){
 
 document.getElementById("name").innerText = places[index].name
-
 document.getElementById("category").innerText = places[index].category
-
 document.getElementById("rating").innerText = places[index].rating
-
 document.getElementById("image").src = places[index].image
 
-}
+showFavorites()
 
+}
 
 function swipeLeft(){
 
-index++
-
-if(index >= places.length){
-
-index = 0
+next()
 
 }
-
-showPlace()
-
-}
-
 
 function swipeRight(){
 
-alert("Lagret i favoritter ❤️")
+favorites.push(places[index].name)
+
+localStorage.setItem("favorites", JSON.stringify(favorites))
+
+next()
+
+}
+
+function next(){
 
 index++
 
 if(index >= places.length){
-
 index = 0
-
 }
+
+card.style.transform = "translateX(0)"
 
 showPlace()
 
 }
-
 
 function openMap(){
 
@@ -274,6 +232,51 @@ window.open(places[index].maps)
 
 }
 
+function showFavorites(){
+
+document.getElementById("favorites").innerText =
+"Favoritter: " + favorites.join(", ")
+
+}
+
+
+let startX = 0
+
+card.addEventListener("touchstart", e=>{
+startX = e.touches[0].clientX
+})
+
+card.addEventListener("touchmove", e=>{
+
+let moveX = e.touches[0].clientX - startX
+
+card.style.transform = `translateX(${moveX}px) rotate(${moveX*0.05}deg)`
+
+})
+
+card.addEventListener("touchend", e=>{
+
+let moveX = e.changedTouches[0].clientX - startX
+
+if(moveX > 120){
+
+swipeRight()
+
+}
+
+else if(moveX < -120){
+
+swipeLeft()
+
+}
+
+else{
+
+card.style.transform = "translateX(0)"
+
+}
+
+})
 
 showPlace()
 
