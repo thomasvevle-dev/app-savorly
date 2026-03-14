@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Savorly</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#111;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.container{
+width:360px;
+text-align:center;
+}
+
+.card{
+background:#222;
+border-radius:20px;
+padding:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+.card img{
+width:100%;
+border-radius:15px;
+}
+
+h2{
+margin:10px 0;
+}
+
+.category{
+color:#bbb;
+margin-bottom:6px;
+}
+
+.rating{
+color:#FFD700;
+font-size:18px;
+margin-bottom:10px;
+}
+
+.arrows{
+margin-top:10px;
+font-size:26px;
+opacity:0.7;
+}
+
+.buttons{
+display:flex;
+justify-content:space-between;
+margin-top:20px;
+}
+
+button{
+border:none;
+border-radius:50%;
+width:65px;
+height:65px;
+font-size:22px;
+cursor:pointer;
+}
+
+.left{
+background:#ff4d4d;
+}
+
+.right{
+background:#4CAF50;
+}
+
+.map-btn{
+margin-top:18px;
+background:#2196F3;
+padding:12px 20px;
+border-radius:10px;
+border:none;
+cursor:pointer;
+color:white;
+font-size:16px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<img id="image" src="">
+
+<h2 id="name"></h2>
+
+<div class="category" id="category"></div>
+
+<div class="rating" id="rating"></div>
+
+<div class="arrows">
+⬅️ Swipe left | Swipe right ➡️
+</div>
+
+<div class="buttons">
+
+<button class="left" onclick="swipeLeft()">←</button>
+
+<button class="right" onclick="swipeRight()">→</button>
+
+</div>
+
+<button class="map-btn" onclick="openMap()">
+📍 Veibeskrivelse
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const places = [
+
+{
+name:"Territoriet",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.6",
+image:"https://images.unsplash.com/photo-1510626176961-4b57d4fbad03",
+maps:"https://www.google.com/maps/search/Territoriet+Oslo"
+},
+
+{
+name:"Nektar Vinbar",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.5",
+image:"https://images.unsplash.com/photo-1470337458703-46ad1756a187",
+maps:"https://www.google.com/maps/search/Nektar+Vinbar+Oslo"
+},
+
+{
+name:"Vin Vin",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.4",
+image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+maps:"https://www.google.com/maps/search/Vin+Vin+Oslo"
+},
+
+{
+name:"Radegast Vinbar",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.5",
+image:"https://images.unsplash.com/photo-1510812431401-41d2bd2722f3",
+maps:"https://www.google.com/maps/search/Radegast+Vinbar+Oslo"
+},
+
+{
+name:"Bar Boca",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.6",
+image:"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
+maps:"https://www.google.com/maps/search/Bar+Boca+Oslo"
+},
+
+{
+name:"Andre Til Høyre",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.4",
+image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+maps:"https://www.google.com/maps/search/Andre+Til+Høyre+Oslo"
+},
+
+{
+name:"Oslo Vinkontor",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.5",
+image:"https://images.unsplash.com/photo-1510812431401-41d2bd2722f3",
+maps:"https://www.google.com/maps/search/Oslo+Vinkontor+Oslo"
+},
+
+{
+name:"Becco",
+category:"Vinbar • Oslo",
+rating:"⭐ 4.6",
+image:"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
+maps:"https://www.google.com/maps/search/Becco+Oslo"
+},
+
+{
+name:"Himkok",
+category:"Cocktailbar • Oslo",
+rating:"⭐ 4.8",
+image:"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
+maps:"https://www.google.com/maps/search/Himkok+Oslo"
+},
+
+{
+name:"Vesper Bar",
+category:"Cocktailbar • Oslo",
+rating:"⭐ 4.6",
+image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+maps:"https://www.google.com/maps/search/Vesper+Bar+Oslo"
+}
+
+]
+
+
+let index = 0
+
+
+function showPlace(){
+
+document.getElementById("name").innerText = places[index].name
+
+document.getElementById("category").innerText = places[index].category
+
+document.getElementById("rating").innerText = places[index].rating
+
+document.getElementById("image").src = places[index].image
+
+}
+
+
+function swipeLeft(){
+
+index++
+
+if(index >= places.length){
+
+index = 0
+
+}
+
+showPlace()
+
+}
+
+
+function swipeRight(){
+
+alert("Lagret i favoritter ❤️")
+
+index++
+
+if(index >= places.length){
+
+index = 0
+
+}
+
+showPlace()
+
+}
+
+
+function openMap(){
+
+window.open(places[index].maps)
+
+}
+
+
+showPlace()
+
+</script>
+
+</body>
+
+</html>
