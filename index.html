@@ -2,67 +2,82 @@
 <html lang="no">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Savorly</title>
 
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 background:#111;
 color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
 margin:0;
-overflow:hidden;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
 }
 
-.container{
-width:360px;
-text-align:center;
+h2{
+margin-bottom:10px;
+}
+
+#filter{
+margin-bottom:10px;
+padding:8px;
+border-radius:6px;
+}
+
+#card-stack{
+position:relative;
+width:340px;
+height:420px;
 }
 
 .card{
+
+position:absolute;
+width:100%;
+height:100%;
 background:#222;
 border-radius:20px;
-padding:20px;
+overflow:hidden;
 box-shadow:0 10px 25px rgba(0,0,0,0.4);
 touch-action:none;
-position:relative;
+
 }
 
 .card img{
 width:100%;
-border-radius:15px;
+height:220px;
+object-fit:cover;
 }
 
-.category{
-color:#bbb;
-margin-bottom:6px;
-}
-
-.rating{
-color:#FFD700;
-font-size:18px;
-margin-bottom:10px;
+.info{
+padding:15px;
 }
 
 .buttons{
+
 display:flex;
 justify-content:space-between;
-margin-top:20px;
+margin-top:10px;
+
 }
 
 button{
+
 border:none;
 border-radius:50%;
-width:65px;
-height:65px;
-font-size:22px;
+width:60px;
+height:60px;
+font-size:20px;
 cursor:pointer;
+
 }
 
 .left{
@@ -74,211 +89,226 @@ background:#4CAF50;
 }
 
 .map-btn{
-margin-top:18px;
+margin-top:10px;
 background:#2196F3;
-padding:12px 20px;
+padding:10px;
 border-radius:10px;
 border:none;
-cursor:pointer;
-color:white;
-font-size:16px;
 width:100%;
-}
-
-.favorites{
-margin-top:20px;
-font-size:14px;
+color:white;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<div class="container">
+<h2>Savorly 🍷</h2>
 
-<div class="card" id="card">
+<select id="filter" onchange="applyFilter()">
 
-<img id="image">
+<option value="all">Alle steder</option>
+<option value="bar">Bar / Vinbar</option>
+<option value="restaurant">Restaurant</option>
 
-<h2 id="name"></h2>
+</select>
 
-<div class="category" id="category"></div>
+<div id="card-stack"></div>
 
-<div class="rating" id="rating"></div>
-
-<div class="buttons">
-
-<button class="left" onclick="swipeLeft()">←</button>
-
-<button class="right" onclick="swipeRight()">→</button>
-
-</div>
-
-<button class="map-btn" onclick="openMap()">
-📍 Veibeskrivelse
-</button>
-
-</div>
-
-<div class="favorites" id="favorites"></div>
-
-</div>
-
+<p id="favorites"></p>
 
 <script>
 
-const places = [
+let places=[]
+let filtered=[]
+let favorites=JSON.parse(localStorage.getItem("favorites"))||[]
 
-{
-name:"Territoriet",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.6",
-image:"https://images.unsplash.com/photo-1510626176961-4b57d4fbad03",
-maps:"https://www.google.com/maps/search/Territoriet+Oslo"
-},
+async function loadPlaces(){
 
-{
-name:"Nektar Vinbar",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.5",
-image:"https://images.unsplash.com/photo-1470337458703-46ad1756a187",
-maps:"https://www.google.com/maps/search/Nektar+Vinbar+Oslo"
-},
+let query=`
+[out:json];
+(
+node["amenity"="bar"](59.9,10.7,59.95,10.8);
+node["amenity"="restaurant"](59.9,10.7,59.95,10.8);
+);
+out;
+`
 
+let res=await fetch(
+"https://overpass-api.de/api/interpreter",
 {
-name:"Vin Vin",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.4",
-image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-maps:"https://www.google.com/maps/search/Vin+Vin+Oslo"
-},
+method:"POST",
+body:query
+}
+)
 
-{
-name:"Radegast Vinbar",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.5",
-image:"https://images.unsplash.com/photo-1510812431401-41d2bd2722f3",
-maps:"https://www.google.com/maps/search/Radegast+Vinbar+Oslo"
-},
+let data=await res.json()
 
-{
-name:"Bar Boca",
-category:"Vinbar • Oslo",
-rating:"⭐ 4.6",
-image:"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
-maps:"https://www.google.com/maps/search/Bar+Boca+Oslo"
-},
+places=data.elements.map(p=>({
 
-{
-name:"Himkok",
-category:"Cocktailbar • Oslo",
-rating:"⭐ 4.8",
-image:"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
-maps:"https://www.google.com/maps/search/Himkok+Oslo"
+name:p.tags.name||"Ukjent sted",
+
+type:p.tags.amenity,
+
+lat:p.lat,
+
+lon:p.lon,
+
+image:getImage(p.tags.amenity)
+
+}))
+
+filtered=places
+
+renderCards()
+
 }
 
-]
+function getImage(type){
 
-let index = 0
-let favorites = JSON.parse(localStorage.getItem("favorites")) || []
+if(type==="bar")
+return "https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75"
 
-const card = document.getElementById("card")
+if(type==="restaurant")
+return "https://images.unsplash.com/photo-1552566626-52f8b828add9"
 
-function showPlace(){
+return "https://images.unsplash.com/photo-1504674900247-0877df9cc836"
 
-document.getElementById("name").innerText = places[index].name
-document.getElementById("category").innerText = places[index].category
-document.getElementById("rating").innerText = places[index].rating
-document.getElementById("image").src = places[index].image
+}
+
+function renderCards(){
+
+const stack=document.getElementById("card-stack")
+
+stack.innerHTML=""
+
+filtered.slice(0,5).forEach((place,i)=>{
+
+const card=document.createElement("div")
+
+card.className="card"
+
+card.style.zIndex=100-i
+
+card.innerHTML=`
+
+<img src="${place.image}">
+
+<div class="info">
+
+<h3>${place.name}</h3>
+
+<p>${place.type}</p>
+
+<div class="buttons">
+
+<button class="left">←</button>
+
+<button class="right">→</button>
+
+</div>
+
+<button class="map-btn">📍 Veibeskrivelse</button>
+
+</div>
+`
+
+addSwipe(card,place)
+
+stack.appendChild(card)
+
+})
 
 showFavorites()
 
 }
 
-function swipeLeft(){
+function addSwipe(card,place){
 
-next()
+let startX=0
 
-}
-
-function swipeRight(){
-
-favorites.push(places[index].name)
-
-localStorage.setItem("favorites", JSON.stringify(favorites))
-
-next()
-
-}
-
-function next(){
-
-index++
-
-if(index >= places.length){
-index = 0
-}
-
-card.style.transform = "translateX(0)"
-
-showPlace()
-
-}
-
-function openMap(){
-
-window.open(places[index].maps)
-
-}
-
-function showFavorites(){
-
-document.getElementById("favorites").innerText =
-"Favoritter: " + favorites.join(", ")
-
-}
-
-
-let startX = 0
-
-card.addEventListener("touchstart", e=>{
-startX = e.touches[0].clientX
+card.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
 })
 
-card.addEventListener("touchmove", e=>{
+card.addEventListener("touchmove",e=>{
 
-let moveX = e.touches[0].clientX - startX
+let moveX=e.touches[0].clientX-startX
 
-card.style.transform = `translateX(${moveX}px) rotate(${moveX*0.05}deg)`
+card.style.transform=
+`translateX(${moveX}px) rotate(${moveX*0.05}deg)`
 
 })
 
-card.addEventListener("touchend", e=>{
+card.addEventListener("touchend",e=>{
 
-let moveX = e.changedTouches[0].clientX - startX
+let moveX=e.changedTouches[0].clientX-startX
 
-if(moveX > 120){
+if(moveX>120){
 
-swipeRight()
+favorites.push(place.name)
+
+localStorage.setItem(
+"favorites",
+JSON.stringify(favorites)
+)
+
+card.remove()
 
 }
 
-else if(moveX < -120){
+else if(moveX<-120){
 
-swipeLeft()
+card.remove()
 
 }
 
 else{
 
-card.style.transform = "translateX(0)"
+card.style.transform="translateX(0)"
 
 }
 
+showFavorites()
+
 })
 
-showPlace()
+card.querySelector(".map-btn")
+.onclick=()=>{
+
+window.open(
+`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}`
+)
+
+}
+
+}
+
+function applyFilter(){
+
+let f=document.getElementById("filter").value
+
+if(f==="all"){
+filtered=places
+}
+
+else{
+filtered=places.filter(p=>p.type===f)
+}
+
+renderCards()
+
+}
+
+function showFavorites(){
+
+document.getElementById("favorites")
+.innerText="Favoritter: "+favorites.join(", ")
+
+}
+
+loadPlaces()
 
 </script>
 
