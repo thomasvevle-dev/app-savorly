@@ -26,12 +26,6 @@ h2{
 margin-bottom:10px;
 }
 
-#filter{
-margin-bottom:10px;
-padding:8px;
-border-radius:6px;
-}
-
 #card-stack{
 position:relative;
 width:340px;
@@ -104,15 +98,7 @@ color:white;
 
 <body>
 
-<h2>Savorly 🍷</h2>
-
-<select id="filter" onchange="applyFilter()">
-
-<option value="all">Alle steder</option>
-<option value="bar">Bar / Vinbar</option>
-<option value="restaurant">Restaurant</option>
-
-</select>
+<h2>Savorly 🍷🍸</h2>
 
 <div id="card-stack"></div>
 
@@ -121,7 +107,6 @@ color:white;
 <script>
 
 let places=[]
-let filtered=[]
 let favorites=JSON.parse(localStorage.getItem("favorites"))||[]
 
 async function loadPlaces(){
@@ -130,7 +115,7 @@ let query=`
 [out:json];
 (
 node["amenity"="bar"](59.9,10.7,59.95,10.8);
-node["amenity"="restaurant"](59.9,10.7,59.95,10.8);
+node["amenity"="pub"](59.9,10.7,59.95,10.8);
 );
 out;
 `
@@ -147,7 +132,7 @@ let data=await res.json()
 
 places=data.elements.map(p=>({
 
-name:p.tags.name||"Ukjent sted",
+name:p.tags.name||"Ukjent bar",
 
 type:p.tags.amenity,
 
@@ -155,25 +140,26 @@ lat:p.lat,
 
 lon:p.lon,
 
-image:getImage(p.tags.amenity)
+image:getImage()
 
 }))
-
-filtered=places
 
 renderCards()
 
 }
 
-function getImage(type){
+function getImage(){
 
-if(type==="bar")
-return "https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75"
+const imgs=[
 
-if(type==="restaurant")
-return "https://images.unsplash.com/photo-1552566626-52f8b828add9"
+"https://images.unsplash.com/photo-1514361892635-cebb3a9c8d75",
+"https://images.unsplash.com/photo-1470337458703-46ad1756a187",
+"https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+"https://images.unsplash.com/photo-1521017432531-fbd92d768814"
 
-return "https://images.unsplash.com/photo-1504674900247-0877df9cc836"
+]
+
+return imgs[Math.floor(Math.random()*imgs.length)]
 
 }
 
@@ -183,7 +169,7 @@ const stack=document.getElementById("card-stack")
 
 stack.innerHTML=""
 
-filtered.slice(0,5).forEach((place,i)=>{
+places.slice(0,6).forEach((place,i)=>{
 
 const card=document.createElement("div")
 
@@ -199,7 +185,7 @@ card.innerHTML=`
 
 <h3>${place.name}</h3>
 
-<p>${place.type}</p>
+<p>Vinbar / Cocktailbar</p>
 
 <div class="buttons">
 
@@ -282,22 +268,6 @@ window.open(
 )
 
 }
-
-}
-
-function applyFilter(){
-
-let f=document.getElementById("filter").value
-
-if(f==="all"){
-filtered=places
-}
-
-else{
-filtered=places.filter(p=>p.type===f)
-}
-
-renderCards()
 
 }
 
