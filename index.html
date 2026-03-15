@@ -17,9 +17,8 @@ color:white;
 display:flex;
 flex-direction:column;
 align-items:center;
+overflow:hidden;
 }
-
-/* hidden map */
 
 #map{
 width:1px;
@@ -52,29 +51,13 @@ border-radius:26px;
 overflow:hidden;
 position:relative;
 display:none;
+transition:transform 0.3s ease;
 }
 
 #photo{
 width:100%;
 height:100%;
 object-fit:cover;
-}
-
-/* GLASS ICONS */
-
-.glass{
-
-color:white;
-font-size:22px;
-
-backdrop-filter:blur(10px);
--webkit-backdrop-filter:blur(10px);
-
-text-shadow:
-0 0 6px rgba(0,0,0,0.6),
-0 0 14px rgba(0,0,0,0.4);
-
-cursor:pointer;
 }
 
 /* TOP BAR */
@@ -86,8 +69,37 @@ left:0;
 width:100%;
 display:flex;
 justify-content:space-between;
-padding:0 20px;
+padding:0 22px;
 z-index:5;
+}
+
+.icon-left,.icon-right{
+font-size:22px;
+text-shadow:0 0 12px rgba(0,0,0,0.7);
+cursor:pointer;
+}
+
+/* PHOTO INDICATOR */
+
+.photo-indicator{
+position:absolute;
+top:10px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:6px;
+z-index:5;
+}
+
+.photo-bar{
+width:32px;
+height:4px;
+border-radius:3px;
+background:rgba(255,255,255,0.3);
+}
+
+.photo-bar.active{
+background:white;
 }
 
 /* TEXT */
@@ -109,7 +121,7 @@ font-size:18px;
 margin-top:6px;
 }
 
-/* BUTTON ROW */
+/* ACTION BUTTONS */
 
 .buttons{
 position:absolute;
@@ -121,19 +133,9 @@ z-index:5;
 }
 
 .action{
-
 font-size:28px;
-color:white;
-
-backdrop-filter:blur(8px);
--webkit-backdrop-filter:blur(8px);
-
-text-shadow:
-0 0 6px rgba(0,0,0,0.7),
-0 0 20px rgba(0,0,0,0.5);
-
+text-shadow:0 0 12px rgba(0,0,0,0.8);
 cursor:pointer;
-
 }
 
 /* FAVORITES */
@@ -150,6 +152,15 @@ padding:16px;
 margin:10px 0;
 border-radius:12px;
 cursor:pointer;
+}
+
+.back-button{
+margin-top:20px;
+background:#333;
+padding:12px 20px;
+border-radius:10px;
+cursor:pointer;
+text-align:center;
 }
 
 </style>
@@ -173,10 +184,12 @@ cursor:pointer;
 
 <div class="topbar">
 
-<div class="glass" onclick="back()">⬅</div>
-<div class="glass" onclick="openFavorites()">⭐</div>
+<div class="icon-left" onclick="back()">⬅</div>
+<div class="icon-right" onclick="openFavorites()">⭐</div>
 
 </div>
+
+<div class="photo-indicator" id="indicator"></div>
 
 <img id="photo">
 
@@ -189,7 +202,7 @@ cursor:pointer;
 
 <div class="buttons">
 
-<div class="action" onclick="next()">✖</div>
+<div class="action" onclick="skip()">✖</div>
 <div class="action" onclick="maps()">📍</div>
 <div class="action" onclick="maps()">📅</div>
 <div class="action" onclick="like()">❤</div>
@@ -203,15 +216,11 @@ cursor:pointer;
 <h2>Favoritter</h2>
 <div id="favoritesList"></div>
 
+<div class="back-button" onclick="backToCards()">Tilbake til kort</div>
+
 </div>
 
 <script>
-
-const restaurants=["Maaemo","Kontrast","Statholdergaarden","Hot Shop","Plah","Arakataka","Le Benjamin","Vaaghals","Katla","Kolonialen","Smalhans","Fyr Bistronomi","Ylajali","Dinner","Südøst","Louise Restaurant","Alex Sushi","Kverneriet"]
-
-const wineBars=["Territoriet","Nektar Vinbar","Radegast","Andre til Høyre","Vintage Kitchen","Lasarett","Vin Vin","Skaal Matbar","Fuglen","Vinoteket"]
-
-const cocktailBars=["Himkok","Bettola","Svanen","Torggata Botaniske","Fuglen","Aku Aku","Pier 42","Jaeger","Internasjonalen"]
 
 let service
 let places=[]
@@ -219,6 +228,8 @@ let index=0
 let photos=[]
 let photoIndex=0
 let favorites=[]
+
+/* INIT MAP */
 
 function initMap(){
 
@@ -233,13 +244,16 @@ service=new google.maps.places.PlacesService(map)
 
 /* LOAD CATEGORY */
 
-function loadCategory(type){
+async function loadCategory(type){
+
+let res=await fetch("data/places.json")
+let data=await res.json()
 
 let list=[]
 
-if(type==="restaurant") list=restaurants
-if(type==="wine") list=wineBars
-if(type==="cocktail") list=cocktailBars
+if(type==="restaurant") list=data.restaurants
+if(type==="wine") list=data.winebars
+if(type==="cocktail") list=data.cocktailbars
 
 places=[]
 index=0
@@ -257,11 +271,7 @@ fields:["name","rating","photos"]
 
 loaded++
 
-if(status==="OK"){
-
-places.push(results[0])
-
-}
+if(status==="OK") places.push(results[0])
 
 if(loaded===list.length){
 
@@ -300,7 +310,30 @@ photos.push(p.photos[i].getUrl({maxWidth:1200}))
 }
 
 photoIndex=0
+
 document.getElementById("photo").src=photos[0]
+
+renderIndicator()
+
+}
+
+/* PHOTO INDICATOR */
+
+function renderIndicator(){
+
+const container=document.getElementById("indicator")
+container.innerHTML=""
+
+photos.forEach((p,i)=>{
+
+let bar=document.createElement("div")
+bar.className="photo-bar"
+
+if(i===photoIndex) bar.classList.add("active")
+
+container.appendChild(bar)
+
+})
 
 }
 
@@ -324,57 +357,96 @@ if(startX-endX>50) nextPhoto()
 function nextPhoto(){
 
 photoIndex++
+
 if(photoIndex>=photos.length) photoIndex=0
+
 document.getElementById("photo").src=photos[photoIndex]
+
+renderIndicator()
 
 }
 
 function prevPhoto(){
 
 photoIndex--
+
 if(photoIndex<0) photoIndex=photos.length-1
+
 document.getElementById("photo").src=photos[photoIndex]
+
+renderIndicator()
 
 }
 
-/* CARD SWIPE */
+/* TINDER SWIPE */
 
 let card=document.getElementById("card")
-let swipeStart=0
+let start=0
 
 card.addEventListener("touchstart",e=>{
-swipeStart=e.touches[0].clientX
+start=e.touches[0].clientX
 })
 
 card.addEventListener("touchend",e=>{
 
-let swipeEnd=e.changedTouches[0].clientX
+let end=e.changedTouches[0].clientX
 
-if(swipeEnd-swipeStart>120) like()
-if(swipeStart-swipeEnd>120) next()
+if(end-start>120) like()
+if(start-end>120) skip()
 
 })
 
-/* ACTIONS */
+function animate(direction){
 
-function next(){
+card.style.transition="transform 0.4s"
 
-index++
-if(index>=places.length) index=0
-show()
+if(direction==="right"){
+
+card.style.transform="translateX(500px) rotate(25deg)"
+
+}else{
+
+card.style.transform="translateX(-500px) rotate(-25deg)"
+
+}
+
+setTimeout(()=>{
+
+card.style.transition="none"
+card.style.transform="translateX(0)"
+next()
+
+},400)
 
 }
 
 function like(){
 
 favorites.push(index)
-next()
+animate("right")
+
+}
+
+function skip(){
+
+animate("left")
+
+}
+
+function next(){
+
+index++
+
+if(index>=places.length) index=0
+
+show()
 
 }
 
 function maps(){
 
 let p=places[index]
+
 window.open("https://maps.google.com/?q="+p.name)
 
 }
@@ -392,7 +464,6 @@ list.innerHTML=""
 favorites.forEach(i=>{
 
 let item=document.createElement("div")
-
 item.className="favorite-item"
 item.innerText=places[i].name
 
@@ -413,7 +484,12 @@ list.appendChild(item)
 
 }
 
-/* BACK */
+function backToCards(){
+
+document.getElementById("favoritesPage").style.display="none"
+document.getElementById("card").style.display="block"
+
+}
 
 function back(){
 
