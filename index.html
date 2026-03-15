@@ -12,22 +12,22 @@
 body{
 margin:0;
 font-family:Arial;
-background:#000;
+background:black;
 color:white;
-text-align:center;
-overflow-x:hidden;
+overflow:hidden;
 }
 
+/* HOME */
+
 #home{
-padding-top:40px;
-padding-bottom:120px;
-overflow-y:auto;
 height:100vh;
+overflow-y:auto;
+text-align:center;
+padding-top:40px;
 }
 
 .logo{
-width:160px;
-margin:auto;
+width:240px;
 margin-bottom:30px;
 }
 
@@ -45,54 +45,102 @@ padding:16px;
 border-radius:14px;
 font-size:18px;
 color:white;
-cursor:pointer;
-}
-
-.category-btn:hover{
-background:#1a1a1a;
 }
 
 .divider{
 height:1px;
 background:#333;
-margin:40px 40px;
+margin:40px;
 }
 
-.favorites-section{
-padding:0 30px;
-}
-
-.fav-title{
-font-size:20px;
-margin-bottom:20px;
-text-align:left;
-}
-
-.fav-category{
-margin-bottom:20px;
-}
+/* FAVORITES */
 
 .fav-header{
 background:#111;
 border:1px solid #333;
 padding:14px;
 border-radius:12px;
-cursor:pointer;
+margin:10px 30px;
 text-align:left;
 }
 
 .fav-list{
 display:none;
-margin-top:10px;
+padding:0 30px;
 }
 
 .fav-item{
 background:#1a1a1a;
 padding:10px;
-margin-bottom:6px;
+margin:5px 0;
 border-radius:8px;
-cursor:pointer;
 text-align:left;
+}
+
+/* SWIPE */
+
+#swipe{
+display:none;
+height:100vh;
+width:100%;
+}
+
+#card{
+position:absolute;
+width:100%;
+height:100%;
+}
+
+#card img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* INFO */
+
+.place-info{
+position:absolute;
+bottom:130px;
+left:20px;
+text-align:left;
+}
+
+.place-name{
+font-size:32px;
+font-weight:bold;
+}
+
+.rating{
+font-size:20px;
+color:gold;
+}
+
+/* BUTTONS */
+
+.buttons{
+position:absolute;
+bottom:40px;
+width:100%;
+display:flex;
+justify-content:space-evenly;
+font-size:34px;
+}
+
+/* TOP BUTTONS */
+
+.back{
+position:absolute;
+top:40px;
+left:20px;
+font-size:28px;
+}
+
+.undo{
+position:absolute;
+top:40px;
+right:20px;
+font-size:28px;
 }
 
 </style>
@@ -100,57 +148,61 @@ text-align:left;
 
 <body>
 
+<!-- HOME -->
+
 <div id="home">
 
-<img class="logo" src="logo.png">
+<img src="logo.png" class="logo">
 
 <div class="categories">
 
-<button class="category-btn" onclick="startCategory('restaurant')">
-Restaurant
-</button>
-
-<button class="category-btn" onclick="startCategory('winebar')">
-Vinbar
-</button>
-
-<button class="category-btn" onclick="startCategory('cocktailbar')">
-Cocktailbar
-</button>
+<button class="category-btn" onclick="start()">Restaurant</button>
+<button class="category-btn" onclick="start()">Vinbar</button>
+<button class="category-btn" onclick="start()">Cocktailbar</button>
 
 </div>
 
 <div class="divider"></div>
 
-<div class="favorites-section">
-
-<div class="fav-category">
-
-<div class="fav-header" onclick="toggleFav('fav-restaurants')">
+<div class="fav-header" onclick="toggleFav('fav-rest')">
 Favoritt restaurant
 </div>
+<div id="fav-rest" class="fav-list"></div>
 
-<div class="fav-list" id="fav-restaurants"></div>
-
-</div>
-
-<div class="fav-category">
-
-<div class="fav-header" onclick="toggleFav('fav-winebars')">
+<div class="fav-header" onclick="toggleFav('fav-wine')">
 Favoritt vinbar
 </div>
+<div id="fav-wine" class="fav-list"></div>
 
-<div class="fav-list" id="fav-winebars"></div>
-
-</div>
-
-<div class="fav-category">
-
-<div class="fav-header" onclick="toggleFav('fav-cocktails')">
+<div class="fav-header" onclick="toggleFav('fav-cocktail')">
 Favoritt cocktailbar
 </div>
+<div id="fav-cocktail" class="fav-list"></div>
 
-<div class="fav-list" id="fav-cocktails"></div>
+</div>
+
+<!-- SWIPE -->
+
+<div id="swipe">
+
+<div id="card">
+
+<div class="back" onclick="goHome()">⬅️</div>
+<div class="undo" onclick="undo()">↩️</div>
+
+<img id="image">
+
+<div class="place-info">
+<div class="place-name" id="name"></div>
+<div class="rating" id="rating"></div>
+</div>
+
+<div class="buttons">
+
+<div onclick="dislike()">❌</div>
+<div onclick="navigate()">📍</div>
+<div onclick="book()">📅</div>
+<div onclick="like()">❤️</div>
 
 </div>
 
@@ -159,6 +211,159 @@ Favoritt cocktailbar
 </div>
 
 <script>
+
+let places=[]
+let index=0
+let history=[]
+let imageIndex=0
+
+async function loadPlaces(){
+
+let res=await fetch("data/places.json")
+places=await res.json()
+
+}
+
+function start(){
+
+document.getElementById("home").style.display="none"
+document.getElementById("swipe").style.display="block"
+
+showPlace()
+
+}
+
+function showPlace(){
+
+let p=places[index]
+
+imageIndex=0
+
+document.getElementById("name").innerText=p.name
+document.getElementById("rating").innerText="⭐ "+p.rating
+document.getElementById("image").src=p.images[imageIndex]
+
+}
+
+function nextImage(){
+
+let p=places[index]
+
+imageIndex++
+
+if(imageIndex>=p.images.length){
+imageIndex=0
+}
+
+document.getElementById("image").src=p.images[imageIndex]
+
+}
+
+document.getElementById("card").onclick=nextImage
+
+function dislike(){
+
+history.push(index)
+
+index++
+
+showPlace()
+
+}
+
+function like(){
+
+let fav=JSON.parse(localStorage.getItem("fav")||"[]")
+
+if(!fav.includes(places[index].name)){
+fav.push(places[index].name)
+localStorage.setItem("fav",JSON.stringify(fav))
+}
+
+dislike()
+
+}
+
+function undo(){
+
+if(history.length>0){
+index=history.pop()
+showPlace()
+}
+
+}
+
+function navigate(){
+
+let p=places[index]
+
+window.open(
+"https://www.google.com/maps/search/?api=1&query="+
+encodeURIComponent(p.name+" Oslo")
+)
+
+}
+
+function book(){
+
+let p=places[index]
+
+window.open(
+"https://www.google.com/search?q="+
+encodeURIComponent(p.name+" booking")
+)
+
+}
+
+function goHome(){
+
+document.getElementById("swipe").style.display="none"
+document.getElementById("home").style.display="block"
+
+}
+
+/* SWIPE */
+
+let card=document.getElementById("card")
+
+let startX=0
+let currentX=0
+let dragging=false
+
+card.addEventListener("touchstart",e=>{
+dragging=true
+startX=e.touches[0].clientX
+})
+
+card.addEventListener("touchmove",e=>{
+
+if(!dragging)return
+
+currentX=e.touches[0].clientX
+let diff=currentX-startX
+
+card.style.transform=
+"translateX("+diff+"px) rotate("+(diff/20)+"deg)"
+
+})
+
+card.addEventListener("touchend",()=>{
+
+dragging=false
+
+let diff=currentX-startX
+
+if(diff>120){
+like()
+}
+
+else if(diff<-120){
+dislike()
+}
+
+card.style.transform="translateX(0)"
+
+})
 
 function toggleFav(id){
 
@@ -172,13 +377,7 @@ el.style.display="block"
 
 }
 
-function startCategory(type){
-
-localStorage.setItem("category",type)
-
-window.location.href="swipe.html"
-
-}
+loadPlaces()
 
 </script>
 
