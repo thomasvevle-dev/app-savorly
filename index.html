@@ -26,7 +26,7 @@ height:1px;
 opacity:0;
 }
 
-/* START */
+/* START SCREEN */
 
 #start{
 margin-top:120px;
@@ -42,19 +42,36 @@ cursor:pointer;
 font-size:18px;
 }
 
-/* CARD */
+/* CARD STACK */
 
-#card{
+#cardStack{
+position:relative;
 width:360px;
 height:580px;
+display:none;
+}
+
+.card{
+position:absolute;
+width:100%;
+height:100%;
 border-radius:26px;
 overflow:hidden;
-position:relative;
-display:none;
+background:#000;
 transition:transform 0.3s ease;
 }
 
-#photo{
+.card:nth-child(2){
+transform:scale(0.96) translateY(8px);
+opacity:0.8;
+}
+
+.card:nth-child(3){
+transform:scale(0.92) translateY(16px);
+opacity:0.6;
+}
+
+.photo{
 width:100%;
 height:100%;
 object-fit:cover;
@@ -69,13 +86,13 @@ left:0;
 width:100%;
 display:flex;
 justify-content:space-between;
-padding:0 22px;
+padding:0 30px;
 z-index:5;
 }
 
-.icon-left,.icon-right{
+.icon{
 font-size:22px;
-text-shadow:0 0 12px rgba(0,0,0,0.7);
+text-shadow:0 0 12px rgba(0,0,0,0.8);
 cursor:pointer;
 }
 
@@ -83,7 +100,7 @@ cursor:pointer;
 
 .photo-indicator{
 position:absolute;
-top:10px;
+top:8px;
 left:50%;
 transform:translateX(-50%);
 display:flex;
@@ -180,18 +197,20 @@ text-align:center;
 
 </div>
 
-<div id="card">
+<div id="cardStack">
+
+<div class="card" id="card">
 
 <div class="topbar">
 
-<div class="icon-left" onclick="back()">⬅</div>
-<div class="icon-right" onclick="openFavorites()">⭐</div>
+<div class="icon" onclick="back()">⬅</div>
+<div class="icon" onclick="openFavorites()">⭐</div>
 
 </div>
 
 <div class="photo-indicator" id="indicator"></div>
 
-<img id="photo">
+<img class="photo" id="photo">
 
 <div class="overlay">
 
@@ -202,12 +221,17 @@ text-align:center;
 
 <div class="buttons">
 
-<div class="action" onclick="skip()">✖</div>
+<div class="action" onclick="skip()">❌</div>
 <div class="action" onclick="maps()">📍</div>
 <div class="action" onclick="maps()">📅</div>
-<div class="action" onclick="like()">❤</div>
+<div class="action" onclick="like()">❤️</div>
 
 </div>
+
+</div>
+
+<div class="card"></div>
+<div class="card"></div>
 
 </div>
 
@@ -228,8 +252,6 @@ let index=0
 let photos=[]
 let photoIndex=0
 let favorites=[]
-
-/* INIT MAP */
 
 function initMap(){
 
@@ -276,7 +298,7 @@ if(status==="OK") places.push(results[0])
 if(loaded===list.length){
 
 document.getElementById("start").style.display="none"
-document.getElementById("card").style.display="block"
+document.getElementById("cardStack").style.display="block"
 
 show()
 
@@ -378,7 +400,7 @@ renderIndicator()
 
 }
 
-/* TINDER SWIPE */
+/* CARD SWIPE */
 
 let card=document.getElementById("card")
 let start=0
@@ -401,13 +423,9 @@ function animate(direction){
 card.style.transition="transform 0.4s"
 
 if(direction==="right"){
-
 card.style.transform="translateX(500px) rotate(25deg)"
-
 }else{
-
 card.style.transform="translateX(-500px) rotate(-25deg)"
-
 }
 
 setTimeout(()=>{
@@ -455,7 +473,7 @@ window.open("https://maps.google.com/?q="+p.name)
 
 function openFavorites(){
 
-document.getElementById("card").style.display="none"
+document.getElementById("cardStack").style.display="none"
 document.getElementById("favoritesPage").style.display="block"
 
 const list=document.getElementById("favoritesList")
@@ -472,7 +490,7 @@ item.onclick=function(){
 index=i
 
 document.getElementById("favoritesPage").style.display="none"
-document.getElementById("card").style.display="block"
+document.getElementById("cardStack").style.display="block"
 
 show()
 
@@ -487,13 +505,13 @@ list.appendChild(item)
 function backToCards(){
 
 document.getElementById("favoritesPage").style.display="none"
-document.getElementById("card").style.display="block"
+document.getElementById("cardStack").style.display="block"
 
 }
 
 function back(){
 
-document.getElementById("card").style.display="none"
+document.getElementById("cardStack").style.display="none"
 document.getElementById("favoritesPage").style.display="none"
 document.getElementById("start").style.display="block"
 
