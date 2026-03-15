@@ -22,7 +22,7 @@ align-items:center;
 #card-stack{
 position:relative;
 width:340px;
-height:480px;
+height:500px;
 margin-top:30px;
 }
 
@@ -39,7 +39,7 @@ box-shadow:0 10px 25px rgba(0,0,0,0.4);
 .image-container{
 position:relative;
 width:100%;
-height:240px;
+height:260px;
 overflow:hidden;
 }
 
@@ -80,7 +80,23 @@ font-weight:bold;
 
 .rating{
 color:#FFD700;
-margin:6px 0;
+margin:5px 0;
+}
+
+.small-buttons{
+display:flex;
+gap:8px;
+margin:8px 0;
+}
+
+.small-buttons button{
+font-size:12px;
+padding:6px 10px;
+border-radius:6px;
+border:none;
+cursor:pointer;
+background:#2196F3;
+color:white;
 }
 
 .buttons{
@@ -89,7 +105,7 @@ justify-content:space-between;
 margin-top:10px;
 }
 
-button{
+.buttons button{
 border:none;
 border-radius:50%;
 width:60px;
@@ -104,16 +120,6 @@ background:#ff4d4d;
 
 .like{
 background:#4CAF50;
-}
-
-.action-btn{
-margin-top:8px;
-background:#2196F3;
-padding:8px;
-border-radius:8px;
-border:none;
-width:100%;
-color:white;
 }
 
 #favorites{
@@ -215,14 +221,14 @@ let photos=[]
 
 if(place.photos){
 
-place.photos.slice(0,3).forEach(p=>{
-photos.push(p.getUrl({maxWidth:400}))
+place.photos.slice(0,5).forEach(p=>{
+photos.push(p.getUrl({maxWidth:500}))
 })
 
 }
 
 if(photos.length===0){
-photos=["https://via.placeholder.com/400x240"]
+photos=["https://via.placeholder.com/400x260"]
 }
 
 let photoIndex=0
@@ -250,15 +256,14 @@ ${photos.map((_,i)=>`<div class="dot ${i==0?"active":""}"></div>`).join("")}
 
 <div class="rating">⭐ ${place.rating}</div>
 
-<button class="action-btn nav">📍 Naviger</button>
-
-<button class="action-btn book">📅 Book bord</button>
+<div class="small-buttons">
+<button class="nav">📍 Naviger</button>
+<button class="book">📅 Book</button>
+</div>
 
 <div class="buttons">
-
 <button class="dislike">❌</button>
 <button class="like">❤️</button>
-
 </div>
 
 </div>
