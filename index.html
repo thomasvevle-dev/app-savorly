@@ -26,7 +26,7 @@ height:1px;
 opacity:0;
 }
 
-/* START SCREEN */
+/* START */
 
 #start{
 margin-top:120px;
@@ -58,17 +58,20 @@ height:100%;
 border-radius:26px;
 overflow:hidden;
 background:#000;
-transition:transform 0.3s ease;
 }
 
-.card:nth-child(2){
-transform:scale(0.96) translateY(8px);
-opacity:0.8;
+.card.top{
+z-index:3;
 }
 
-.card:nth-child(3){
-transform:scale(0.92) translateY(16px);
-opacity:0.6;
+.card.middle{
+z-index:2;
+transform:scale(0.96) translateY(10px);
+}
+
+.card.bottom{
+z-index:1;
+transform:scale(0.92) translateY(20px);
 }
 
 .photo{
@@ -86,13 +89,13 @@ left:0;
 width:100%;
 display:flex;
 justify-content:space-between;
-padding:0 30px;
-z-index:5;
+padding:0 28px;
+z-index:10;
 }
 
 .icon{
 font-size:22px;
-text-shadow:0 0 12px rgba(0,0,0,0.8);
+text-shadow:0 0 12px rgba(0,0,0,0.9);
 cursor:pointer;
 }
 
@@ -100,12 +103,12 @@ cursor:pointer;
 
 .photo-indicator{
 position:absolute;
-top:8px;
+top:10px;
 left:50%;
 transform:translateX(-50%);
 display:flex;
 gap:6px;
-z-index:5;
+z-index:10;
 }
 
 .photo-bar{
@@ -125,6 +128,7 @@ background:white;
 position:absolute;
 bottom:110px;
 left:22px;
+z-index:10;
 }
 
 .name{
@@ -138,7 +142,7 @@ font-size:18px;
 margin-top:6px;
 }
 
-/* ACTION BUTTONS */
+/* BUTTONS */
 
 .buttons{
 position:absolute;
@@ -146,7 +150,7 @@ bottom:25px;
 width:100%;
 display:flex;
 justify-content:space-evenly;
-z-index:5;
+z-index:10;
 }
 
 .action{
@@ -199,7 +203,11 @@ text-align:center;
 
 <div id="cardStack">
 
-<div class="card" id="card">
+<div class="card bottom"></div>
+
+<div class="card middle"></div>
+
+<div class="card top" id="card">
 
 <div class="topbar">
 
@@ -230,14 +238,12 @@ text-align:center;
 
 </div>
 
-<div class="card"></div>
-<div class="card"></div>
-
 </div>
 
 <div id="favoritesPage">
 
 <h2>Favoritter</h2>
+
 <div id="favoritesList"></div>
 
 <div class="back-button" onclick="backToCards()">Tilbake til kort</div>
@@ -344,11 +350,13 @@ renderIndicator()
 function renderIndicator(){
 
 const container=document.getElementById("indicator")
+
 container.innerHTML=""
 
 photos.forEach((p,i)=>{
 
 let bar=document.createElement("div")
+
 bar.className="photo-bar"
 
 if(i===photoIndex) bar.classList.add("active")
@@ -400,9 +408,10 @@ renderIndicator()
 
 }
 
-/* CARD SWIPE */
+/* SWIPE CARD */
 
 let card=document.getElementById("card")
+
 let start=0
 
 card.addEventListener("touchstart",e=>{
@@ -423,15 +432,20 @@ function animate(direction){
 card.style.transition="transform 0.4s"
 
 if(direction==="right"){
-card.style.transform="translateX(500px) rotate(25deg)"
+
+card.style.transform="translateX(600px) rotate(30deg)"
+
 }else{
-card.style.transform="translateX(-500px) rotate(-25deg)"
+
+card.style.transform="translateX(-600px) rotate(-30deg)"
+
 }
 
 setTimeout(()=>{
 
 card.style.transition="none"
 card.style.transform="translateX(0)"
+
 next()
 
 },400)
@@ -441,6 +455,7 @@ next()
 function like(){
 
 favorites.push(index)
+
 animate("right")
 
 }
@@ -474,15 +489,19 @@ window.open("https://maps.google.com/?q="+p.name)
 function openFavorites(){
 
 document.getElementById("cardStack").style.display="none"
+
 document.getElementById("favoritesPage").style.display="block"
 
 const list=document.getElementById("favoritesList")
+
 list.innerHTML=""
 
 favorites.forEach(i=>{
 
 let item=document.createElement("div")
+
 item.className="favorite-item"
+
 item.innerText=places[i].name
 
 item.onclick=function(){
@@ -490,6 +509,7 @@ item.onclick=function(){
 index=i
 
 document.getElementById("favoritesPage").style.display="none"
+
 document.getElementById("cardStack").style.display="block"
 
 show()
@@ -505,6 +525,7 @@ list.appendChild(item)
 function backToCards(){
 
 document.getElementById("favoritesPage").style.display="none"
+
 document.getElementById("cardStack").style.display="block"
 
 }
@@ -512,7 +533,9 @@ document.getElementById("cardStack").style.display="block"
 function back(){
 
 document.getElementById("cardStack").style.display="none"
+
 document.getElementById("favoritesPage").style.display="none"
+
 document.getElementById("start").style.display="block"
 
 }
