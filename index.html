@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Savorly</title>
 
 <style>
@@ -20,27 +18,25 @@ align-items:center;
 }
 
 /* hidden map */
-
 #map{
-height:1px;
 width:1px;
+height:1px;
 opacity:0;
 }
 
-/* START */
+/* start */
 
-#start-screen{
+#start{
 margin-top:120px;
 text-align:center;
 }
 
 .category{
-background:#222;
-padding:14px 24px;
+background:#333;
+padding:18px 26px;
 border-radius:20px;
 margin:10px;
 cursor:pointer;
-display:inline-block;
 font-size:18px;
 }
 
@@ -48,47 +44,31 @@ font-size:18px;
 background:#4CAF50;
 }
 
-/* CARD */
+/* card */
 
-#card-stack{
-position:relative;
+#card{
 width:360px;
 height:560px;
-margin-top:20px;
+border-radius:20px;
+overflow:hidden;
+position:relative;
 display:none;
 }
 
-.card{
-position:absolute;
-width:100%;
-height:100%;
-border-radius:20px;
-overflow:hidden;
-background:black;
-}
-
-.card img{
+#card img{
 width:100%;
 height:100%;
 object-fit:cover;
 }
 
-/* TEXT */
-
 .overlay{
 position:absolute;
-bottom:110px;
+bottom:100px;
 left:20px;
 }
 
-.title-row{
-display:flex;
-gap:10px;
-align-items:center;
-}
-
-.place-name{
-font-size:24px;
+.name{
+font-size:26px;
 font-weight:bold;
 }
 
@@ -96,9 +76,9 @@ font-weight:bold;
 color:#FFD700;
 }
 
-/* ICONS */
+/* buttons */
 
-.icon-row{
+.buttons{
 position:absolute;
 bottom:20px;
 width:100%;
@@ -106,37 +86,55 @@ display:flex;
 justify-content:space-evenly;
 }
 
-.icon-btn{
-width:50px;
-height:50px;
+button{
+width:55px;
+height:55px;
 border-radius:50%;
 border:none;
 font-size:20px;
 background:#333;
 color:white;
+cursor:pointer;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div id="map"></div>
 
-<div id="start-screen">
+<div id="start">
 
 <h2>Hva vil du utforske?</h2>
 
 <div class="category" onclick="loadCategory('restaurant')">Restaurant</div>
-
 <div class="category" onclick="loadCategory('wine')">Vinbar</div>
-
 <div class="category" onclick="loadCategory('cocktail')">Cocktailbar</div>
 
 </div>
 
-<div id="card-stack"></div>
+<div id="card">
+
+<img id="photo">
+
+<div class="overlay">
+
+<div class="name" id="name"></div>
+<div class="rating" id="rating"></div>
+
+</div>
+
+<div class="buttons">
+
+<button onclick="next()">❌</button>
+<button onclick="maps()">📍</button>
+<button onclick="maps()">📅</button>
+<button onclick="next()">❤️</button>
+
+</div>
+
+</div>
 
 <script>
 
@@ -145,56 +143,44 @@ const restaurants=[
 "Skaal Matbar",
 "Arakataka",
 "Le Benjamin",
-"Hyde",
-"Kverneriet",
 "Kolonialen"
 ]
 
 const wineBars=[
 "Territoriet",
 "Nektar Vinbar",
-"Radegast",
-"Vinoteket",
-"Andre til Høyre"
+"Radegast"
 ]
 
 const cocktailBars=[
 "Himkok",
 "Bettola",
-"Svanen",
-"Torggata Botaniske",
-"Fuglen"
+"Svanen"
 ]
 
 let service
 let places=[]
 let index=0
-
-/* INIT GOOGLE */
+let photos=[]
+let photoIndex=0
 
 function initMap(){
 
-const map=new google.maps.Map(document.getElementById("map"),{
-center:{lat:59.9139,lng:10.7522},
-zoom:13
-})
+const map=new google.maps.Map(
+document.getElementById("map"),
+{center:{lat:59.91,lng:10.75},zoom:13}
+)
 
 service=new google.maps.places.PlacesService(map)
 
 }
-
-window.initMap=initMap
-
-/* LOAD CATEGORY */
 
 function loadCategory(type){
 
 let list=[]
 
 if(type==="restaurant") list=restaurants
-
 if(type==="wine") list=wineBars
-
 if(type==="cocktail") list=cocktailBars
 
 places=[]
@@ -213,7 +199,7 @@ fields:["name","rating","photos"]
 
 loaded++
 
-if(status===google.maps.places.PlacesServiceStatus.OK){
+if(status==="OK"){
 
 places.push(results[0])
 
@@ -221,11 +207,10 @@ places.push(results[0])
 
 if(loaded===list.length){
 
-document.getElementById("start-screen").style.display="none"
+document.getElementById("start").style.display="none"
+document.getElementById("card").style.display="block"
 
-document.getElementById("card-stack").style.display="block"
-
-renderCards()
+show()
 
 }
 
@@ -235,113 +220,62 @@ renderCards()
 
 }
 
-/* STARS */
+function show(){
 
-function stars(r){
+let p=places[index]
 
-if(!r) return ""
+document.getElementById("name").innerText=p.name
+document.getElementById("rating").innerText="⭐ "+(p.rating||"")
 
-let full=Math.floor(r)
+photos=[]
 
-let empty=5-full
+if(p.photos){
 
-return "⭐".repeat(full)+"✩".repeat(empty)
+for(let i=0;i<3 && i<p.photos.length;i++){
 
-}
-
-/* RENDER */
-
-function renderCards(){
-
-const stack=document.getElementById("card-stack")
-
-stack.innerHTML=""
-
-let place=places[index]
-
-if(!place) return
-
-let photos=[]
-
-if(place.photos){
-
-for(let i=0;i<3 && i<place.photos.length;i++){
-
-photos.push(place.photos[i].getUrl({maxWidth:800}))
+photos.push(p.photos[i].getUrl({maxWidth:800}))
 
 }
 
 }
 
-let current=0
+photoIndex=0
 
-const card=document.createElement("div")
-
-card.className="card"
-
-card.innerHTML=`
-
-<img id="place-img" src="${photos[0]}">
-
-<div class="overlay">
-
-<div class="title-row">
-
-<div class="place-name">${place.name}</div>
-
-<div class="rating">${stars(place.rating)} ${place.rating||""}</div>
-
-</div>
-
-</div>
-
-<div class="icon-row">
-
-<button class="icon-btn" onclick="next()">❌</button>
-
-<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${place.name}')">📍</button>
-
-<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${place.name}')">📅</button>
-
-<button class="icon-btn" onclick="next()">❤️</button>
-
-</div>
-
-`
-
-card.addEventListener("click",()=>{
-
-current++
-
-if(current>=photos.length){
-current=0
-}
-
-card.querySelector("#place-img").src=photos[current]
-
-})
-
-stack.appendChild(card)
+document.getElementById("photo").src=photos[0]
 
 }
 
-/* NEXT */
+document.getElementById("photo").onclick=function(){
+
+photoIndex++
+
+if(photoIndex>=photos.length) photoIndex=0
+
+document.getElementById("photo").src=photos[photoIndex]
+
+}
 
 function next(){
 
 index++
 
-if(index>=places.length){
-index=0
+if(index>=places.length) index=0
+
+show()
+
 }
 
-renderCards()
+function maps(){
+
+let p=places[index]
+
+window.open("https://maps.google.com/?q="+p.name)
 
 }
 
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=DIN_GOOGLE_API_KEY&libraries=places&callback=initMap"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap"></script>
 
 </body>
 </html>
