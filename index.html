@@ -11,22 +11,22 @@
 
 body{
 margin:0;
-font-family:Arial;
+font-family:"DIN Round","DINRoundPro","Arial";
 background:#111;
+color:white;
 display:flex;
 flex-direction:column;
 align-items:center;
-color:white;
 }
 
-/* FAVORITTER BUTTON */
+/* FAVORITT BUTTON */
 
 .fav-button{
-margin-top:10px;
-background:#222;
+margin-top:15px;
+background:transparent;
 border:none;
-padding:10px 20px;
-border-radius:20px;
+color:white;
+font-size:16px;
 cursor:pointer;
 }
 
@@ -42,6 +42,36 @@ background:#222;
 padding:14px;
 margin:8px 0;
 border-radius:10px;
+cursor:pointer;
+}
+
+/* START SCREEN */
+
+#start-screen{
+margin-top:120px;
+text-align:center;
+}
+
+.category{
+background:#222;
+padding:12px 20px;
+border-radius:20px;
+margin:10px;
+display:inline-block;
+cursor:pointer;
+}
+
+.category.active{
+background:#4CAF50;
+}
+
+.start-btn{
+margin-top:20px;
+padding:12px 30px;
+border:none;
+border-radius:20px;
+background:#4CAF50;
+color:white;
 cursor:pointer;
 }
 
@@ -76,6 +106,7 @@ bottom:0;
 width:100%;
 padding:20px;
 background:linear-gradient(transparent,rgba(0,0,0,0.8));
+text-align:center;
 }
 
 .place-name{
@@ -88,7 +119,7 @@ color:#FFD700;
 margin-top:4px;
 }
 
-/* NAV / BOOK */
+/* NAV BOOK */
 
 .bottom-buttons{
 display:flex;
@@ -106,12 +137,12 @@ color:white;
 cursor:pointer;
 }
 
-/* SWIPE BUTTONS */
+/* LIKE / DISLIKE */
 
 .x-btn{
 position:absolute;
 left:15px;
-bottom:90px;
+bottom:15px;
 width:60px;
 height:60px;
 border-radius:50%;
@@ -124,7 +155,7 @@ cursor:pointer;
 .like-btn{
 position:absolute;
 right:15px;
-bottom:90px;
+bottom:15px;
 width:60px;
 height:60px;
 border-radius:50%;
@@ -144,11 +175,26 @@ cursor:pointer;
 
 <div id="favorites-page"></div>
 
-<div id="card-stack"></div>
+<div id="start-screen">
+
+<h2>Hva vil du utforske?</h2>
+
+<div class="category" data-type="restaurant">Restaurant</div>
+<div class="category" data-type="bar">Vinbar</div>
+<div class="category" data-type="night_club">Cocktailbar</div>
+
+<br>
+
+<button class="start-btn" onclick="start()">Start</button>
+
+</div>
+
+<div id="card-stack" style="display:none"></div>
 
 <script>
 
 const curatedPlaces=[
+
 "Libertine",
 "Territoriet",
 "Skaal Matbar",
@@ -166,15 +212,46 @@ const curatedPlaces=[
 "Le Benjamin",
 "Hyde",
 "Brasserie France"
+
 ]
 
 let places=[]
 let favorites=[]
 let index=0
+let selectedType=null
+
+document.querySelectorAll(".category").forEach(el=>{
+
+el.onclick=()=>{
+
+document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"))
+
+el.classList.add("active")
+
+selectedType=el.dataset.type
+
+}
+
+})
+
+function start(){
+
+if(!selectedType){
+alert("Velg kategori")
+return
+}
+
+document.getElementById("start-screen").style.display="none"
+document.getElementById("card-stack").style.display="block"
+
+initMap()
+
+}
 
 function initMap(){
 
 const map=new google.maps.Map(document.createElement("div"))
+
 const service=new google.maps.places.PlacesService(map)
 
 let loaded=0
@@ -193,13 +270,17 @@ if(status==="OK"){
 service.getDetails({
 
 placeId:results[0].place_id,
-fields:["name","rating","photos"]
+fields:["name","rating","photos","types"]
 
 },(place,status)=>{
 
 if(status==="OK" && place.rating>=4){
 
+if(place.types.includes(selectedType)){
+
 places.push(place)
+
+}
 
 }
 
