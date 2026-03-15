@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="no">
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Savorly</title>
 
@@ -72,28 +72,6 @@ height:100%;
 object-fit:cover;
 }
 
-/* TOP */
-
-.back-btn{
-position:absolute;
-left:15px;
-top:15px;
-font-size:22px;
-background:none;
-border:none;
-color:white;
-}
-
-.fav-btn{
-position:absolute;
-right:15px;
-top:15px;
-font-size:22px;
-background:none;
-border:none;
-color:white;
-}
-
 /* TEXT */
 
 .overlay{
@@ -122,7 +100,7 @@ font-size:14px;
 opacity:0.8;
 }
 
-/* ICONS */
+/* ICON ROW */
 
 .icon-row{
 position:absolute;
@@ -167,10 +145,10 @@ color:white;
 <script>
 
 let selectedType=null
+let userLocation=null
 let places=[]
 let index=0
 let service
-let userLocation
 
 /* CATEGORY */
 
@@ -197,7 +175,24 @@ alert("Velg kategori")
 return
 }
 
-navigator.geolocation.getCurrentPosition(pos=>{
+userLocation = JSON.parse(localStorage.getItem("userLocation"))
+
+if(userLocation){
+initPlaces()
+}
+else{
+getLocation()
+}
+
+}
+
+/* GET GPS */
+
+function getLocation(){
+
+navigator.geolocation.getCurrentPosition(
+
+pos=>{
 
 userLocation={
 lat:pos.coords.latitude,
@@ -208,7 +203,14 @@ localStorage.setItem("userLocation",JSON.stringify(userLocation))
 
 initPlaces()
 
-})
+},
+
+err=>{
+alert("Kunne ikke hente GPS")
+console.log(err)
+}
+
+)
 
 }
 
@@ -220,23 +222,26 @@ const map=new google.maps.Map(document.createElement("div"))
 
 service=new google.maps.places.PlacesService(map)
 
-loadPlaces()
+searchPlaces()
 
 }
 
-/* LOAD PLACES */
+/* SEARCH */
 
-function loadPlaces(){
+function searchPlaces(){
 
 const request={
-location:userLocation,
+location:new google.maps.LatLng(userLocation.lat,userLocation.lng),
 radius:3000,
 type:selectedType
 }
 
 service.nearbySearch(request,(results,status)=>{
 
-if(status===google.maps.places.PlacesServiceStatus.OK){
+if(status!==google.maps.places.PlacesServiceStatus.OK){
+alert("Fant ingen steder")
+return
+}
 
 places=results
 
@@ -244,8 +249,6 @@ document.getElementById("start-screen").style.display="none"
 document.getElementById("card-stack").style.display="block"
 
 renderCards()
-
-}
 
 })
 
@@ -256,7 +259,6 @@ renderCards()
 function stars(r){
 
 let full=Math.floor(r)
-
 let empty=5-full
 
 return "⭐".repeat(full)+"✩".repeat(empty)
@@ -295,9 +297,7 @@ places.slice(index,index+3).forEach(place=>{
 let photo=""
 
 if(place.photos){
-
 photo=place.photos[0].getUrl({maxWidth:800})
-
 }
 
 let d=distance(
@@ -315,14 +315,11 @@ card.innerHTML=`
 
 <img src="${photo}">
 
-<button class="back-btn" onclick="goBack()">⬅</button>
-
 <div class="overlay">
 
 <div class="title-row">
 
 <div class="place-name">${place.name}</div>
-
 <div class="rating">${stars(place.rating)} ${place.rating}</div>
 
 </div>
@@ -362,15 +359,6 @@ index=0
 }
 
 renderCards()
-
-}
-
-/* BACK */
-
-function goBack(){
-
-document.getElementById("card-stack").style.display="none"
-document.getElementById("start-screen").style.display="block"
 
 }
 
