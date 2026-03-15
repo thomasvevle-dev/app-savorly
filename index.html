@@ -11,7 +11,7 @@
 
 body{
 margin:0;
-font-family:"DIN Round",Arial;
+font-family:Arial;
 background:#111;
 color:white;
 display:flex;
@@ -19,7 +19,7 @@ flex-direction:column;
 align-items:center;
 }
 
-/* START SCREEN */
+/* START */
 
 #start-screen{
 margin-top:120px;
@@ -31,8 +31,8 @@ background:#222;
 padding:12px 20px;
 border-radius:20px;
 margin:10px;
-display:inline-block;
 cursor:pointer;
+display:inline-block;
 }
 
 .category.active{
@@ -46,10 +46,9 @@ border:none;
 border-radius:20px;
 background:#4CAF50;
 color:white;
-cursor:pointer;
 }
 
-/* CARD STACK */
+/* CARD */
 
 #card-stack{
 position:relative;
@@ -64,7 +63,7 @@ width:100%;
 height:100%;
 border-radius:20px;
 overflow:hidden;
-background:#000;
+background:black;
 }
 
 .card img{
@@ -73,7 +72,7 @@ height:100%;
 object-fit:cover;
 }
 
-/* TOP BUTTONS */
+/* TOP */
 
 .back-btn{
 position:absolute;
@@ -83,25 +82,23 @@ font-size:22px;
 background:none;
 border:none;
 color:white;
-cursor:pointer;
 }
 
 .fav-btn{
 position:absolute;
 right:15px;
 top:15px;
-font-size:20px;
+font-size:22px;
 background:none;
 border:none;
 color:white;
-cursor:pointer;
 }
 
 /* TEXT */
 
 .overlay{
 position:absolute;
-bottom:80px;
+bottom:90px;
 left:20px;
 }
 
@@ -110,8 +107,9 @@ font-size:24px;
 font-weight:bold;
 }
 
-.rating{
-color:#FFD700;
+.distance{
+font-size:14px;
+opacity:0.8;
 }
 
 /* ICON ROW */
@@ -132,7 +130,6 @@ border:none;
 font-size:20px;
 background:#333;
 color:white;
-cursor:pointer;
 }
 
 /* FAVORITES */
@@ -194,6 +191,7 @@ const cocktailBars=[
 let places=[]
 let favorites=[]
 let index=0
+let userLocation=null
 let selectedType=null
 
 /* CATEGORY SELECT */
@@ -225,6 +223,23 @@ if(selectedType==="restaurant") places=[...restaurants]
 if(selectedType==="wine") places=[...wineBars]
 if(selectedType==="cocktail") places=[...cocktailBars]
 
+navigator.geolocation.getCurrentPosition(pos=>{
+
+userLocation={
+lat:pos.coords.latitude,
+lng:pos.coords.longitude
+}
+
+init()
+
+})
+
+}
+
+/* INIT */
+
+function init(){
+
 document.getElementById("start-screen").style.display="none"
 document.getElementById("card-stack").style.display="block"
 
@@ -242,13 +257,15 @@ stack.innerHTML=""
 
 places.slice(index,index+3).forEach((name,i)=>{
 
+let distance = Math.floor(Math.random()*2000)
+
 const card=document.createElement("div")
 
 card.className="card"
 
 card.innerHTML=`
 
-<img src="https://source.unsplash.com/600x800/?restaurant">
+<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800">
 
 <button class="back-btn">⬅</button>
 <button class="fav-btn">⭐</button>
@@ -256,7 +273,7 @@ card.innerHTML=`
 <div class="overlay">
 
 <div class="place-name">${name}</div>
-<div class="rating">⭐ 4.2</div>
+<div class="distance">📍 ${distance} m unna</div>
 
 </div>
 
@@ -277,7 +294,7 @@ card.querySelector(".fav-btn").onclick=showFavorites
 card.querySelector(".skip").onclick=next
 
 card.querySelector(".like").onclick=()=>{
-favorites.push(name)
+favorites.push({name,index})
 updateFavorites()
 next()
 }
@@ -290,41 +307,7 @@ card.querySelector(".book").onclick=()=>{
 window.open("https://maps.google.com/search/"+name)
 }
 
-addSwipe(card,name)
-
 stack.appendChild(card)
-
-})
-
-}
-
-/* SWIPE */
-
-function addSwipe(card,name){
-
-let startX=null
-
-card.addEventListener("pointerdown",e=>{
-startX=e.clientX
-})
-
-card.addEventListener("pointerup",e=>{
-
-if(startX===null) return
-
-let diff=e.clientX-startX
-
-if(diff>120){
-favorites.push(name)
-updateFavorites()
-next()
-}
-
-if(diff<-120){
-next()
-}
-
-startX=null
 
 })
 
@@ -352,17 +335,17 @@ const list=document.getElementById("favorites-page")
 
 list.innerHTML=""
 
-favorites.forEach(place=>{
+favorites.forEach(fav=>{
 
 let div=document.createElement("div")
 
 div.className="favorite-item"
 
-div.innerText=place
+div.innerText=fav.name
 
 div.onclick=()=>{
 
-index=places.indexOf(place)
+index=fav.index
 
 document.getElementById("favorites-page").style.display="none"
 document.getElementById("card-stack").style.display="block"
