@@ -13,6 +13,7 @@ body{
 margin:0;
 font-family:-apple-system,BlinkMacSystemFont,Arial;
 background:#000;
+color:white;
 overflow:hidden;
 }
 
@@ -20,7 +21,7 @@ overflow:hidden;
 
 #map{width:1px;height:1px;opacity:0}
 
-/* START SCREEN */
+/* START */
 
 #start{
 position:absolute;
@@ -28,7 +29,6 @@ top:80px;
 width:100%;
 text-align:center;
 z-index:20;
-color:white;
 }
 
 .category{
@@ -57,8 +57,8 @@ width:100%;
 height:100%;
 border-radius:24px;
 overflow:hidden;
-transition:transform .3s ease;
 background:#000;
+transition:transform .3s ease;
 }
 
 .card.next{
@@ -77,6 +77,19 @@ height:100%;
 object-fit:cover;
 }
 
+/* TEXT */
+
+.overlay{
+position:absolute;
+bottom:120px;
+left:24px;
+z-index:10;
+}
+
+.name{font-size:32px;font-weight:600}
+
+.rating{color:#FFD54F;font-size:18px}
+
 /* ICONS */
 
 .back{
@@ -86,7 +99,6 @@ left:20px;
 font-size:26px;
 z-index:10;
 cursor:pointer;
-color:white;
 }
 
 .prev{
@@ -96,27 +108,6 @@ right:20px;
 font-size:26px;
 z-index:10;
 cursor:pointer;
-color:white;
-}
-
-/* TEXT */
-
-.overlay{
-position:absolute;
-bottom:120px;
-left:24px;
-color:white;
-z-index:10;
-}
-
-.name{
-font-size:32px;
-font-weight:600;
-}
-
-.rating{
-color:#FFD54F;
-font-size:18px;
 }
 
 /* PHOTO INDICATOR */
@@ -138,9 +129,7 @@ border-radius:3px;
 background:rgba(255,255,255,.3);
 }
 
-.photo-bar.active{
-background:white;
-}
+.photo-bar.active{background:white}
 
 /* BUTTONS */
 
@@ -151,34 +140,11 @@ width:100%;
 display:flex;
 justify-content:space-evenly;
 z-index:10;
-color:white;
 }
 
 .action{
 font-size:32px;
 cursor:pointer;
-}
-
-/* SWIPE OVERLAY */
-
-.swipeLike{
-position:absolute;
-top:100px;
-right:40px;
-font-size:80px;
-color:#00ff88;
-opacity:0;
-transform:rotate(20deg);
-}
-
-.swipeNope{
-position:absolute;
-top:100px;
-left:40px;
-font-size:80px;
-color:#ff3b3b;
-opacity:0;
-transform:rotate(-20deg);
 }
 
 </style>
@@ -211,7 +177,8 @@ transform:rotate(-20deg);
 let service
 let places=[]
 let index=0
-
+let photos=[]
+let photoIndex=0
 let startX=0
 let currentX=0
 let dragging=false
@@ -312,7 +279,7 @@ if(imgs.length===0){
 imgs=["https://images.unsplash.com/photo-1414235077428-338989a2e8c0"]
 }
 
-/* PRELOAD */
+/* preload */
 
 imgs.forEach(src=>{
 let img=new Image()
@@ -325,9 +292,6 @@ card.innerHTML=`
 
 <div class="back" onclick="back()">⬅</div>
 <div class="prev" onclick="prevCard()">↩</div>
-
-<div class="swipeLike">❤️</div>
-<div class="swipeNope">❌</div>
 
 <div class="photo-indicator"></div>
 
@@ -352,8 +316,6 @@ card.innerHTML=`
 
 let img=card.querySelector(".photo")
 let indicator=card.querySelector(".photo-indicator")
-let likeOverlay=card.querySelector(".swipeLike")
-let nopeOverlay=card.querySelector(".swipeNope")
 
 function renderIndicator(){
 
@@ -379,7 +341,6 @@ img.src=imgs[0]
 img.onclick=()=>{
 
 photoIndex++
-
 if(photoIndex>=imgs.length)photoIndex=0
 
 img.src=imgs[photoIndex]
@@ -387,9 +348,6 @@ img.src=imgs[photoIndex]
 renderIndicator()
 
 }
-
-card.likeOverlay=likeOverlay
-card.nopeOverlay=nopeOverlay
 
 }
 
@@ -407,8 +365,6 @@ setTimeout(()=>{
 index++
 
 card1.style.transform=""
-card1.likeOverlay.style.opacity=0
-card1.nopeOverlay.style.opacity=0
 
 renderStack()
 
@@ -419,7 +375,7 @@ renderStack()
 function like(){swipe("right")}
 function skip(){swipe("left")}
 
-/* DRAG SWIPE */
+/* TOUCH SWIPE */
 
 cardStack.addEventListener("pointerdown",e=>{
 dragging=true
@@ -435,20 +391,6 @@ currentX=e.clientX-startX
 card1.style.transform=
 `translateX(${currentX}px) rotate(${currentX/10}deg)`
 
-let percent=Math.abs(currentX)/150
-
-if(currentX>0){
-
-card1.likeOverlay.style.opacity=percent
-card1.nopeOverlay.style.opacity=0
-
-}else{
-
-card1.nopeOverlay.style.opacity=percent
-card1.likeOverlay.style.opacity=0
-
-}
-
 })
 
 cardStack.addEventListener("pointerup",()=>{
@@ -459,13 +401,7 @@ dragging=false
 
 if(currentX>120)swipe("right")
 else if(currentX<-120)swipe("left")
-else{
-
-card1.style.transform=""
-card1.likeOverlay.style.opacity=0
-card1.nopeOverlay.style.opacity=0
-
-}
+else card1.style.transform=""
 
 currentX=0
 
