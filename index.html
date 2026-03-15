@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Savorly</title>
 
 <style>
@@ -10,9 +10,8 @@
 body{
 margin:0;
 font-family:-apple-system,BlinkMacSystemFont;
-background:#000;
+background:black;
 color:white;
-overflow:hidden;
 }
 
 #home{
@@ -29,18 +28,18 @@ overflow-y:auto;
 }
 
 .logo{
-width:180px;
-margin-bottom:40px;
+width:220px;
+margin-bottom:50px;
 }
 
 .cat{
 width:80%;
 max-width:420px;
-padding:20px;
+padding:18px;
 margin:12px;
 border-radius:20px;
-border:1px solid #333;
 background:#111;
+border:1px solid #333;
 text-align:center;
 font-size:22px;
 }
@@ -74,7 +73,6 @@ height:92%;
 border-radius:26px;
 overflow:hidden;
 background:black;
-box-shadow:0 20px 40px rgba(0,0,0,.6);
 }
 
 .card img{
@@ -85,7 +83,7 @@ object-fit:cover;
 
 .info{
 position:absolute;
-bottom:140px;
+bottom:130px;
 left:24px;
 }
 
@@ -95,7 +93,7 @@ font-weight:600;
 }
 
 .rating{
-font-size:22px;
+font-size:20px;
 color:#FFD54F;
 }
 
@@ -116,11 +114,11 @@ font-size:28px;
 }
 
 .back{
-left:22px;
+left:20px;
 }
 
 .undo{
-right:22px;
+right:20px;
 }
 
 .photoDots{
@@ -174,7 +172,8 @@ let data;
 let list=[];
 let index=0;
 let history=[];
-let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
+
+let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
 
 const deck=document.getElementById("deck");
 
@@ -216,211 +215,30 @@ createCard(list[i],i);
 
 }
 
-async function createCard(name,i){
+async function createCard(name){
 
 const card=document.createElement("div");
 card.className="card";
 
-const place=await findPlace(name);
+let place=await getPlace(name);
 
-const photos=place.photos || [];
+let photos=place.photos;
+
 let photoIndex=0;
 
 card.innerHTML=`
-<img src="${getPhoto(photos[0])}">
-<div class="photoDots">${photos.slice(0,3).map((_,x)=>`<span class="dot ${x==0?'active':''}"></span>`).join("")}</div>
+
+<img src="${photos[0]}">
+
+<div class="photoDots">
+<span class="dot active"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
 
 <div class="topbtn back" onclick="goHome()">←</div>
 <div class="topbtn undo" onclick="undo()">↩</div>
 
 <div class="info">
 <div class="name">${place.name}</div>
-<div class="rating">⭐ ${place.rating || ""}</div>
-</div>
-
-<div class="buttons">
-<div onclick="dislike()">❌</div>
-<div onclick="navigate('${place.lat}','${place.lng}')">📍</div>
-<div onclick="book('${place.name}')">📅</div>
-<div onclick="like('${place.name}')">❤️</div>
-</div>
-`;
-
-card.onclick=()=>{
-
-if(photos.length<2)return;
-
-photoIndex=(photoIndex+1)%Math.min(3,photos.length);
-
-card.querySelector("img").src=getPhoto(photos[photoIndex]);
-
-const dots=card.querySelectorAll(".dot");
-
-dots.forEach((d,x)=>d.classList.toggle("active",x===photoIndex));
-
-};
-
-enableSwipe(card);
-
-deck.appendChild(card);
-
-}
-
-function enableSwipe(card){
-
-let startX;
-
-card.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX;
-});
-
-card.addEventListener("touchmove",e=>{
-
-const diff=e.touches[0].clientX-startX;
-
-card.style.transform=`translateX(${diff}px) rotate(${diff/20}deg)`;
-
-});
-
-card.addEventListener("touchend",e=>{
-
-const diff=e.changedTouches[0].clientX-startX;
-
-if(diff>120) like();
-else if(diff<-120) dislike();
-else card.style.transform="";
-
-});
-
-}
-
-function like(name){
-
-if(name && !favorites.includes(name)){
-favorites.push(name);
-localStorage.setItem("favorites",JSON.stringify(favorites));
-renderFavorites();
-}
-
-next();
-
-}
-
-function dislike(){
-next();
-}
-
-function next(){
-
-history.push(index);
-
-index++;
-
-buildDeck();
-
-}
-
-function undo(){
-
-if(history.length==0) return;
-
-index=history.pop();
-
-buildDeck();
-
-}
-
-function goHome(){
-
-deck.style.display="none";
-document.getElementById("home").style.display="flex";
-
-}
-
-function renderFavorites(){
-
-const box=document.getElementById("favorites");
-
-box.innerHTML="";
-
-favorites.forEach(f=>{
-
-const el=document.createElement("div");
-
-el.className="favoriteItem";
-
-el.innerText=f;
-
-el.onclick=()=>{
-
-openFromFavorite(f);
-
-};
-
-box.appendChild(el);
-
-});
-
-}
-
-function openFromFavorite(name){
-
-const pos=list.indexOf(name);
-
-if(pos>=0){
-
-index=pos;
-
-document.getElementById("home").style.display="none";
-deck.style.display="flex";
-
-buildDeck();
-
-}
-
-}
-
-function navigate(lat,lng){
-
-window.open(`https://maps.google.com/?q=${lat},${lng}`);
-
-}
-
-function book(name){
-
-window.open(`https://www.google.com/search?q=${name}+booking`);
-
-}
-
-async function findPlace(name){
-
-const url=`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(name+" Oslo")}&inputtype=textquery&fields=photos,rating,name,geometry&key=${API_KEY}`;
-
-const res=await fetch(url);
-
-const j=await res.json();
-
-const c=j.candidates[0];
-
-return{
-name:c.name,
-rating:c.rating,
-photos:c.photos,
-lat:c.geometry.location.lat,
-lng:c.geometry.location.lng
-};
-
-}
-
-function getPhoto(p){
-
-if(!p) return "";
-
-return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${p.photo_reference}&key=${API_KEY}`;
-
-}
-
-</script>
-
-</body>
-</html>
+<div class="rating">
