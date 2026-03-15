@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
 <title>Savorly</title>
 
 <style>
@@ -53,9 +51,15 @@ margin-top:40px;
 }
 
 .favoriteItem{
-padding:14px;
-border-bottom:1px solid #333;
+padding:16px;
+margin:8px 0;
+border-radius:16px;
 background:#111;
+border:1px solid #333;
+}
+
+.hidden{
+display:none;
 }
 
 #deck{
@@ -91,8 +95,13 @@ left:24px;
 }
 
 .name{
-font-size:34px;
+font-size:32px;
 font-weight:600;
+}
+
+.rating{
+font-size:20px;
+color:#FFD54F;
 }
 
 .buttons{
@@ -114,27 +123,6 @@ font-size:28px;
 .back{left:20px}
 .undo{right:20px}
 
-.photoDots{
-position:absolute;
-top:16px;
-left:0;
-right:0;
-text-align:center;
-}
-
-.dot{
-display:inline-block;
-width:22px;
-height:4px;
-background:rgba(255,255,255,.4);
-margin:3px;
-border-radius:10px;
-}
-
-.dot.active{
-background:white;
-}
-
 </style>
 </head>
 
@@ -150,14 +138,14 @@ background:white;
 
 <div class="section">
 
-<h3>Favoritt restaurant</h3>
-<div id="fav-restaurants"></div>
+<div class="cat" onclick="toggleFav('restaurants')">Favoritt restaurant</div>
+<div id="fav-restaurants" class="hidden"></div>
 
-<h3>Favoritt vinbar</h3>
-<div id="fav-winebars"></div>
+<div class="cat" onclick="toggleFav('winebars')">Favoritt vinbar</div>
+<div id="fav-winebars" class="hidden"></div>
 
-<h3>Favoritt cocktailbar</h3>
-<div id="fav-cocktailbars"></div>
+<div class="cat" onclick="toggleFav('cocktailbars')">Favoritt cocktailbar</div>
+<div id="fav-cocktailbars" class="hidden"></div>
 
 </div>
 
@@ -165,12 +153,16 @@ background:white;
 
 <div id="deck"></div>
 
+<div id="map" style="display:none"></div>
+
 <script>
 
 let data
 let list=[]
 let index=0
 let history=[]
+let currentType=""
+let placesService
 
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
@@ -191,11 +183,18 @@ renderFavorites()
 
 loadData()
 
+function initMap(){
+const map=new google.maps.Map(document.getElementById("map"),{
+center:{lat:59.91,lng:10.75},
+zoom:13
+})
+placesService=new google.maps.places.PlacesService(map)
+}
+
 function openCategory(type){
 
-list=data[type]
 currentType=type
-
+list=data[type]
 index=0
 
 document.getElementById("home").style.display="none"
@@ -224,54 +223,72 @@ function createCard(name){
 const card=document.createElement("div")
 card.className="card"
 
-let photos=[
+searchPlace(name,(place)=>{
+
+let photos=[]
+
+if(place.photos){
+for(let i=0;i<Math.min(3,place.photos.length);i++){
+photos.push(place.photos[i].getUrl({maxWidth:1200}))
+}
+}
+
+if(photos.length===0){
+photos=[
 "https://source.unsplash.com/featured/?restaurant",
 "https://source.unsplash.com/featured/?food",
 "https://source.unsplash.com/featured/?wine"
 ]
+}
 
 let photoIndex=0
 
 card.innerHTML=`
-
 <img src="${photos[0]}">
-
-<div class="photoDots">
-<span class="dot active"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-</div>
 
 <div class="topbtn back" onclick="goHome()">←</div>
 <div class="topbtn undo" onclick="undo()">↩</div>
 
 <div class="info">
-<div class="name">${name}</div>
+<div class="name">${place.name}</div>
+<div class="rating">⭐ ${place.rating||""}</div>
 </div>
 
 <div class="buttons">
 <div onclick="dislike()">❌</div>
-<div onclick="navigate('${name}')">📍</div>
-<div onclick="book('${name}')">📅</div>
-<div onclick="like('${name}')">❤️</div>
+<div onclick="navigate('${place.name}')">📍</div>
+<div onclick="book('${place.name}')">📅</div>
+<div onclick="like('${place.name}')">❤️</div>
 </div>
 `
 
 card.onclick=()=>{
-
-photoIndex=(photoIndex+1)%3
-
+photoIndex=(photoIndex+1)%photos.length
 card.querySelector("img").src=photos[photoIndex]
-
-const dots=card.querySelectorAll(".dot")
-
-dots.forEach((d,x)=>d.classList.toggle("active",x===photoIndex))
-
 }
 
 enableSwipe(card)
 
 deck.appendChild(card)
+
+})
+
+}
+
+function searchPlace(name,callback){
+
+placesService.findPlaceFromQuery({
+query:name+" Oslo",
+fields:["name","rating","photos"]
+},(results,status)=>{
+
+if(status===google.maps.places.PlacesServiceStatus.OK){
+callback(results[0])
+}else{
+callback({name:name})
+}
+
+})
 
 }
 
@@ -284,21 +301,15 @@ startX=e.touches[0].clientX
 })
 
 card.addEventListener("touchmove",e=>{
-
 const diff=e.touches[0].clientX-startX
-
 card.style.transform=`translateX(${diff}px) rotate(${diff/20}deg)`
-
 })
 
 card.addEventListener("touchend",e=>{
-
 const diff=e.changedTouches[0].clientX-startX
-
 if(diff>120) like()
 else if(diff<-120) dislike()
 else card.style.transform=""
-
 })
 
 }
@@ -308,71 +319,49 @@ function like(name){
 let arr=favorites[currentType]
 
 if(!arr.includes(name)){
-
 arr.push(name)
-
 localStorage.setItem("fav-"+currentType,JSON.stringify(arr))
-
 renderFavorites()
-
 }
 
 next()
 
 }
 
-function dislike(){
-next()
-}
+function dislike(){next()}
 
 function next(){
-
 history.push(index)
-
 index++
-
 buildDeck()
-
 }
 
 function undo(){
-
 if(history.length===0)return
-
 index=history.pop()
-
 buildDeck()
-
 }
 
 function goHome(){
-
 deck.style.display="none"
-
 document.getElementById("home").style.display="flex"
-
 }
 
 function renderFavorites(){
-
 renderFavCategory("restaurants")
 renderFavCategory("winebars")
 renderFavCategory("cocktailbars")
-
 }
 
 function renderFavCategory(type){
 
 const box=document.getElementById("fav-"+type)
-
 box.innerHTML=""
 
 favorites[type].forEach(name=>{
 
 const el=document.createElement("div")
-
 el.className="favoriteItem"
-
 el.innerText=name
 
 enableFavSwipe(el,type,name)
@@ -385,6 +374,18 @@ box.appendChild(el)
 
 }
 
+function toggleFav(type){
+
+const el=document.getElementById("fav-"+type)
+
+if(el.classList.contains("hidden")){
+el.classList.remove("hidden")
+}else{
+el.classList.add("hidden")
+}
+
+}
+
 function enableFavSwipe(el,type,name){
 
 let startX
@@ -394,19 +395,13 @@ startX=e.touches[0].clientX
 })
 
 el.addEventListener("touchend",e=>{
-
 let diff=e.changedTouches[0].clientX-startX
 
 if(Math.abs(diff)>120){
-
 favorites[type]=favorites[type].filter(x=>x!==name)
-
 localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
-
 renderFavorites()
-
 }
-
 })
 
 }
@@ -414,11 +409,9 @@ renderFavorites()
 function openFromFavorite(type,name){
 
 list=data[type]
-
 index=list.indexOf(name)
 
 document.getElementById("home").style.display="none"
-
 deck.style.display="flex"
 
 buildDeck()
@@ -426,17 +419,17 @@ buildDeck()
 }
 
 function navigate(name){
-
 window.open(`https://maps.google.com/?q=${encodeURIComponent(name+" Oslo")}`)
-
 }
 
 function book(name){
-
 window.open(`https://www.google.com/search?q=${encodeURIComponent(name+" booking")}`)
-
 }
 
+</script>
+
+<script async
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap">
 </script>
 
 </body>
