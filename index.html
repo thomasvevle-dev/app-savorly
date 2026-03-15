@@ -11,54 +11,16 @@
 
 body{
 margin:0;
-font-family:"DIN Round","DINRoundPro","Arial";
+font-family:"DIN Round","DINRoundPro",Arial;
 background:#111;
 color:white;
 display:flex;
 flex-direction:column;
 align-items:center;
+overflow:hidden;
 }
 
-/* TOP BUTTONS */
-
-.top-left{
-position:absolute;
-left:15px;
-top:15px;
-background:none;
-border:none;
-font-size:22px;
-color:white;
-cursor:pointer;
-}
-
-.top-right{
-position:absolute;
-right:15px;
-top:15px;
-background:none;
-border:none;
-font-size:18px;
-color:white;
-cursor:pointer;
-}
-
-/* FAVORITTER */
-
-#favorites-page{
-display:none;
-width:360px;
-}
-
-.favorite-item{
-background:#222;
-padding:14px;
-margin:8px 0;
-border-radius:10px;
-cursor:pointer;
-}
-
-/* START SCREEN */
+/* START */
 
 #start-screen{
 margin-top:120px;
@@ -93,7 +55,7 @@ cursor:pointer;
 #card-stack{
 position:relative;
 width:360px;
-height:520px;
+height:540px;
 margin-top:10px;
 }
 
@@ -103,6 +65,7 @@ width:100%;
 height:100%;
 border-radius:20px;
 overflow:hidden;
+touch-action:none;
 }
 
 .card img{
@@ -111,71 +74,81 @@ height:100%;
 object-fit:cover;
 }
 
-/* OVERLAY */
+/* TOP */
+
+.back-btn{
+position:absolute;
+left:15px;
+top:15px;
+font-size:22px;
+background:none;
+border:none;
+color:white;
+cursor:pointer;
+}
+
+.fav-btn{
+position:absolute;
+right:15px;
+top:15px;
+font-size:20px;
+background:none;
+border:none;
+color:white;
+cursor:pointer;
+}
+
+/* INFO */
 
 .overlay{
 position:absolute;
-bottom:0;
-width:100%;
-padding:20px;
-background:linear-gradient(transparent,rgba(0,0,0,0.8));
+bottom:80px;
+left:20px;
 }
 
 .place-name{
-font-size:22px;
+font-size:24px;
 font-weight:bold;
 }
 
 .rating{
 color:#FFD700;
-margin-top:4px;
 }
 
-/* NAV BOOK */
+/* ICON ROW */
 
-.bottom-buttons{
+.icon-row{
+position:absolute;
+bottom:20px;
+width:100%;
 display:flex;
-justify-content:center;
-gap:15px;
-margin-top:10px;
+justify-content:space-evenly;
 }
 
 .icon-btn{
-background:#2196F3;
-border:none;
-width:45px;
-height:45px;
+width:50px;
+height:50px;
 border-radius:50%;
-font-size:18px;
+border:none;
+font-size:20px;
+cursor:pointer;
+background:#333;
 color:white;
-cursor:pointer;
 }
 
-/* LIKE DISLIKE */
+/* FAVORITTER */
 
-.x-btn{
-position:absolute;
-left:15px;
-bottom:15px;
-width:45px;
-height:45px;
-border-radius:50%;
-border:none;
-font-size:20px;
-background:#ff4d4d;
-cursor:pointer;
+#favorites-page{
+display:none;
+width:360px;
+margin-top:40px;
 }
 
-.like-btn{
-position:absolute;
-right:15px;
-bottom:15px;
-width:45px;
-height:45px;
-border-radius:50%;
-border:none;
-font-size:20px;
-background:#4CAF50;
+.favorite-item{
+background:#222;
+padding:14px;
+margin:8px 0;
+border-radius:10px;
 cursor:pointer;
 }
 
@@ -185,15 +158,13 @@ cursor:pointer;
 
 <body>
 
-<div id="favorites-page"></div>
-
 <div id="start-screen">
 
 <h2>Hva vil du utforske?</h2>
 
 <div class="category" data-type="restaurant">Restaurant</div>
-<div class="category" data-type="bar">Vinbar</div>
-<div class="category" data-type="night_club">Cocktailbar</div>
+<div class="category" data-type="wine">Vinbar</div>
+<div class="category" data-type="cocktail">Cocktailbar</div>
 
 <br>
 
@@ -201,29 +172,24 @@ cursor:pointer;
 
 </div>
 
+<div id="favorites-page"></div>
+
 <div id="card-stack" style="display:none"></div>
 
 <script>
 
-const curatedPlaces=[
-"Libertine",
-"Territoriet",
-"Skaal Matbar",
-"F6 Cocktailbar",
-"Bettola",
-"Himkok",
-"Svanen",
-"Torggata Botaniske",
-"Andre til Høyre",
-"Nektar Vinbar",
-"Radegast",
-"Vinoteket",
-"Fuglen",
-"Arakataka",
-"Le Benjamin",
-"Hyde",
-"Brasserie France"
-]
+let userLocation=null
+
+navigator.geolocation.getCurrentPosition(pos=>{
+userLocation={
+lat:pos.coords.latitude,
+lng:pos.coords.longitude
+}
+})
+
+const restaurants=[/* dine 67 restauranter */]
+const wineBars=[/* dine 30 vinbarer */]
+const cocktailBars=[/* dine 30 cocktailbarer */]
 
 let places=[]
 let favorites=[]
@@ -251,10 +217,138 @@ alert("Velg kategori")
 return
 }
 
+if(selectedType==="restaurant") places=[...restaurants]
+if(selectedType==="wine") places=[...wineBars]
+if(selectedType==="cocktail") places=[...cocktailBars]
+
 document.getElementById("start-screen").style.display="none"
 document.getElementById("card-stack").style.display="block"
 
-initMap()
+shuffle()
+
+renderCards()
+
+}
+
+function shuffle(){
+places.sort(()=>Math.random()-0.5)
+}
+
+function renderCards(){
+
+const stack=document.getElementById("card-stack")
+
+stack.innerHTML=""
+
+places.slice(index,index+3).forEach((name,i)=>{
+
+const card=document.createElement("div")
+
+card.className="card"
+
+card.innerHTML=`
+
+<img src="https://source.unsplash.com/600x800/?restaurant">
+
+<button class="back-btn" onclick="goBack()">⬅</button>
+<button class="fav-btn" onclick="showFavorites()">⭐</button>
+
+<div class="overlay">
+
+<div class="place-name">${name}</div>
+<div class="rating">⭐ 4.2</div>
+
+</div>
+
+<div class="icon-row">
+
+<button class="icon-btn skip">❌</button>
+<button class="icon-btn nav">📍</button>
+<button class="icon-btn book">📅</button>
+<button class="icon-btn like">❤️</button>
+
+</div>
+
+`
+
+addSwipe(card,name)
+
+card.querySelector(".like").onclick=()=>{
+favorites.push(name)
+updateFavorites()
+next()
+}
+
+card.querySelector(".skip").onclick=()=>{
+next()
+}
+
+card.querySelector(".nav").onclick=()=>{
+window.open("https://maps.google.com/search/"+name)
+}
+
+card.querySelector(".book").onclick=()=>{
+window.open("https://maps.google.com/search/"+name)
+}
+
+stack.appendChild(card)
+
+})
+
+}
+
+function addSwipe(card,name){
+
+let startX=0
+
+card.addEventListener("pointerdown",e=>{
+startX=e.clientX
+})
+
+card.addEventListener("pointermove",e=>{
+
+if(!startX) return
+
+let diff=e.clientX-startX
+
+card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
+
+})
+
+card.addEventListener("pointerup",e=>{
+
+let diff=e.clientX-startX
+
+if(diff>120){
+favorites.push(name)
+updateFavorites()
+next()
+}
+
+else if(diff<-120){
+next()
+}
+
+else{
+card.style.transform=""
+}
+
+startX=0
+
+})
+
+}
+
+function next(){
+
+index++
+
+if(index>=places.length){
+index=0
+shuffle()
+}
+
+renderCards()
 
 }
 
@@ -267,156 +361,6 @@ document.getElementById("start-screen").style.display="block"
 
 function showFavorites(){
 
-document.getElementById("favorites-page").style.display="block"
-document.getElementById("card-stack").style.display="none"
-
-}
-
-function initMap(){
-
-const map=new google.maps.Map(document.createElement("div"))
-
-const service=new google.maps.places.PlacesService(map)
-
-let loaded=0
-
-curatedPlaces.forEach(name=>{
-
-service.findPlaceFromQuery({
-
-query:name+" oslo",
-fields:["place_id"]
-
-},(results,status)=>{
-
-if(status==="OK"){
-
-service.getDetails({
-
-placeId:results[0].place_id,
-fields:["name","rating","photos","types"]
-
-},(place,status)=>{
-
-if(status==="OK" && place.rating>=4){
-
-if(place.types.includes(selectedType)){
-places.push(place)
-}
-
-}
-
-loaded++
-
-if(loaded===curatedPlaces.length){
-renderCards()
-}
-
-})
-
-}else{
-loaded++
-}
-
-})
-
-})
-
-}
-
-function renderCards(){
-
-const stack=document.getElementById("card-stack")
-
-stack.innerHTML=""
-
-places.slice(index,index+3).forEach((place,i)=>{
-
-let photo="https://via.placeholder.com/400"
-
-if(place.photos){
-photo=place.photos[0].getUrl({maxWidth:600})
-}
-
-const card=document.createElement("div")
-
-card.className="card"
-card.style.zIndex=100-i
-
-card.innerHTML=`
-
-<img src="${photo}">
-
-<button class="top-left" onclick="goBack()">⬅</button>
-<button class="top-right" onclick="showFavorites()">⭐</button>
-
-<div class="overlay">
-
-<div class="place-name">${place.name}</div>
-<div class="rating">⭐ ${place.rating}</div>
-
-<div class="bottom-buttons">
-
-<button class="icon-btn nav">📍</button>
-<button class="icon-btn book">📅</button>
-
-</div>
-
-</div>
-
-<button class="x-btn">❌</button>
-<button class="like-btn">❤️</button>
-
-`
-
-card.querySelector(".nav").onclick=()=>{
-
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
-
-}
-
-card.querySelector(".book").onclick=()=>{
-
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
-
-}
-
-card.querySelector(".like-btn").onclick=()=>{
-
-favorites.push(place)
-updateFavorites()
-card.remove()
-next()
-
-}
-
-card.querySelector(".x-btn").onclick=()=>{
-
-card.remove()
-next()
-
-}
-
-stack.appendChild(card)
-
-})
-
-}
-
-function next(){
-
-index++
-
-if(index>=places.length){
-index=0
-}
-
-renderCards()
-
-}
-
-function updateFavorites(){
-
 const list=document.getElementById("favorites-page")
 
 list.innerHTML=""
@@ -427,11 +371,11 @@ let div=document.createElement("div")
 
 div.className="favorite-item"
 
-div.innerText=place.name
+div.innerText=place
 
 div.onclick=()=>{
 
-index=places.findIndex(p=>p.name===place.name)
+index=places.indexOf(place)
 
 document.getElementById("favorites-page").style.display="none"
 document.getElementById("card-stack").style.display="block"
@@ -444,11 +388,14 @@ list.appendChild(div)
 
 })
 
+document.getElementById("favorites-page").style.display="block"
+document.getElementById("card-stack").style.display="none"
+
 }
 
-</script>
+function updateFavorites(){}
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap" async defer></script>
+</script>
 
 </body>
 </html>
