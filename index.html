@@ -74,12 +74,18 @@ height:92%;
 border-radius:26px;
 overflow:hidden;
 background:black;
+transition:transform .3s ease;
 }
 
 .card img{
 width:100%;
 height:100%;
 object-fit:cover;
+}
+
+.card.next{
+transform:scale(.96) translateY(10px);
+opacity:.6;
 }
 
 .photoDots{
@@ -143,6 +149,15 @@ right:20px;
 font-size:30px;
 }
 
+.loader{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:18px;
+opacity:.6;
+}
+
 </style>
 </head>
 
@@ -182,6 +197,7 @@ let index=0
 let history=[]
 let currentType=""
 let placesService
+let imageCache={}
 
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
@@ -215,6 +231,7 @@ function openCategory(type){
 
 currentType=type
 list=[...data[type]]
+
 shuffle(list)
 
 index=0
@@ -223,6 +240,7 @@ document.getElementById("home").style.display="none"
 deck.style.display="flex"
 
 buildDeck()
+preloadNext()
 
 }
 
@@ -231,23 +249,32 @@ function buildDeck(){
 deck.innerHTML=""
 
 if(index>=list.length){
+
 shuffle(list)
 index=0
-}
-
-createCard(list[index])
 
 }
 
-function createCard(name){
+createCard(list[index],false)
+
+if(list[index+1]){
+createCard(list[index+1],true)
+}
+
+}
+
+function createCard(name,isNext){
 
 const card=document.createElement("div")
 card.className="card"
 
+if(isNext) card.classList.add("next")
+
+card.innerHTML=`<div class="loader">Loading…</div>`
+
 loadPlace(name).then(place=>{
 
 let photos=place.photos
-
 let photoIndex=0
 
 card.innerHTML=`
@@ -272,7 +299,7 @@ card.innerHTML=`
 <div onclick="dislike()">❌</div>
 <div onclick="navigate('${place.name}')">📍</div>
 <div onclick="book('${place.name}')">📅</div>
-<div onclick="like('${place.name}')">❤️</div>
+<div onclick="like()">❤️</div>
 </div>
 `
 
@@ -295,15 +322,30 @@ card.querySelector(".topRight").onclick=undo
 
 enableSwipe(card)
 
+})
+
 deck.appendChild(card)
 
-})
+}
+
+function preloadNext(){
+
+for(let i=1;i<5;i++){
+
+if(list[index+i]) loadPlace(list[index+i])
+
+}
 
 }
 
 function loadPlace(name){
 
 return new Promise(resolve=>{
+
+if(imageCache[name]){
+resolve(imageCache[name])
+return
+}
 
 placesService.findPlaceFromQuery({
 query:name+" Oslo",
@@ -320,47 +362,38 @@ placeId:results[0].place_id,
 fields:["name","rating","photos"]
 },(place,status)=>{
 
-if(status!==google.maps.places.PlacesServiceStatus.OK){
-resolve(fallback(name))
-return
-}
-
 let photos=[]
 
-if(place.photos){
+if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
+
 for(let i=0;i<Math.min(3,place.photos.length);i++){
 photos.push(place.photos[i].getUrl({maxWidth:1200}))
 }
+
 }
 
 while(photos.length<3){
+
 photos.push("https://source.unsplash.com/featured/?restaurant")
+
 }
 
-resolve({
-name:place.name,
-rating:place.rating,
+let result={
+name:place?.name||name,
+rating:place?.rating||"",
 photos:photos
-})
-
-})
-
-})
-
-})
-
 }
 
-function fallback(name){
-return{
-name:name,
-rating:"",
-photos:[
-"https://source.unsplash.com/featured/?restaurant",
-"https://source.unsplash.com/featured/?food",
-"https://source.unsplash.com/featured/?wine"
-]
-}
+imageCache[name]=result
+
+resolve(result)
+
+})
+
+})
+
+})
+
 }
 
 function enableSwipe(card){
@@ -393,9 +426,13 @@ function like(){
 let name=list[index]
 
 if(!favorites[currentType].includes(name)){
+
 favorites[currentType].push(name)
+
 localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
+
 renderFavorites()
+
 }
 
 next()
@@ -405,24 +442,39 @@ next()
 function dislike(){next()}
 
 function next(){
+
 history.push(index)
+
 index++
+
 buildDeck()
+
+preloadNext()
+
 }
 
 function undo(){
-if(history.length===0)return
+
+if(history.length===0) return
+
 index=history.pop()
+
 buildDeck()
+
 }
 
 function goHome(){
+
 deck.style.display="none"
+
 document.getElementById("home").style.display="flex"
+
 }
 
 function toggleFav(type){
+
 document.getElementById("fav-"+type).classList.toggle("hidden")
+
 }
 
 function renderFavorites(){
@@ -430,12 +482,15 @@ function renderFavorites(){
 ["restaurants","winebars","cocktailbars"].forEach(type=>{
 
 const box=document.getElementById("fav-"+type)
+
 box.innerHTML=""
 
 favorites[type].forEach(name=>{
 
 const el=document.createElement("div")
+
 el.className="favoriteItem"
+
 el.innerText=name
 
 enableFavSwipe(el,type,name)
@@ -475,11 +530,15 @@ renderFavorites()
 }
 
 function navigate(name){
+
 window.open(`https://maps.google.com/?q=${encodeURIComponent(name+" Oslo")}`)
+
 }
 
 function book(name){
+
 window.open(`https://www.google.com/search?q=${encodeURIComponent(name+" booking")}`)
+
 }
 
 </script>
