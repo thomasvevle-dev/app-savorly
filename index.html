@@ -19,6 +19,13 @@ flex-direction:column;
 align-items:center;
 }
 
+/* hidden map */
+#map{
+height:1px;
+width:1px;
+opacity:0;
+}
+
 /* START */
 
 #start-screen{
@@ -72,8 +79,6 @@ height:100%;
 object-fit:cover;
 }
 
-/* TEXT */
-
 .overlay{
 position:absolute;
 bottom:110px;
@@ -94,8 +99,6 @@ font-weight:bold;
 .rating{
 color:#FFD700;
 }
-
-/* ICON ROW */
 
 .icon-row{
 position:absolute;
@@ -120,6 +123,8 @@ color:white;
 </head>
 
 <body>
+
+<div id="map"></div>
 
 <div id="start-screen">
 
@@ -170,6 +175,8 @@ let places=[]
 let index=0
 let service
 
+/* CATEGORY */
+
 document.querySelectorAll(".category").forEach(el=>{
 
 el.onclick=()=>{
@@ -184,6 +191,23 @@ selectedType=el.dataset.type
 
 })
 
+/* INIT GOOGLE */
+
+function initMap(){
+
+const map=new google.maps.Map(document.getElementById("map"),{
+center:{lat:59.9139,lng:10.7522},
+zoom:13
+})
+
+service=new google.maps.places.PlacesService(map)
+
+}
+
+window.initMap=initMap
+
+/* START */
+
 function start(){
 
 if(!selectedType){
@@ -197,17 +221,7 @@ if(selectedType==="restaurant") list=restaurants
 if(selectedType==="wine") list=wineBars
 if(selectedType==="cocktail") list=cocktailBars
 
-const map=new google.maps.Map(document.createElement("div"))
-
-service=new google.maps.places.PlacesService(map)
-
 places=[]
-
-loadPlaces(list)
-
-}
-
-function loadPlaces(list){
 
 let loaded=0
 
@@ -244,6 +258,8 @@ renderCards()
 
 }
 
+/* STARS */
+
 function stars(r){
 
 if(!r) return ""
@@ -255,6 +271,8 @@ let empty=5-full
 return "⭐".repeat(full)+"✩".repeat(empty)
 
 }
+
+/* RENDER */
 
 function renderCards(){
 
@@ -330,6 +348,8 @@ stack.appendChild(card)
 
 }
 
+/* NEXT */
+
 function next(){
 
 index++
@@ -344,7 +364,7 @@ renderCards()
 
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=DIN_GOOGLE_API_KEY&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=DIN_GOOGLE_API_KEY&libraries=places&callback=initMap"></script>
 
 </body>
 </html>
