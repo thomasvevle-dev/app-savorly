@@ -22,7 +22,7 @@ align-items:center;
 #card-stack{
 position:relative;
 width:340px;
-height:500px;
+height:520px;
 margin-top:30px;
 }
 
@@ -80,7 +80,13 @@ font-weight:bold;
 
 .rating{
 color:#FFD700;
-margin:5px 0;
+margin:4px 0;
+}
+
+.desc{
+font-size:13px;
+color:#ccc;
+margin-bottom:6px;
 }
 
 .small-buttons{
@@ -114,13 +120,8 @@ font-size:22px;
 cursor:pointer;
 }
 
-.dislike{
-background:#ff4d4d;
-}
-
-.like{
-background:#4CAF50;
-}
+.dislike{ background:#ff4d4d }
+.like{ background:#4CAF50 }
 
 #favorites{
 margin:20px;
@@ -153,6 +154,21 @@ cursor:pointer;
 let places=[]
 let favorites=[]
 let index=0
+
+function getDescription(types){
+
+if(types.includes("restaurant"))
+return "Restaurant med matservering"
+
+if(types.includes("bar"))
+return "Vinbar / cocktailbar"
+
+if(types.includes("night_club"))
+return "Cocktailbar og natteliv"
+
+return "Servering og drikke"
+
+}
 
 function initMap(){
 
@@ -194,7 +210,6 @@ return true
 places=[...places,...filtered]
 
 shufflePlaces()
-
 renderCards()
 
 }
@@ -212,7 +227,6 @@ places.sort(()=>Math.random()-0.5)
 function renderCards(){
 
 const stack=document.getElementById("card-stack")
-
 stack.innerHTML=""
 
 places.slice(index,index+5).forEach((place,i)=>{
@@ -234,7 +248,6 @@ photos=["https://via.placeholder.com/400x260"]
 let photoIndex=0
 
 const card=document.createElement("div")
-
 card.className="card"
 card.style.zIndex=100-i
 
@@ -253,8 +266,8 @@ ${photos.map((_,i)=>`<div class="dot ${i==0?"active":""}"></div>`).join("")}
 <div class="info">
 
 <div class="place-name">${place.name}</div>
-
 <div class="rating">⭐ ${place.rating}</div>
+<div class="desc">${getDescription(place.types)}</div>
 
 <div class="small-buttons">
 <button class="nav">📍 Naviger</button>
@@ -271,22 +284,24 @@ ${photos.map((_,i)=>`<div class="dot ${i==0?"active":""}"></div>`).join("")}
 
 const img=card.querySelector(".photo")
 const dots=card.querySelectorAll(".dot")
+const container=card.querySelector(".image-container")
 
 let startX=0
 
-card.querySelector(".image-container").addEventListener("touchstart",e=>{
+container.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
 })
 
-card.querySelector(".image-container").addEventListener("touchend",e=>{
+container.addEventListener("touchend",e=>{
 
-let diff=e.changedTouches[0].clientX-startX
+let endX=e.changedTouches[0].clientX
+let diff=endX-startX
 
-if(diff<-50 && photoIndex<photos.length-1){
+if(diff<-40 && photoIndex<photos.length-1){
 photoIndex++
 }
 
-if(diff>50 && photoIndex>0){
+if(diff>40 && photoIndex>0){
 photoIndex--
 }
 
@@ -299,23 +314,16 @@ d.classList.toggle("active",i===photoIndex)
 })
 
 card.querySelector(".nav").onclick=()=>{
-
-window.open(
-`https://www.google.com/maps/search/?api=1&query=${place.name}`
-)
-
+window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
 }
 
 card.querySelector(".book").onclick=()=>{
-
-window.open(
-`https://www.google.com/maps/search/?api=1&query=${place.name}`
-)
-
+window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
 }
 
 card.querySelector(".like").onclick=()=>{
-like(place)
+favorites.push(place)
+updateFavorites()
 card.remove()
 next()
 }
@@ -331,34 +339,20 @@ stack.appendChild(card)
 
 }
 
-function like(place){
-
-favorites.push(place)
-
-updateFavorites()
-
-}
-
 function updateFavorites(){
 
 let favList=document.getElementById("fav-list")
-
 favList.innerHTML=""
 
 favorites.forEach(f=>{
 
 let div=document.createElement("div")
-
 div.className="favorite-item"
-
 div.innerText=f.name
 
 div.onclick=()=>{
-
 index=places.findIndex(p=>p.name===f.name)
-
 renderCards()
-
 }
 
 favList.appendChild(div)
@@ -372,11 +366,8 @@ function next(){
 index++
 
 if(index>=places.length){
-
 shufflePlaces()
-
 index=0
-
 }
 
 renderCards()
