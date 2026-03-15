@@ -88,6 +88,27 @@ height:100%;
 object-fit:cover;
 }
 
+.photoDots{
+position:absolute;
+top:16px;
+left:0;
+right:0;
+text-align:center;
+}
+
+.dot{
+display:inline-block;
+width:26px;
+height:4px;
+margin:3px;
+border-radius:10px;
+background:rgba(255,255,255,.4);
+}
+
+.dot.active{
+background:white;
+}
+
 .info{
 position:absolute;
 bottom:130px;
@@ -191,14 +212,11 @@ buildDeck()
 }
 
 function buildDeck(){
-
 deck.innerHTML=""
-
 for(let i=index;i<index+3;i++){
 if(!list[i])continue
 createCard(list[i])
 }
-
 }
 
 function createCard(name){
@@ -209,12 +227,17 @@ card.className="card"
 loadPlace(name).then(place=>{
 
 let photos=place.photos
-
 let photoIndex=0
 
 card.innerHTML=`
 
 <img src="${photos[0]}">
+
+<div class="photoDots">
+<span class="dot active"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
 
 <div class="info">
 <div class="name">${place.name}</div>
@@ -230,8 +253,16 @@ card.innerHTML=`
 `
 
 card.onclick=()=>{
+
 photoIndex=(photoIndex+1)%photos.length
 card.querySelector("img").src=photos[photoIndex]
+
+const dots=card.querySelectorAll(".dot")
+
+dots.forEach((d,i)=>{
+d.classList.toggle("active",i===photoIndex)
+})
+
 }
 
 enableSwipe(card)
@@ -263,21 +294,15 @@ if(status===google.maps.places.PlacesServiceStatus.OK){
 let p=results[0]
 
 if(p.photos){
-
 for(let i=0;i<Math.min(3,p.photos.length);i++){
 photos.push(p.photos[i].getUrl({maxWidth:1200}))
 }
-
 }
 
 let place={
 name:p.name,
 rating:p.rating,
-photos:photos
-}
-
-if(photos.length===0){
-place.photos=fallbackImages()
+photos:photos.length?photos:fallbackImages()
 }
 
 imageCache[name]=place
@@ -299,13 +324,11 @@ photos:fallbackImages()
 }
 
 function fallbackImages(){
-
 return[
 "https://source.unsplash.com/featured/?restaurant",
 "https://source.unsplash.com/featured/?food",
 "https://source.unsplash.com/featured/?cocktail"
 ]
-
 }
 
 function enableSwipe(card){
@@ -385,17 +408,22 @@ el.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
 })
 
+el.addEventListener("touchmove",e=>{
+const diff=e.touches[0].clientX-startX
+el.style.transform=`translateX(${diff}px)`
+})
+
 el.addEventListener("touchend",e=>{
 
 let diff=e.changedTouches[0].clientX-startX
 
 if(Math.abs(diff)>120){
-
 favorites[type]=favorites[type].filter(x=>x!==name)
 localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
 renderFavorites()
-
 }
+
+el.style.transform=""
 
 })
 
