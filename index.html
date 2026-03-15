@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="no">
+<html>
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Savorly</title>
 
@@ -72,7 +72,7 @@ height:100%;
 object-fit:cover;
 }
 
-/* TOP BUTTONS */
+/* TOP */
 
 .back-btn{
 position:absolute;
@@ -104,8 +104,8 @@ left:20px;
 
 .title-row{
 display:flex;
-align-items:center;
 gap:10px;
+align-items:center;
 }
 
 .place-name{
@@ -142,22 +142,6 @@ background:#333;
 color:white;
 }
 
-/* FAVORITES */
-
-#favorites-page{
-display:none;
-width:360px;
-margin-top:40px;
-}
-
-.favorite-item{
-background:#222;
-padding:14px;
-margin:8px 0;
-border-radius:10px;
-cursor:pointer;
-}
-
 </style>
 
 </head>
@@ -169,8 +153,8 @@ cursor:pointer;
 <h2>Hva vil du utforske?</h2>
 
 <div class="category" data-type="restaurant">Restaurant</div>
-<div class="category" data-type="wine">Vinbar</div>
-<div class="category" data-type="cocktail">Cocktailbar</div>
+<div class="category" data-type="bar">Vinbar</div>
+<div class="category" data-type="night_club">Cocktailbar</div>
 
 <br>
 
@@ -178,36 +162,15 @@ cursor:pointer;
 
 </div>
 
-<div id="favorites-page"></div>
-
 <div id="card-stack" style="display:none"></div>
 
 <script>
 
-/* GOOGLE KEY */
-
-const API_KEY="DIN_GOOGLE_API_KEY"
-
-/* LISTE */
-
-const restaurants=[
-"Libertine","Skaal Matbar","Arakataka","Le Benjamin","Hyde","Kverneriet","Kolonialen"
-]
-
-const wineBars=[
-"Territoriet","Nektar Vinbar","Radegast","Vinoteket","Andre til Høyre"
-]
-
-const cocktailBars=[
-"Himkok","Bettola","Svanen","Torggata Botaniske","Fuglen"
-]
-
-let places=[]
-let favorites=[]
-let index=0
 let selectedType=null
-
-let userLocation=JSON.parse(localStorage.getItem("userLocation"))
+let places=[]
+let index=0
+let service
+let userLocation
 
 /* CATEGORY */
 
@@ -227,24 +190,14 @@ selectedType=el.dataset.type
 
 /* START */
 
-async function start(){
+function start(){
 
 if(!selectedType){
 alert("Velg kategori")
 return
 }
 
-/* hent GPS hvis ikke lagret */
-
-if(!userLocation){
-
-try{
-
-const pos=await new Promise((resolve,reject)=>{
-
-navigator.geolocation.getCurrentPosition(resolve,reject)
-
-})
+navigator.geolocation.getCurrentPosition(pos=>{
 
 userLocation={
 lat:pos.coords.latitude,
@@ -253,56 +206,39 @@ lng:pos.coords.longitude
 
 localStorage.setItem("userLocation",JSON.stringify(userLocation))
 
-}catch{
+initPlaces()
 
-alert("Kunne ikke hente posisjon")
-
-}
+})
 
 }
+
+/* INIT GOOGLE */
+
+function initPlaces(){
+
+const map=new google.maps.Map(document.createElement("div"))
+
+service=new google.maps.places.PlacesService(map)
 
 loadPlaces()
 
 }
 
-/* LOAD GOOGLE PLACES */
+/* LOAD PLACES */
 
-async function loadPlaces(){
+function loadPlaces(){
 
-let list=[]
-
-if(selectedType==="restaurant") list=restaurants
-if(selectedType==="wine") list=wineBars
-if(selectedType==="cocktail") list=cocktailBars
-
-places=[]
-
-for(const name of list){
-
-try{
-
-let url=`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}+oslo&inputtype=textquery&fields=place_id,photos,rating,geometry,name&key=${API_KEY}`
-
-let res=await fetch(url)
-let data=await res.json()
-
-if(data.candidates.length>0){
-
-places.push(data.candidates[0])
-
+const request={
+location:userLocation,
+radius:3000,
+type:selectedType
 }
 
-}catch{}
+service.nearbySearch(request,(results,status)=>{
 
-}
+if(status===google.maps.places.PlacesServiceStatus.OK){
 
-init()
-
-}
-
-/* INIT */
-
-function init(){
+places=results
 
 document.getElementById("start-screen").style.display="none"
 document.getElementById("card-stack").style.display="block"
@@ -311,21 +247,25 @@ renderCards()
 
 }
 
+})
+
+}
+
 /* STARS */
 
-function getStars(rating){
+function stars(r){
 
-let full=Math.floor(rating)
-let half=rating%1>=0.5
-let empty=5-full-(half?1:0)
+let full=Math.floor(r)
 
-return "⭐".repeat(full)+(half?"☆":"")+"✩".repeat(empty)
+let empty=5-full
+
+return "⭐".repeat(full)+"✩".repeat(empty)
 
 }
 
 /* DISTANCE */
 
-function getDistance(lat1,lon1,lat2,lon2){
+function distance(lat1,lon1,lat2,lon2){
 
 const R=6371
 
@@ -333,13 +273,12 @@ const dLat=(lat2-lat1)*Math.PI/180
 const dLon=(lon2-lon1)*Math.PI/180
 
 const a=
-Math.sin(dLat/2)*Math.sin(dLat/2)+
-Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-Math.sin(dLon/2)*Math.sin(dLon/2)
+Math.sin(dLat/2)**2+
+Math.cos(lat1*Math.PI/180)*
+Math.cos(lat2*Math.PI/180)*
+Math.sin(dLon/2)**2
 
-const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
-
-return Math.round(R*c*1000)
+return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1000)
 
 }
 
@@ -357,15 +296,15 @@ let photo=""
 
 if(place.photos){
 
-photo=`https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${place.photos[0].photo_reference}&key=${API_KEY}`
+photo=place.photos[0].getUrl({maxWidth:800})
 
 }
 
-let distance=getDistance(
+let d=distance(
 userLocation.lat,
 userLocation.lng,
-place.geometry.location.lat,
-place.geometry.location.lng
+place.geometry.location.lat(),
+place.geometry.location.lng()
 )
 
 const card=document.createElement("div")
@@ -377,47 +316,34 @@ card.innerHTML=`
 <img src="${photo}">
 
 <button class="back-btn" onclick="goBack()">⬅</button>
-<button class="fav-btn" onclick="showFavorites()">⭐</button>
 
 <div class="overlay">
 
 <div class="title-row">
 
 <div class="place-name">${place.name}</div>
-<div class="rating">${getStars(place.rating)} ${place.rating}</div>
+
+<div class="rating">${stars(place.rating)} ${place.rating}</div>
 
 </div>
 
-<div class="distance">📍 ${distance} m unna</div>
+<div class="distance">📍 ${d} m unna</div>
 
 </div>
 
 <div class="icon-row">
 
-<button class="icon-btn skip">❌</button>
-<button class="icon-btn nav">📍</button>
-<button class="icon-btn book">📅</button>
-<button class="icon-btn like">❤️</button>
+<button class="icon-btn" onclick="next()">❌</button>
+
+<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${place.name}')">📍</button>
+
+<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${place.name}')">📅</button>
+
+<button class="icon-btn" onclick="next()">❤️</button>
 
 </div>
 
 `
-
-card.querySelector(".skip").onclick=next
-
-card.querySelector(".like").onclick=()=>{
-favorites.push(place.place_id)
-updateFavorites()
-next()
-}
-
-card.querySelector(".nav").onclick=()=>{
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
-}
-
-card.querySelector(".book").onclick=()=>{
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
-}
 
 stack.appendChild(card)
 
@@ -439,50 +365,6 @@ renderCards()
 
 }
 
-/* FAVORITES */
-
-function updateFavorites(){
-
-const list=document.getElementById("favorites-page")
-
-list.innerHTML=""
-
-favorites.forEach(id=>{
-
-let place=places.find(p=>p.place_id===id)
-
-if(!place) return
-
-let div=document.createElement("div")
-
-div.className="favorite-item"
-
-div.innerText=place.name
-
-div.onclick=()=>{
-
-index=places.indexOf(place)
-
-document.getElementById("favorites-page").style.display="none"
-document.getElementById("card-stack").style.display="block"
-
-renderCards()
-
-}
-
-list.appendChild(div)
-
-})
-
-}
-
-function showFavorites(){
-
-document.getElementById("favorites-page").style.display="block"
-document.getElementById("card-stack").style.display="none"
-
-}
-
 /* BACK */
 
 function goBack(){
@@ -493,6 +375,8 @@ document.getElementById("start-screen").style.display="block"
 }
 
 </script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=DIN_GOOGLE_API_KEY&libraries=places"></script>
 
 </body>
 </html>
