@@ -139,8 +139,35 @@ color:white;
 
 <script>
 
+/* LISTENE FRA FILEN DIN */
+
+const restaurants=[
+"Libertine",
+"Skaal Matbar",
+"Arakataka",
+"Le Benjamin",
+"Hyde",
+"Kverneriet",
+"Kolonialen"
+]
+
+const wineBars=[
+"Territoriet",
+"Nektar Vinbar",
+"Radegast",
+"Vinoteket",
+"Andre til Høyre"
+]
+
+const cocktailBars=[
+"Himkok",
+"Bettola",
+"Svanen",
+"Torggata Botaniske",
+"Fuglen"
+]
+
 let selectedType=null
-let service
 let places=[]
 let index=0
 
@@ -169,81 +196,17 @@ alert("Velg kategori")
 return
 }
 
-initPlaces()
+if(selectedType==="restaurant") places=[...restaurants]
 
-}
+if(selectedType==="wine") places=[...wineBars]
 
-/* GOOGLE PLACES */
-
-function initPlaces(){
-
-const oslo={lat:59.9139,lng:10.7522}
-
-const map=new google.maps.Map(document.createElement("div"),{
-center:oslo,
-zoom:13
-})
-
-service=new google.maps.places.PlacesService(map)
-
-searchPlaces(oslo)
-
-}
-
-/* SEARCH */
-
-function searchPlaces(location){
-
-let request
-
-if(selectedType==="restaurant"){
-
-request={
-location:location,
-radius:4000,
-type:"restaurant"
-}
-
-}
-
-if(selectedType==="wine"){
-
-request={
-location:location,
-radius:4000,
-keyword:"wine bar"
-}
-
-}
-
-if(selectedType==="cocktail"){
-
-request={
-location:location,
-radius:4000,
-type:"bar"
-}
-
-}
-
-service.nearbySearch(request,(results,status)=>{
-
-if(status!==google.maps.places.PlacesServiceStatus.OK){
-
-alert("Fant ingen steder")
-
-return
-
-}
-
-places=results
+if(selectedType==="cocktail") places=[...cocktailBars]
 
 document.getElementById("start-screen").style.display="none"
+
 document.getElementById("card-stack").style.display="block"
 
 renderCards()
-
-})
 
 }
 
@@ -267,15 +230,7 @@ const stack=document.getElementById("card-stack")
 
 stack.innerHTML=""
 
-places.slice(index,index+3).forEach(place=>{
-
-let photo=""
-
-if(place.photos){
-
-photo=place.photos[0].getUrl({maxWidth:800})
-
-}
+places.slice(index,index+3).forEach(name=>{
 
 const card=document.createElement("div")
 
@@ -283,15 +238,15 @@ card.className="card"
 
 card.innerHTML=`
 
-<img src="${photo}">
+<img src="https://source.unsplash.com/600x800/?restaurant">
 
 <div class="overlay">
 
 <div class="title-row">
 
-<div class="place-name">${place.name}</div>
+<div class="place-name">${name}</div>
 
-<div class="rating">${stars(place.rating)} ${place.rating}</div>
+<div class="rating">⭐⭐⭐⭐☆ 4.2</div>
 
 </div>
 
@@ -301,9 +256,9 @@ card.innerHTML=`
 
 <button class="icon-btn" onclick="next()">❌</button>
 
-<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${place.name}')">📍</button>
+<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${name}')">📍</button>
 
-<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${place.name}')">📅</button>
+<button class="icon-btn" onclick="window.open('https://maps.google.com/?q=${name}')">📅</button>
 
 <button class="icon-btn" onclick="next()">❤️</button>
 
@@ -332,8 +287,6 @@ renderCards()
 }
 
 </script>
-
-<script src="https://maps.googleapis.com/maps/api/js?key=DIN_GOOGLE_API_KEY&libraries=places"></script>
 
 </body>
 </html>
