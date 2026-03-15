@@ -11,28 +11,26 @@ body{
 margin:0;
 font-family:-apple-system,BlinkMacSystemFont,Arial;
 background:#000;
-overflow:hidden;
 color:white;
+height:100vh;
+overflow:hidden;
 }
 
-/* MAP */
-
-#map{
-width:1px;
-height:1px;
-opacity:0;
-position:absolute;
-}
-
-/* START */
+/* START SCREEN */
 
 #start{
 position:absolute;
-top:80px;
+top:0;
+left:0;
 width:100%;
+height:100vh;
+overflow-y:auto;
+padding-top:80px;
 text-align:center;
 z-index:20;
 }
+
+/* CATEGORY BUTTONS */
 
 .category{
 background:#222;
@@ -43,6 +41,13 @@ width:260px;
 cursor:pointer;
 }
 
+/* FAVORITES SECTION */
+
+.favorites-section{
+margin-top:50px;
+padding-bottom:80px;
+}
+
 .fav-list{
 display:none;
 }
@@ -50,7 +55,8 @@ display:none;
 .fav-item{
 background:#333;
 padding:14px;
-margin:6px;
+margin:6px auto;
+width:260px;
 border-radius:10px;
 cursor:pointer;
 touch-action:none;
@@ -162,6 +168,13 @@ width:70px;
 text-align:center;
 }
 
+#map{
+width:1px;
+height:1px;
+opacity:0;
+position:absolute;
+}
+
 </style>
 </head>
 
@@ -177,6 +190,8 @@ text-align:center;
 <div class="category" onclick="openCategory('wine')">Vinbar</div>
 <div class="category" onclick="openCategory('cocktail')">Cocktailbar</div>
 
+<div class="favorites-section">
+
 <div class="category" onclick="toggleFav('restaurant')">Favoritt restaurant</div>
 <div class="fav-list" id="fav-restaurant"></div>
 
@@ -185,6 +200,8 @@ text-align:center;
 
 <div class="category" onclick="toggleFav('cocktail')">Favoritt cocktailbar</div>
 <div class="fav-list" id="fav-cocktail"></div>
+
+</div>
 
 </div>
 
@@ -215,8 +232,6 @@ function saveFavorites(){
 localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
 }
 
-/* GOOGLE MAP */
-
 function initMap(){
 
 map=new google.maps.Map(
@@ -227,8 +242,6 @@ document.getElementById("map"),
 service=new google.maps.places.PlacesService(map)
 
 }
-
-/* CATEGORY */
 
 async function openCategory(type){
 
@@ -248,8 +261,6 @@ cardStack.style.display="block"
 loadPlace()
 
 }
-
-/* LOAD PLACE */
 
 function loadPlace(){
 
@@ -275,11 +286,7 @@ let photos=[]
 if(place.photos){
 
 for(let i=0;i<Math.min(3,place.photos.length);i++){
-
-photos.push(
-place.photos[i].getUrl({maxWidth:1200})
-)
-
+photos.push(place.photos[i].getUrl({maxWidth:1200}))
 }
 
 }
@@ -291,8 +298,6 @@ renderCard(name,photos,place.rating)
 })
 
 }
-
-/* RENDER CARD */
 
 function renderCard(name,photos,rating){
 
@@ -317,11 +322,8 @@ card1.innerHTML=`
 <div class="buttons">
 
 <div class="action" onclick="skip()">❌</div>
-
 <div class="action" onclick="navigate()">📍</div>
-
 <div class="action" onclick="book()">📅</div>
-
 <div class="action" onclick="like()">❤️</div>
 
 </div>
@@ -350,8 +352,6 @@ enableSwipe(card1)
 
 }
 
-/* IMAGE INDICATOR */
-
 function updateIndicator(){
 
 let indicator=document.querySelector(".indicator")
@@ -371,34 +371,25 @@ indicator.appendChild(bar)
 
 }
 
-/* NAVIGATE */
-
 function navigate(){
 
 let place=places[index]
 
-let url=
-"https://www.google.com/maps/search/?api=1&query="
-+encodeURIComponent(place+" Oslo")
+let url="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(place+" Oslo")
 
 window.open(url)
 
 }
-
-/* BOOKING */
 
 function book(){
 
 let place=places[index]
 
-let url="https://www.google.com/search?q="
-+encodeURIComponent(place+" restaurant booking")
+let url="https://www.google.com/search?q="+encodeURIComponent(place+" restaurant booking")
 
 window.open(url)
 
 }
-
-/* SWIPE */
 
 function swipe(dir){
 
@@ -425,8 +416,6 @@ loadPlace()
 
 function like(){swipe("right")}
 function skip(){swipe("left")}
-
-/* DRAG SWIPE */
 
 function enableSwipe(card){
 
@@ -466,8 +455,6 @@ currentX=0
 
 }
 
-/* FAVORITE */
-
 function addFavorite(){
 
 let place=places[index]
@@ -482,8 +469,6 @@ updateFavorites()
 }
 
 }
-
-/* FAVORITE LIST */
 
 function updateFavorites(){
 
