@@ -1,146 +1,147 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Savorly</title>
 
 <style>
 
 body{
 margin:0;
-font-family:Arial;
-background:black;
+font-family:-apple-system,BlinkMacSystemFont;
+background:#000;
 color:white;
 overflow:hidden;
 }
 
-/* HOME */
-
 #home{
-height:100vh;
+position:absolute;
+top:0;
+left:0;
+right:0;
+bottom:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding-top:120px;
 overflow-y:auto;
-text-align:center;
-padding-top:40px;
 }
 
 .logo{
-width:260px;
-margin-bottom:30px;
+width:180px;
+margin-bottom:40px;
 }
 
-.categories{
-display:flex;
-flex-direction:column;
-gap:16px;
-padding:0 30px;
-}
-
-.category-btn{
-background:#111;
+.cat{
+width:80%;
+max-width:420px;
+padding:20px;
+margin:12px;
+border-radius:20px;
 border:1px solid #333;
-padding:16px;
-border-radius:14px;
-font-size:18px;
-color:white;
-}
-
-.divider{
-height:1px;
-background:#333;
-margin:40px;
-}
-
-/* FAVORITES */
-
-.fav-header{
 background:#111;
-border:1px solid #333;
+text-align:center;
+font-size:22px;
+}
+
+.section{
+width:80%;
+max-width:420px;
+margin-top:40px;
+}
+
+.favoriteItem{
 padding:14px;
-border-radius:12px;
-margin:10px 30px;
-text-align:left;
+border-bottom:1px solid #333;
 }
 
-.fav-list{
-display:none;
-padding:0 30px;
-}
-
-.fav-item{
-background:#1a1a1a;
-padding:10px;
-margin:5px 0;
-border-radius:8px;
-text-align:left;
-}
-
-/* SWIPE */
-
-#swipe{
-display:none;
-height:100vh;
-width:100%;
-}
-
-#card{
+#deck{
 position:absolute;
-width:100%;
-height:100%;
+top:0;
+left:0;
+right:0;
+bottom:0;
+display:none;
+justify-content:center;
+align-items:center;
 }
 
-#card img{
+.card{
+position:absolute;
+width:95%;
+height:92%;
+border-radius:26px;
+overflow:hidden;
+background:black;
+box-shadow:0 20px 40px rgba(0,0,0,.6);
+}
+
+.card img{
 width:100%;
 height:100%;
 object-fit:cover;
 }
 
-/* INFO */
-
-.place-info{
+.info{
 position:absolute;
 bottom:140px;
-left:20px;
-text-align:left;
+left:24px;
 }
 
-.place-name{
-font-size:32px;
-font-weight:bold;
+.name{
+font-size:34px;
+font-weight:600;
 }
 
 .rating{
-font-size:20px;
-color:gold;
+font-size:22px;
+color:#FFD54F;
 }
-
-/* BUTTONS */
 
 .buttons{
 position:absolute;
-bottom:40px;
-width:100%;
+bottom:30px;
+left:0;
+right:0;
 display:flex;
 justify-content:space-evenly;
 font-size:34px;
 }
 
-/* TOP BUTTONS */
-
-.back{
+.topbtn{
 position:absolute;
-top:40px;
-left:20px;
+top:30px;
 font-size:28px;
 }
 
+.back{
+left:22px;
+}
+
 .undo{
+right:22px;
+}
+
+.photoDots{
 position:absolute;
-top:40px;
-right:20px;
-font-size:28px;
+top:16px;
+left:0;
+right:0;
+text-align:center;
+}
+
+.dot{
+display:inline-block;
+width:22px;
+height:4px;
+background:rgba(255,255,255,.4);
+margin:3px;
+border-radius:10px;
+}
+
+.dot.active{
+background:white;
 }
 
 </style>
@@ -148,247 +149,276 @@ font-size:28px;
 
 <body>
 
-<!-- HOME -->
-
 <div id="home">
 
 <img src="logo.png" class="logo">
 
-<div class="categories">
+<div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
+<div class="cat" onclick="openCategory('winebars')">Vinbar</div>
+<div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
 
-<button class="category-btn" onclick="start()">Restaurant</button>
-<button class="category-btn" onclick="start()">Vinbar</button>
-<button class="category-btn" onclick="start()">Cocktailbar</button>
-
-</div>
-
-<div class="divider"></div>
-
-<div class="fav-header" onclick="toggleFav('fav-list')">
-Favoritter
-</div>
-
-<div id="fav-list" class="fav-list"></div>
-
-</div>
-
-<!-- SWIPE -->
-
-<div id="swipe">
-
-<div id="card">
-
-<div class="back" onclick="goHome()">⬅️</div>
-<div class="undo" onclick="undo()">↩️</div>
-
-<img id="image">
-
-<div class="place-info">
-<div class="place-name" id="name"></div>
-<div class="rating" id="rating"></div>
-</div>
-
-<div class="buttons">
-
-<div onclick="dislike()">❌</div>
-<div onclick="navigate()">📍</div>
-<div onclick="book()">📅</div>
-<div onclick="like()">❤️</div>
-
+<div class="section">
+<h3>Favoritter</h3>
+<div id="favorites"></div>
 </div>
 
 </div>
 
-</div>
+<div id="deck"></div>
 
 <script>
 
-let places=[]
-let index=0
-let history=[]
-let imageIndex=0
+const API_KEY="AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ";
 
-async function loadPlaces(){
+let data;
+let list=[];
+let index=0;
+let history=[];
+let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
 
-try{
+const deck=document.getElementById("deck");
 
-let res=await fetch("./data/places.json")
-places=await res.json()
+async function loadData(){
 
-if(!Array.isArray(places)){
-alert("places.json må starte med [ ]")
-return
-}
+const res=await fetch("data/places.json");
+data=await res.json();
 
-}catch(e){
-
-alert("Kunne ikke laste places.json")
+renderFavorites();
 
 }
 
-}
+loadData();
 
-function start(){
 
-document.getElementById("home").style.display="none"
-document.getElementById("swipe").style.display="block"
+function openCategory(type){
 
-if(places.length===0){
-loadPlaces().then(showPlace)
-}else{
-showPlace()
-}
+list=data[type];
+index=0;
 
-}
+document.getElementById("home").style.display="none";
+deck.style.display="flex";
 
-function showPlace(){
-
-let p=places[index]
-
-if(!p){
-index=0
-p=places[index]
-}
-
-imageIndex=0
-
-document.getElementById("name").innerText=p.name
-document.getElementById("rating").innerText="⭐ "+p.rating
-document.getElementById("image").src=p.images[0]
+buildDeck();
 
 }
 
-function nextImage(){
+function buildDeck(){
 
-let p=places[index]
+deck.innerHTML="";
 
-imageIndex++
+for(let i=index;i<index+3;i++){
 
-if(imageIndex>=p.images.length){
-imageIndex=0
-}
+if(!list[i]) continue;
 
-document.getElementById("image").src=p.images[imageIndex]
+createCard(list[i],i);
 
 }
 
-document.getElementById("card").onclick=nextImage
+}
+
+async function createCard(name,i){
+
+const card=document.createElement("div");
+card.className="card";
+
+const place=await findPlace(name);
+
+const photos=place.photos || [];
+let photoIndex=0;
+
+card.innerHTML=`
+<img src="${getPhoto(photos[0])}">
+<div class="photoDots">${photos.slice(0,3).map((_,x)=>`<span class="dot ${x==0?'active':''}"></span>`).join("")}</div>
+
+<div class="topbtn back" onclick="goHome()">←</div>
+<div class="topbtn undo" onclick="undo()">↩</div>
+
+<div class="info">
+<div class="name">${place.name}</div>
+<div class="rating">⭐ ${place.rating || ""}</div>
+</div>
+
+<div class="buttons">
+<div onclick="dislike()">❌</div>
+<div onclick="navigate('${place.lat}','${place.lng}')">📍</div>
+<div onclick="book('${place.name}')">📅</div>
+<div onclick="like('${place.name}')">❤️</div>
+</div>
+`;
+
+card.onclick=()=>{
+
+if(photos.length<2)return;
+
+photoIndex=(photoIndex+1)%Math.min(3,photos.length);
+
+card.querySelector("img").src=getPhoto(photos[photoIndex]);
+
+const dots=card.querySelectorAll(".dot");
+
+dots.forEach((d,x)=>d.classList.toggle("active",x===photoIndex));
+
+};
+
+enableSwipe(card);
+
+deck.appendChild(card);
+
+}
+
+function enableSwipe(card){
+
+let startX;
+
+card.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX;
+});
+
+card.addEventListener("touchmove",e=>{
+
+const diff=e.touches[0].clientX-startX;
+
+card.style.transform=`translateX(${diff}px) rotate(${diff/20}deg)`;
+
+});
+
+card.addEventListener("touchend",e=>{
+
+const diff=e.changedTouches[0].clientX-startX;
+
+if(diff>120) like();
+else if(diff<-120) dislike();
+else card.style.transform="";
+
+});
+
+}
+
+function like(name){
+
+if(name && !favorites.includes(name)){
+favorites.push(name);
+localStorage.setItem("favorites",JSON.stringify(favorites));
+renderFavorites();
+}
+
+next();
+
+}
 
 function dislike(){
-
-history.push(index)
-
-index++
-
-showPlace()
-
+next();
 }
 
-function like(){
+function next(){
 
-let fav=JSON.parse(localStorage.getItem("fav")||"[]")
+history.push(index);
 
-if(!fav.includes(places[index].name)){
-fav.push(places[index].name)
-localStorage.setItem("fav",JSON.stringify(fav))
-}
+index++;
 
-dislike()
+buildDeck();
 
 }
 
 function undo(){
 
-if(history.length>0){
-index=history.pop()
-showPlace()
-}
+if(history.length==0) return;
 
-}
+index=history.pop();
 
-function navigate(){
-
-let p=places[index]
-
-window.open(
-"https://www.google.com/maps/search/?api=1&query="+
-encodeURIComponent(p.name+" Oslo")
-)
-
-}
-
-function book(){
-
-let p=places[index]
-
-window.open(
-"https://www.google.com/search?q="+
-encodeURIComponent(p.name+" booking")
-)
+buildDeck();
 
 }
 
 function goHome(){
 
-document.getElementById("swipe").style.display="none"
-document.getElementById("home").style.display="block"
+deck.style.display="none";
+document.getElementById("home").style.display="flex";
 
 }
 
-function toggleFav(id){
+function renderFavorites(){
 
-let el=document.getElementById(id)
+const box=document.getElementById("favorites");
 
-if(el.style.display==="block"){
-el.style.display="none"
-}else{
-el.style.display="block"
+box.innerHTML="";
+
+favorites.forEach(f=>{
+
+const el=document.createElement("div");
+
+el.className="favoriteItem";
+
+el.innerText=f;
+
+el.onclick=()=>{
+
+openFromFavorite(f);
+
+};
+
+box.appendChild(el);
+
+});
+
+}
+
+function openFromFavorite(name){
+
+const pos=list.indexOf(name);
+
+if(pos>=0){
+
+index=pos;
+
+document.getElementById("home").style.display="none";
+deck.style.display="flex";
+
+buildDeck();
+
 }
 
 }
 
-loadPlaces()
+function navigate(lat,lng){
 
-/* SWIPE */
+window.open(`https://maps.google.com/?q=${lat},${lng}`);
 
-let card=document.getElementById("card")
-
-let startX=0
-let currentX=0
-let dragging=false
-
-card.addEventListener("touchstart",e=>{
-dragging=true
-startX=e.touches[0].clientX
-})
-
-card.addEventListener("touchmove",e=>{
-
-if(!dragging)return
-
-currentX=e.touches[0].clientX
-let diff=currentX-startX
-
-card.style.transform="translateX("+diff+"px) rotate("+(diff/20)+"deg)"
-
-})
-
-card.addEventListener("touchend",()=>{
-
-dragging=false
-
-let diff=currentX-startX
-
-if(diff>120){
-like()
-}
-else if(diff<-120){
-dislike()
 }
 
-card.style.transform="translateX(0)"
+function book(name){
 
-})
+window.open(`https://www.google.com/search?q=${name}+booking`);
+
+}
+
+async function findPlace(name){
+
+const url=`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(name+" Oslo")}&inputtype=textquery&fields=photos,rating,name,geometry&key=${API_KEY}`;
+
+const res=await fetch(url);
+
+const j=await res.json();
+
+const c=j.candidates[0];
+
+return{
+name:c.name,
+rating:c.rating,
+photos:c.photos,
+lat:c.geometry.location.lat,
+lng:c.geometry.location.lng
+};
+
+}
+
+function getPhoto(p){
+
+if(!p) return "";
+
+return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${p.photo_reference}&key=${API_KEY}`;
+
+}
 
 </script>
 
