@@ -13,74 +13,45 @@ body{
 margin:0;
 font-family:Arial;
 background:#111;
-color:white;
 display:flex;
 flex-direction:column;
 align-items:center;
+color:white;
 }
 
-/* top bar */
+/* FAVORITTER BUTTON */
 
-.topbar{
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:12px 20px;
-box-sizing:border-box;
-}
-
-.top-btn{
+.fav-button{
+margin-top:10px;
 background:#222;
 border:none;
-padding:8px 15px;
+padding:10px 20px;
 border-radius:20px;
-color:white;
 cursor:pointer;
 }
 
-/* favorites page */
+/* FAVORITTER SIDE */
 
 #favorites-page{
 display:none;
-width:100%;
-max-width:420px;
+width:360px;
 }
 
 .favorite-item{
 background:#222;
-padding:15px;
-margin:10px;
+padding:14px;
+margin:8px 0;
 border-radius:10px;
 cursor:pointer;
 }
 
-/* category */
-
-#start-screen{
-margin-top:100px;
-text-align:center;
-}
-
-.category{
-background:#222;
-padding:12px 20px;
-border-radius:20px;
-margin:10px;
-display:inline-block;
-cursor:pointer;
-}
-
-.category.active{
-background:#4CAF50;
-}
-
-/* cards */
+/* CARD */
 
 #card-stack{
 position:relative;
 width:360px;
 height:520px;
-margin-top:20px;
+margin-top:10px;
 }
 
 .card{
@@ -89,7 +60,6 @@ width:100%;
 height:100%;
 border-radius:20px;
 overflow:hidden;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
 
 .card img{
@@ -98,14 +68,14 @@ height:100%;
 object-fit:cover;
 }
 
-/* overlay */
+/* OVERLAY */
 
 .overlay{
 position:absolute;
 bottom:0;
 width:100%;
 padding:20px;
-background:linear-gradient(transparent, rgba(0,0,0,0.8));
+background:linear-gradient(transparent,rgba(0,0,0,0.8));
 }
 
 .place-name{
@@ -118,8 +88,11 @@ color:#FFD700;
 margin-top:4px;
 }
 
-.buttons{
+/* NAV / BOOK */
+
+.bottom-buttons{
 display:flex;
+justify-content:center;
 gap:10px;
 margin-top:10px;
 }
@@ -127,35 +100,39 @@ margin-top:10px;
 .small-btn{
 background:#2196F3;
 border:none;
-padding:6px 10px;
+padding:6px 12px;
 border-radius:6px;
 color:white;
-font-size:12px;
 cursor:pointer;
 }
 
-/* swipe buttons */
+/* SWIPE BUTTONS */
 
-.swipe-buttons{
+.x-btn{
 position:absolute;
-bottom:20px;
-width:100%;
-display:flex;
-justify-content:center;
-gap:25px;
-}
-
-.swipe-buttons button{
+left:15px;
+bottom:80px;
 width:60px;
 height:60px;
 border-radius:50%;
 border:none;
 font-size:22px;
+background:#ff4d4d;
 cursor:pointer;
 }
 
-.dislike{background:#ff4d4d}
-.like{background:#4CAF50}
+.like-btn{
+position:absolute;
+right:15px;
+bottom:80px;
+width:60px;
+height:60px;
+border-radius:50%;
+border:none;
+font-size:22px;
+background:#4CAF50;
+cursor:pointer;
+}
 
 </style>
 
@@ -163,34 +140,15 @@ cursor:pointer;
 
 <body>
 
-<div class="topbar">
-
-<button class="top-btn" onclick="showFavorites()">⭐ Favoritter</button>
-
-</div>
+<button class="fav-button" onclick="showFavorites()">⭐ Favoritter</button>
 
 <div id="favorites-page"></div>
 
-<div id="start-screen">
-
-<h2>Velg kategori</h2>
-
-<div class="category" data-type="restaurant">Restaurant</div>
-<div class="category" data-type="bar">Vinbar</div>
-<div class="category" data-type="night_club">Cocktailbar</div>
-
-<br><br>
-
-<button onclick="start()">Start</button>
-
-</div>
-
-<div id="card-stack" style="display:none"></div>
+<div id="card-stack"></div>
 
 <script>
 
 const curatedPlaces=[
-
 "Libertine",
 "Territoriet",
 "Skaal Matbar",
@@ -208,41 +166,11 @@ const curatedPlaces=[
 "Le Benjamin",
 "Hyde",
 "Brasserie France"
-
 ]
 
 let places=[]
 let favorites=[]
 let index=0
-let selectedType=null
-
-document.querySelectorAll(".category").forEach(el=>{
-
-el.onclick=()=>{
-
-document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"))
-
-el.classList.add("active")
-
-selectedType=el.dataset.type
-
-}
-
-})
-
-function start(){
-
-if(!selectedType){
-alert("Velg kategori")
-return
-}
-
-document.getElementById("start-screen").style.display="none"
-document.getElementById("card-stack").style.display="block"
-
-initMap()
-
-}
 
 function initMap(){
 
@@ -264,15 +192,13 @@ if(status!=="OK") return
 service.getDetails({
 
 placeId:results[0].place_id,
-fields:["name","rating","photos","types"]
+fields:["name","rating","photos"]
 
 },(place,status)=>{
 
 if(status!=="OK") return
 
 if(!place.rating || place.rating<4) return
-
-if(!place.types.includes(selectedType)) return
 
 places.push(place)
 
@@ -314,7 +240,7 @@ card.innerHTML=`
 <div class="place-name">${place.name}</div>
 <div class="rating">⭐ ${place.rating}</div>
 
-<div class="buttons">
+<div class="bottom-buttons">
 
 <button class="small-btn nav">Naviger</button>
 <button class="small-btn book">Book</button>
@@ -323,28 +249,24 @@ card.innerHTML=`
 
 </div>
 
-<div class="swipe-buttons">
-
-<button class="dislike">❌</button>
-<button class="like">❤️</button>
-
-</div>
+<button class="x-btn">❌</button>
+<button class="like-btn">❤️</button>
 
 `
 
 card.querySelector(".nav").onclick=()=>{
 
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
+window.open(\`https://www.google.com/maps/search/?api=1&query=\${place.name}\`)
 
 }
 
 card.querySelector(".book").onclick=()=>{
 
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
+window.open(\`https://www.google.com/maps/search/?api=1&query=\${place.name}\`)
 
 }
 
-card.querySelector(".like").onclick=()=>{
+card.querySelector(".like-btn").onclick=()=>{
 
 favorites.push(place)
 
@@ -356,7 +278,7 @@ next()
 
 }
 
-card.querySelector(".dislike").onclick=()=>{
+card.querySelector(".x-btn").onclick=()=>{
 
 card.remove()
 
@@ -400,7 +322,8 @@ div.onclick=()=>{
 
 index=i
 
-list.style.display="none"
+document.getElementById("favorites-page").style.display="none"
+document.getElementById("card-stack").style.display="block"
 
 renderCards()
 
@@ -414,17 +337,14 @@ list.appendChild(div)
 
 function showFavorites(){
 
-const page=document.getElementById("favorites-page")
-
-page.style.display="block"
-
+document.getElementById("favorites-page").style.display="block"
 document.getElementById("card-stack").style.display="none"
 
 }
 
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap"></script>
 
 </body>
 </html>
