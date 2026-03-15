@@ -1,211 +1,14 @@
-<!DOCTYPE html>
-<html lang="no">
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Savorly</title>
-
-<style>
-
-body{
-margin:0;
-font-family:Arial;
-background:#111;
-color:white;
-display:flex;
-flex-direction:column;
-align-items:center;
-}
-
-/* START */
-
-#start-screen{
-margin-top:120px;
-text-align:center;
-}
-
-.category{
-background:#222;
-padding:12px 20px;
-border-radius:20px;
-margin:10px;
-cursor:pointer;
-display:inline-block;
-}
-
-.category.active{
-background:#4CAF50;
-}
-
-.start-btn{
-margin-top:20px;
-padding:12px 30px;
-border:none;
-border-radius:20px;
-background:#4CAF50;
-color:white;
-}
-
-/* CARD */
-
-#card-stack{
-position:relative;
-width:360px;
-height:560px;
-margin-top:20px;
-}
-
-.card{
-position:absolute;
-width:100%;
-height:100%;
-border-radius:20px;
-overflow:hidden;
-background:black;
-}
-
-.card img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
-
-/* TOP */
-
-.back-btn{
-position:absolute;
-left:15px;
-top:15px;
-font-size:22px;
-background:none;
-border:none;
-color:white;
-}
-
-.fav-btn{
-position:absolute;
-right:15px;
-top:15px;
-font-size:22px;
-background:none;
-border:none;
-color:white;
-}
-
-/* TEXT */
-
-.overlay{
-position:absolute;
-bottom:100px;
-left:20px;
-}
-
-.title-row{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.place-name{
-font-size:24px;
-font-weight:bold;
-}
-
-.rating{
-font-size:18px;
-color:#FFD700;
-}
-
-.distance{
-font-size:14px;
-opacity:0.8;
-}
-
-/* ICON ROW */
-
-.icon-row{
-position:absolute;
-bottom:20px;
-width:100%;
-display:flex;
-justify-content:space-evenly;
-}
-
-.icon-btn{
-width:50px;
-height:50px;
-border-radius:50%;
-border:none;
-font-size:20px;
-background:#333;
-color:white;
-}
-
-/* FAVORITES */
-
-#favorites-page{
-display:none;
-width:360px;
-margin-top:40px;
-}
-
-.favorite-item{
-background:#222;
-padding:14px;
-margin:8px 0;
-border-radius:10px;
-cursor:pointer;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div id="start-screen">
-
-<h2>Hva vil du utforske?</h2>
-
-<div class="category" data-type="restaurant">Restaurant</div>
-<div class="category" data-type="wine">Vinbar</div>
-<div class="category" data-type="cocktail">Cocktailbar</div>
-
-<br>
-
-<button class="start-btn" onclick="start()">Start</button>
-
-</div>
-
-<div id="favorites-page"></div>
-
-<div id="card-stack" style="display:none"></div>
-
-<script>
-
+/* API KEY */
 const API_KEY="DIN_GOOGLE_API_KEY"
 
-/* STEDER */
+/* LAGRING */
 
-const restaurants=[
-"Libertine","Skaal Matbar","Arakataka","Le Benjamin","Hyde","Kverneriet","Kolonialen"
-]
-
-const wineBars=[
-"Territoriet","Nektar Vinbar","Radegast","Vinoteket","Andre til Høyre"
-]
-
-const cocktailBars=[
-"Himkok","Bettola","Svanen","Torggata Botaniske","Fuglen"
-]
+let userLocation = JSON.parse(localStorage.getItem("userLocation"))
 
 let places=[]
 let favorites=[]
 let index=0
 let selectedType=null
-let userLocation=null
 
 /* CATEGORY SELECT */
 
@@ -225,23 +28,43 @@ selectedType=el.dataset.type
 
 /* START */
 
-function start(){
+async function start(){
 
 if(!selectedType){
 alert("Velg kategori")
 return
 }
 
-navigator.geolocation.getCurrentPosition(pos=>{
+/* hent posisjon hvis ikke lagret */
+
+if(!userLocation){
+
+try{
+
+const pos = await new Promise((resolve,reject)=>{
+
+navigator.geolocation.getCurrentPosition(resolve,reject)
+
+})
 
 userLocation={
 lat:pos.coords.latitude,
 lng:pos.coords.longitude
 }
 
-loadPlaces()
+localStorage.setItem("userLocation",JSON.stringify(userLocation))
 
-})
+}catch{
+
+alert("Kunne ikke hente posisjon")
+
+}
+
+}
+
+/* last steder */
+
+loadPlaces()
 
 }
 
@@ -255,9 +78,13 @@ if(selectedType==="restaurant") list=restaurants
 if(selectedType==="wine") list=wineBars
 if(selectedType==="cocktail") list=cocktailBars
 
+places=[]
+
 for(const name of list){
 
 let url=`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}+oslo&inputtype=textquery&fields=place_id,photos,rating,geometry,name&key=${API_KEY}`
+
+try{
 
 let res=await fetch(url)
 let data=await res.json()
@@ -265,6 +92,8 @@ let data=await res.json()
 if(data.candidates.length>0){
 places.push(data.candidates[0])
 }
+
+}catch{}
 
 }
 
@@ -282,135 +111,3 @@ document.getElementById("card-stack").style.display="block"
 renderCards()
 
 }
-
-/* STARS */
-
-function getStars(rating){
-
-let full=Math.floor(rating)
-let half=rating%1>=0.5
-let empty=5-full-(half?1:0)
-
-return "⭐".repeat(full)+(half?"☆":"")+"✩".repeat(empty)
-
-}
-
-/* DISTANCE */
-
-function getDistance(lat1,lon1,lat2,lon2){
-
-const R=6371
-const dLat=(lat2-lat1)*Math.PI/180
-const dLon=(lon2-lon1)*Math.PI/180
-
-const a=
-Math.sin(dLat/2)*Math.sin(dLat/2)+
-Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-Math.sin(dLon/2)*Math.sin(dLon/2)
-
-const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
-
-return Math.round(R*c*1000)
-
-}
-
-/* RENDER */
-
-function renderCards(){
-
-const stack=document.getElementById("card-stack")
-
-stack.innerHTML=""
-
-places.slice(index,index+3).forEach(place=>{
-
-let photo=""
-
-if(place.photos){
-
-photo=`https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${place.photos[0].photo_reference}&key=${API_KEY}`
-
-}
-
-let distance=getDistance(
-userLocation.lat,
-userLocation.lng,
-place.geometry.location.lat,
-place.geometry.location.lng
-)
-
-const card=document.createElement("div")
-
-card.className="card"
-
-card.innerHTML=`
-
-<img src="${photo}">
-
-<button class="back-btn">⬅</button>
-<button class="fav-btn">⭐</button>
-
-<div class="overlay">
-
-<div class="title-row">
-
-<div class="place-name">${place.name}</div>
-<div class="rating">${getStars(place.rating)} ${place.rating}</div>
-
-</div>
-
-<div class="distance">📍 ${distance} m unna</div>
-
-</div>
-
-<div class="icon-row">
-
-<button class="icon-btn skip">❌</button>
-<button class="icon-btn nav">📍</button>
-<button class="icon-btn book">📅</button>
-<button class="icon-btn like">❤️</button>
-
-</div>
-
-`
-
-card.querySelector(".skip").onclick=next
-
-card.querySelector(".like").onclick=()=>{
-favorites.push(place.place_id)
-updateFavorites()
-next()
-}
-
-card.querySelector(".nav").onclick=()=>{
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
-}
-
-card.querySelector(".book").onclick=()=>{
-window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
-}
-
-stack.appendChild(card)
-
-})
-
-}
-
-/* NEXT */
-
-function next(){
-
-index++
-
-if(index>=places.length){
-index=0
-}
-
-renderCards()
-
-}
-
-</script>
-
-</body>
-</html>
