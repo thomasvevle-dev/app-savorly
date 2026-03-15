@@ -20,6 +20,7 @@ align-items:center;
 }
 
 /* hidden map */
+
 #map{
 height:1px;
 width:1px;
@@ -35,24 +36,16 @@ text-align:center;
 
 .category{
 background:#222;
-padding:12px 20px;
+padding:14px 24px;
 border-radius:20px;
 margin:10px;
 cursor:pointer;
 display:inline-block;
+font-size:18px;
 }
 
-.category.active{
+.category:hover{
 background:#4CAF50;
-}
-
-.start-btn{
-margin-top:20px;
-padding:12px 30px;
-border:none;
-border-radius:20px;
-background:#4CAF50;
-color:white;
 }
 
 /* CARD */
@@ -62,6 +55,7 @@ position:relative;
 width:360px;
 height:560px;
 margin-top:20px;
+display:none;
 }
 
 .card{
@@ -78,6 +72,8 @@ width:100%;
 height:100%;
 object-fit:cover;
 }
+
+/* TEXT */
 
 .overlay{
 position:absolute;
@@ -99,6 +95,8 @@ font-weight:bold;
 .rating{
 color:#FFD700;
 }
+
+/* ICONS */
 
 .icon-row{
 position:absolute;
@@ -130,17 +128,15 @@ color:white;
 
 <h2>Hva vil du utforske?</h2>
 
-<div class="category" data-type="restaurant">Restaurant</div>
-<div class="category" data-type="wine">Vinbar</div>
-<div class="category" data-type="cocktail">Cocktailbar</div>
+<div class="category" onclick="loadCategory('restaurant')">Restaurant</div>
 
-<br>
+<div class="category" onclick="loadCategory('wine')">Vinbar</div>
 
-<button class="start-btn" onclick="start()">Start</button>
+<div class="category" onclick="loadCategory('cocktail')">Cocktailbar</div>
 
 </div>
 
-<div id="card-stack" style="display:none"></div>
+<div id="card-stack"></div>
 
 <script>
 
@@ -170,26 +166,9 @@ const cocktailBars=[
 "Fuglen"
 ]
 
-let selectedType=null
+let service
 let places=[]
 let index=0
-let service
-
-/* CATEGORY */
-
-document.querySelectorAll(".category").forEach(el=>{
-
-el.onclick=()=>{
-
-document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"))
-
-el.classList.add("active")
-
-selectedType=el.dataset.type
-
-}
-
-})
 
 /* INIT GOOGLE */
 
@@ -206,22 +185,20 @@ service=new google.maps.places.PlacesService(map)
 
 window.initMap=initMap
 
-/* START */
+/* LOAD CATEGORY */
 
-function start(){
-
-if(!selectedType){
-alert("Velg kategori")
-return
-}
+function loadCategory(type){
 
 let list=[]
 
-if(selectedType==="restaurant") list=restaurants
-if(selectedType==="wine") list=wineBars
-if(selectedType==="cocktail") list=cocktailBars
+if(type==="restaurant") list=restaurants
+
+if(type==="wine") list=wineBars
+
+if(type==="cocktail") list=cocktailBars
 
 places=[]
+index=0
 
 let loaded=0
 
