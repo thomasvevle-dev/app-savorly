@@ -1,9 +1,225 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Savorly</title>
+
+<style>
+
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,Arial;
+background:#111;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+#map{
+width:1px;
+height:1px;
+opacity:0;
+}
+
+#start{
+margin-top:80px;
+text-align:center;
+width:90%;
+max-width:380px;
+}
+
+.category{
+background:#222;
+padding:18px 26px;
+border-radius:22px;
+margin:10px;
+cursor:pointer;
+font-size:18px;
+}
+
+.fav-list{
+display:none;
+margin-bottom:10px;
+}
+
+.fav-item{
+background:#333;
+padding:12px;
+margin-top:4px;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* CARD */
+
+#cardStack{
+position:relative;
+width:360px;
+height:580px;
+display:none;
+}
+
+.card{
+position:absolute;
+width:100%;
+height:100%;
+border-radius:26px;
+overflow:hidden;
+background:#000;
+}
+
+.photo{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.back{
+position:absolute;
+top:18px;
+left:20px;
+font-size:24px;
+text-shadow:0 0 12px black;
+cursor:pointer;
+z-index:10;
+}
+
+.favorite{
+position:absolute;
+top:18px;
+right:30px;
+font-size:24px;
+text-shadow:0 0 12px black;
+cursor:pointer;
+z-index:10;
+}
+
+.photo-indicator{
+position:absolute;
+top:10px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:6px;
+z-index:10;
+}
+
+.photo-bar{
+width:32px;
+height:4px;
+border-radius:3px;
+background:rgba(255,255,255,0.3);
+}
+
+.photo-bar.active{
+background:white;
+}
+
+.overlay{
+position:absolute;
+bottom:110px;
+left:22px;
+z-index:10;
+}
+
+.name{
+font-size:30px;
+font-weight:600;
+}
+
+.rating{
+color:#FFD54F;
+font-size:18px;
+margin-top:6px;
+}
+
+.buttons{
+position:absolute;
+bottom:25px;
+width:100%;
+display:flex;
+justify-content:space-evenly;
+z-index:10;
+}
+
+.action{
+font-size:28px;
+text-shadow:0 0 12px black;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div id="start">
+
+<h2>Savorly</h2>
+
+<div class="category" onclick="openCategory('restaurant')">Restaurant</div>
+<div class="category" onclick="openCategory('wine')">Vinbar</div>
+<div class="category" onclick="openCategory('cocktail')">Cocktailbar</div>
+
+<div class="category" onclick="toggleFav('restaurant')">Favoritt restaurant</div>
+<div class="fav-list" id="fav-restaurant"></div>
+
+<div class="category" onclick="toggleFav('wine')">Favoritt vinbar</div>
+<div class="fav-list" id="fav-wine"></div>
+
+<div class="category" onclick="toggleFav('cocktail')">Favoritt cocktailbar</div>
+<div class="fav-list" id="fav-cocktail"></div>
+
+</div>
+
+<div id="cardStack">
+
+<div class="card" id="card">
+
+<div class="back" onclick="back()">⬅</div>
+
+<div class="favorite" onclick="favoriteSwipe()">⭐</div>
+
+<div class="photo-indicator" id="indicator"></div>
+
+<img class="photo" id="photo">
+
+<div class="overlay">
+
+<div class="name" id="name"></div>
+<div class="rating" id="rating"></div>
+
+</div>
+
+<div class="buttons">
+
+<div class="action" onclick="skip()">❌</div>
+<div class="action" onclick="maps()">📍</div>
+<div class="action" onclick="maps()">📅</div>
+<div class="action" onclick="like()">❤️</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
 let service
 let places=[]
 let index=0
 let photos=[]
 let photoIndex=0
 let currentCategory=""
+
+/* FAVORITES STORAGE */
 
 let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
 restaurant:[],
@@ -12,8 +228,22 @@ cocktail:[]
 }
 
 function saveFavorites(){
+
 localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
+
 }
+
+/* PLACES CACHE */
+
+let placesCache=JSON.parse(localStorage.getItem("savorlyPlacesCache"))||{}
+
+function savePlacesCache(){
+
+localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
+
+}
+
+/* INIT MAP */
 
 function initMap(){
 
@@ -28,13 +258,20 @@ updateFavorites()
 
 }
 
-/* LOAD CATEGORY */
+/* OPEN CATEGORY */
 
-async function loadCategory(type){
+async function openCategory(type){
 
 currentCategory=type
 
+if(placesCache[type]){
+
+places=placesCache[type]
+
+}else{
+
 let res=await fetch("data/places.json")
+
 let data=await res.json()
 
 let list=[]
@@ -42,8 +279,6 @@ let list=[]
 if(type==="restaurant") list=data.restaurants
 if(type==="wine") list=data.winebars
 if(type==="cocktail") list=data.cocktailbars
-
-places=[]
 
 const requests=list.map(name=>{
 
@@ -75,9 +310,15 @@ resolve(null)
 
 })
 
-const results=await Promise.all(requests)
+let results=await Promise.all(requests)
 
 places=results.filter(p=>p!==null)
+
+placesCache[type]=places
+
+savePlacesCache()
+
+}
 
 index=0
 
@@ -112,7 +353,9 @@ photos.push(p.photos[i].getUrl({maxWidth:1200}))
 photoIndex=0
 
 if(photos.length>0){
+
 photo.src=photos[0]
+
 }
 
 renderIndicator()
@@ -217,7 +460,9 @@ container.innerHTML=""
 favorites[type].forEach(place=>{
 
 let div=document.createElement("div")
+
 div.className="fav-item"
+
 div.innerText=place.name
 
 div.onclick=function(){
@@ -239,3 +484,41 @@ container.appendChild(div)
 })
 
 }
+
+/* TOGGLE FAVORITE LIST */
+
+function toggleFav(type){
+
+let list=document.getElementById("fav-"+type)
+
+if(list.style.display==="block"){
+list.style.display="none"
+}else{
+list.style.display="block"
+}
+
+}
+
+/* MAP */
+
+function maps(){
+
+let p=places[index]
+
+window.open("https://maps.google.com/?q="+p.name)
+
+}
+
+function back(){
+
+cardStack.style.display="none"
+start.style.display="block"
+
+}
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap"></script>
+
+</body>
+</html>
