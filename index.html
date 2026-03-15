@@ -19,9 +19,42 @@ flex-direction:column;
 align-items:center;
 }
 
+/* start screen */
+
+#start-screen{
+margin-top:120px;
+text-align:center;
+}
+
+.category{
+background:#222;
+border-radius:30px;
+padding:15px 25px;
+margin:10px;
+display:inline-block;
+cursor:pointer;
+}
+
+.category.active{
+background:#4CAF50;
+}
+
+#start-btn{
+margin-top:20px;
+padding:12px 30px;
+border:none;
+border-radius:20px;
+background:#4CAF50;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+/* swipe cards */
+
 #card-stack{
 position:relative;
-width:340px;
+width:360px;
 height:520px;
 margin-top:30px;
 }
@@ -33,40 +66,13 @@ height:100%;
 background:#222;
 border-radius:20px;
 overflow:hidden;
-box-shadow:0 10px 25px rgba(0,0,0,0.4);
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
 
-.image-container{
-position:relative;
+.card img{
 width:100%;
-height:260px;
-overflow:hidden;
-}
-
-.image-container img{
-width:100%;
-height:100%;
+height:300px;
 object-fit:cover;
-}
-
-.photo-dots{
-position:absolute;
-bottom:10px;
-left:50%;
-transform:translateX(-50%);
-display:flex;
-gap:6px;
-}
-
-.dot{
-width:8px;
-height:8px;
-border-radius:50%;
-background:#aaa;
-}
-
-.dot.active{
-background:white;
 }
 
 .info{
@@ -74,35 +80,18 @@ padding:15px;
 }
 
 .place-name{
-font-size:20px;
+font-size:22px;
 font-weight:bold;
 }
 
 .rating{
 color:#FFD700;
-margin:4px 0;
+margin-top:5px;
 }
 
-.desc{
-font-size:13px;
+.type{
 color:#ccc;
-margin-bottom:6px;
-}
-
-.small-buttons{
-display:flex;
-gap:8px;
-margin:8px 0;
-}
-
-.small-buttons button{
-font-size:12px;
-padding:6px 10px;
-border-radius:6px;
-border:none;
-cursor:pointer;
-background:#2196F3;
-color:white;
+font-size:14px;
 }
 
 .buttons{
@@ -111,30 +100,34 @@ justify-content:space-between;
 margin-top:10px;
 }
 
-.buttons button{
+.small-btn{
+background:#2196F3;
 border:none;
-border-radius:50%;
+padding:8px 12px;
+border-radius:6px;
+color:white;
+cursor:pointer;
+font-size:12px;
+}
+
+.swipe-buttons{
+display:flex;
+justify-content:center;
+gap:20px;
+margin-top:15px;
+}
+
+.swipe-buttons button{
 width:60px;
 height:60px;
+border-radius:50%;
+border:none;
 font-size:22px;
 cursor:pointer;
 }
 
-.dislike{ background:#ff4d4d }
-.like{ background:#4CAF50 }
-
-#favorites{
-margin:20px;
-width:90%;
-}
-
-.favorite-item{
-background:#222;
-padding:10px;
-margin:6px 0;
-border-radius:6px;
-cursor:pointer;
-}
+.dislike{background:#ff4d4d}
+.like{background:#4CAF50}
 
 </style>
 
@@ -142,74 +135,104 @@ cursor:pointer;
 
 <body>
 
-<div id="card-stack"></div>
+<div id="start-screen">
 
-<div id="favorites">
-<h3>Favoritter ❤️</h3>
-<div id="fav-list"></div>
+<h2>Hva vil du utforske?</h2>
+
+<div class="category" data-type="restaurant">Restaurant</div>
+<div class="category" data-type="bar">Vinbar</div>
+<div class="category" data-type="night_club">Cocktailbar</div>
+
+<br>
+
+<button id="start-btn">Start</button>
+
 </div>
+
+
+<div id="card-stack" style="display:none"></div>
 
 <script>
 
+const curatedPlaces=[
+
+"Libertine",
+"Territoriet",
+"Skaal Matbar",
+"F6 Cocktailbar",
+"Bettola",
+"Himkok",
+"Svanen",
+"Torggata Botaniske",
+"Andre til Høyre",
+"Nektar Vinbar",
+"Radegast",
+"Vinoteket",
+"Fuglen",
+"Arakataka",
+"Le Benjamin",
+"Hyde",
+"Brasserie France"
+
+]
+
+let selectedType=null
 let places=[]
-let favorites=[]
 let index=0
 
-function getDescription(types){
+document.querySelectorAll(".category").forEach(el=>{
 
-if(types.includes("restaurant"))
-return "Restaurant med matservering"
+el.onclick=()=>{
 
-if(types.includes("bar"))
-return "Vinbar / cocktailbar"
+document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"))
 
-if(types.includes("night_club"))
-return "Cocktailbar og natteliv"
+el.classList.add("active")
 
-return "Servering og drikke"
+selectedType=el.dataset.type
+
+}
+
+})
+
+document.getElementById("start-btn").onclick=()=>{
+
+if(!selectedType){
+alert("Velg kategori først")
+return
+}
+
+document.getElementById("start-screen").style.display="none"
+document.getElementById("card-stack").style.display="block"
+
+initMap()
 
 }
 
 function initMap(){
 
-const map = new google.maps.Map(document.createElement("div"), {
-center:{lat:59.9139,lng:10.7522},
-zoom:13
-})
+const map=new google.maps.Map(document.createElement("div"))
 
-const service = new google.maps.places.PlacesService(map)
+const service=new google.maps.places.PlacesService(map)
 
-let types=["restaurant","bar","night_club"]
+curatedPlaces.forEach(name=>{
 
-types.forEach(type=>{
+service.findPlaceFromQuery({
 
-service.nearbySearch({
-
-location:{lat:59.9139,lng:10.7522},
-radius:3500,
-type:type
+query:name+" oslo",
+fields:["name","photos","rating","types"]
 
 },(results,status)=>{
 
-if(status===google.maps.places.PlacesServiceStatus.OK){
+if(status==="OK"){
 
-let filtered = results.filter(place => {
+let place=results[0]
 
-if(!place.rating) return false
-if(place.rating < 4) return false
+if(!place.rating || place.rating<4) return
 
-let name = place.name.toLowerCase()
+if(!place.types.includes(selectedType)) return
 
-if(name.includes("hotel")) return false
-if(name.includes("hostel")) return false
+places.push(place)
 
-return true
-
-})
-
-places=[...places,...filtered]
-
-shufflePlaces()
 renderCards()
 
 }
@@ -218,144 +241,83 @@ renderCards()
 
 })
 
-}
-
-function shufflePlaces(){
-places.sort(()=>Math.random()-0.5)
 }
 
 function renderCards(){
 
 const stack=document.getElementById("card-stack")
+
 stack.innerHTML=""
 
-places.slice(index,index+5).forEach((place,i)=>{
+places.slice(index,index+3).forEach((place,i)=>{
 
-let photos=[]
+let photo="https://via.placeholder.com/400"
 
 if(place.photos){
-
-place.photos.slice(0,5).forEach(p=>{
-photos.push(p.getUrl({maxWidth:500}))
-})
-
+photo=place.photos[0].getUrl({maxWidth:500})
 }
-
-if(photos.length===0){
-photos=["https://via.placeholder.com/400x260"]
-}
-
-let photoIndex=0
 
 const card=document.createElement("div")
+
 card.className="card"
 card.style.zIndex=100-i
 
 card.innerHTML=`
 
-<div class="image-container">
-
-<img src="${photos[0]}" class="photo">
-
-<div class="photo-dots">
-${photos.map((_,i)=>`<div class="dot ${i==0?"active":""}"></div>`).join("")}
-</div>
-
-</div>
+<img src="${photo}">
 
 <div class="info">
 
 <div class="place-name">${place.name}</div>
-<div class="rating">⭐ ${place.rating}</div>
-<div class="desc">${getDescription(place.types)}</div>
 
-<div class="small-buttons">
-<button class="nav">📍 Naviger</button>
-<button class="book">📅 Book</button>
-</div>
+<div class="rating">⭐ ${place.rating}</div>
+
+<div class="type">${selectedType}</div>
 
 <div class="buttons">
+
+<button class="small-btn nav">Naviger</button>
+<button class="small-btn book">Book</button>
+
+</div>
+
+<div class="swipe-buttons">
+
 <button class="dislike">❌</button>
 <button class="like">❤️</button>
+
 </div>
 
 </div>
 `
 
-const img=card.querySelector(".photo")
-const dots=card.querySelectorAll(".dot")
-const container=card.querySelector(".image-container")
-
-let startX=0
-
-container.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
-
-container.addEventListener("touchend",e=>{
-
-let endX=e.changedTouches[0].clientX
-let diff=endX-startX
-
-if(diff<-40 && photoIndex<photos.length-1){
-photoIndex++
-}
-
-if(diff>40 && photoIndex>0){
-photoIndex--
-}
-
-img.src=photos[photoIndex]
-
-dots.forEach((d,i)=>{
-d.classList.toggle("active",i===photoIndex)
-})
-
-})
-
 card.querySelector(".nav").onclick=()=>{
+
 window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
+
 }
 
 card.querySelector(".book").onclick=()=>{
+
 window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
+
 }
 
 card.querySelector(".like").onclick=()=>{
-favorites.push(place)
-updateFavorites()
+
 card.remove()
 next()
+
 }
 
 card.querySelector(".dislike").onclick=()=>{
+
 card.remove()
 next()
+
 }
 
 stack.appendChild(card)
-
-})
-
-}
-
-function updateFavorites(){
-
-let favList=document.getElementById("fav-list")
-favList.innerHTML=""
-
-favorites.forEach(f=>{
-
-let div=document.createElement("div")
-div.className="favorite-item"
-div.innerText=f.name
-
-div.onclick=()=>{
-index=places.findIndex(p=>p.name===f.name)
-renderCards()
-}
-
-favList.appendChild(div)
 
 })
 
@@ -366,7 +328,6 @@ function next(){
 index++
 
 if(index>=places.length){
-shufflePlaces()
 index=0
 }
 
@@ -376,7 +337,7 @@ renderCards()
 
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places"></script>
 
 </body>
 </html>
