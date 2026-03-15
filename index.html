@@ -144,11 +144,38 @@ color:white;
 
 <script>
 
-let selectedType=null
 let userLocation=null
+let selectedType=null
+let service
 let places=[]
 let index=0
-let service
+
+/* HENT GPS AUTOMATISK */
+
+window.onload=()=>{
+
+let saved=localStorage.getItem("userLocation")
+
+if(saved){
+
+userLocation=JSON.parse(saved)
+
+}else{
+
+navigator.geolocation.getCurrentPosition(pos=>{
+
+userLocation={
+lat:pos.coords.latitude,
+lng:pos.coords.longitude
+}
+
+localStorage.setItem("userLocation",JSON.stringify(userLocation))
+
+})
+
+}
+
+}
 
 /* CATEGORY */
 
@@ -175,22 +202,13 @@ alert("Velg kategori")
 return
 }
 
-navigator.geolocation.getCurrentPosition(pos=>{
-
-userLocation={
-lat:pos.coords.latitude,
-lng:pos.coords.longitude
-}
-
-initGoogle()
-
-})
+initPlaces()
 
 }
 
-/* INIT GOOGLE */
+/* GOOGLE PLACES */
 
-function initGoogle(){
+function initPlaces(){
 
 const map=new google.maps.Map(document.createElement("div"),{
 center:userLocation,
@@ -210,42 +228,22 @@ function searchPlaces(){
 let request
 
 if(selectedType==="restaurant"){
-
-request={
-location:userLocation,
-radius:3000,
-type:"restaurant"
-}
-
+request={location:userLocation,radius:3000,type:"restaurant"}
 }
 
 if(selectedType==="wine"){
-
-request={
-location:userLocation,
-radius:3000,
-keyword:"wine bar"
-}
-
+request={location:userLocation,radius:3000,keyword:"wine bar"}
 }
 
 if(selectedType==="cocktail"){
-
-request={
-location:userLocation,
-radius:3000,
-type:"bar"
-}
-
+request={location:userLocation,radius:3000,type:"bar"}
 }
 
 service.nearbySearch(request,(results,status)=>{
 
 if(status!==google.maps.places.PlacesServiceStatus.OK){
-
 alert("Fant ingen steder")
 return
-
 }
 
 places=results
