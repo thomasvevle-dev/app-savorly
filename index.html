@@ -95,7 +95,7 @@ font-weight:bold;
 color:#FFD700;
 }
 
-/* ICONS */
+/* ICON ROW */
 
 .icon-row{
 position:absolute;
@@ -139,8 +139,6 @@ color:white;
 
 <script>
 
-const API_KEY="DIN_GOOGLE_API_KEY"
-
 const restaurants=[
 "Libertine",
 "Skaal Matbar",
@@ -170,6 +168,7 @@ const cocktailBars=[
 let selectedType=null
 let places=[]
 let index=0
+let service
 
 document.querySelectorAll(".category").forEach(el=>{
 
@@ -185,7 +184,7 @@ selectedType=el.dataset.type
 
 })
 
-async function start(){
+function start(){
 
 if(!selectedType){
 alert("Velg kategori")
@@ -198,37 +197,59 @@ if(selectedType==="restaurant") list=restaurants
 if(selectedType==="wine") list=wineBars
 if(selectedType==="cocktail") list=cocktailBars
 
+const map=new google.maps.Map(document.createElement("div"))
+
+service=new google.maps.places.PlacesService(map)
+
 places=[]
 
-for(const name of list){
-
-let url=`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}+oslo&inputtype=textquery&fields=name,place_id,photos,rating&key=${API_KEY}`
-
-try{
-
-let res=await fetch(url)
-let data=await res.json()
-
-if(data.candidates.length>0){
-
-places.push(data.candidates[0])
+loadPlaces(list)
 
 }
 
-}catch{}
+function loadPlaces(list){
+
+let loaded=0
+
+list.forEach(name=>{
+
+service.findPlaceFromQuery({
+
+query:name+" oslo",
+fields:["name","rating","photos"]
+
+},(results,status)=>{
+
+loaded++
+
+if(status===google.maps.places.PlacesServiceStatus.OK){
+
+places.push(results[0])
 
 }
+
+if(loaded===list.length){
 
 document.getElementById("start-screen").style.display="none"
+
 document.getElementById("card-stack").style.display="block"
 
 renderCards()
 
 }
 
+})
+
+})
+
+}
+
 function stars(r){
 
+if(!r) return ""
+
 let full=Math.floor(r)
+
 let empty=5-full
 
 return "⭐".repeat(full)+"✩".repeat(empty)
@@ -241,7 +262,9 @@ const stack=document.getElementById("card-stack")
 
 stack.innerHTML=""
 
-places.slice(index,index+1).forEach(place=>{
+let place=places[index]
+
+if(!place) return
 
 let photos=[]
 
@@ -249,9 +272,7 @@ if(place.photos){
 
 for(let i=0;i<3 && i<place.photos.length;i++){
 
-photos.push(
-`https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${place.photos[i].photo_reference}&key=${API_KEY}`
-)
+photos.push(place.photos[i].getUrl({maxWidth:800}))
 
 }
 
@@ -273,7 +294,7 @@ card.innerHTML=`
 
 <div class="place-name">${place.name}</div>
 
-<div class="rating">${stars(place.rating)} ${place.rating}</div>
+<div class="rating">${stars(place.rating)} ${place.rating||""}</div>
 
 </div>
 
@@ -307,8 +328,6 @@ card.querySelector("#place-img").src=photos[current]
 
 stack.appendChild(card)
 
-})
-
 }
 
 function next(){
@@ -324,6 +343,8 @@ renderCards()
 }
 
 </script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=DIN_GOOGLE_API_KEY&libraries=places"></script>
 
 </body>
 </html>
