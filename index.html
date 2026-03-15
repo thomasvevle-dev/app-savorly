@@ -19,11 +19,7 @@ flex-direction:column;
 align-items:center;
 }
 
-#map{
-width:1px;
-height:1px;
-opacity:0;
-}
+#map{width:1px;height:1px;opacity:0;}
 
 #start{
 margin-top:80px;
@@ -41,10 +37,7 @@ cursor:pointer;
 font-size:18px;
 }
 
-.fav-list{
-display:none;
-margin-bottom:10px;
-}
+.fav-list{display:none;margin-bottom:10px;}
 
 .fav-item{
 background:#333;
@@ -53,8 +46,6 @@ margin-top:4px;
 border-radius:10px;
 cursor:pointer;
 }
-
-/* CARD */
 
 #cardStack{
 position:relative;
@@ -78,8 +69,6 @@ height:100%;
 object-fit:cover;
 }
 
-/* ICONS */
-
 .back{
 position:absolute;
 top:18px;
@@ -100,8 +89,6 @@ cursor:pointer;
 z-index:10;
 }
 
-/* TEXT OVERLAY */
-
 .overlay{
 position:absolute;
 bottom:110px;
@@ -109,18 +96,9 @@ left:22px;
 z-index:10;
 }
 
-.name{
-font-size:30px;
-font-weight:600;
-}
+.name{font-size:30px;font-weight:600;}
 
-.rating{
-color:#FFD54F;
-font-size:18px;
-margin-top:6px;
-}
-
-/* PHOTO INDICATOR */
+.rating{color:#FFD54F;font-size:18px;margin-top:6px;}
 
 .photo-indicator{
 position:absolute;
@@ -139,11 +117,7 @@ border-radius:3px;
 background:rgba(255,255,255,0.3);
 }
 
-.photo-bar.active{
-background:white;
-}
-
-/* BUTTONS */
+.photo-bar.active{background:white;}
 
 .buttons{
 position:absolute;
@@ -226,21 +200,24 @@ let photos=[]
 let photoIndex=0
 let currentCategory=""
 
+/* FAVORITES */
+
 let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
 restaurant:[],
 wine:[],
 cocktail:[]
 }
 
-let placesCache=JSON.parse(localStorage.getItem("savorlyPlacesCache"))||{}
-
 function saveFavorites(){
 localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
 }
 
-function savePlacesCache(){
-localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
-}
+/* CACHE */
+
+let placesCache=JSON.parse(localStorage.getItem("savorlyPlacesCache"))||{}
+let cacheVersion=localStorage.getItem("savorlyPlacesVersion")||""
+
+/* INIT MAP */
 
 function initMap(){
 
@@ -255,24 +232,39 @@ updateFavorites()
 
 }
 
+/* OPEN CATEGORY */
+
 async function openCategory(type){
 
 currentCategory=type
 
-if(placesCache[type]){
-
-places=placesCache[type]
-
-}else{
-
 let res=await fetch("data/places.json")
-let data=await res.json()
+
+let text=await res.text()
+
+let newVersion=text.length
+
+if(newVersion!==cacheVersion){
+
+placesCache={}
+localStorage.setItem("savorlyPlacesCache","{}")
+localStorage.setItem("savorlyPlacesVersion",newVersion)
+
+}
+
+let data=JSON.parse(text)
 
 let list=[]
 
 if(type==="restaurant") list=data.restaurants
 if(type==="wine") list=data.winebars
 if(type==="cocktail") list=data.cocktailbars
+
+if(placesCache[type]){
+
+places=placesCache[type]
+
+}else{
 
 const requests=list.map(name=>{
 
@@ -290,11 +282,17 @@ placeId:results[0].place_id,
 fields:["name","rating","photos"]
 },(place)=>{
 
+place.name=place.name||name
+
 resolve(place)
 
 })
 
-}else resolve(null)
+}else{
+
+resolve({name:name})
+
+}
 
 })
 
@@ -304,10 +302,11 @@ resolve(place)
 
 let results=await Promise.all(requests)
 
-places=results.filter(p=>p!==null)
+places=results.filter(p=>p)
 
 placesCache[type]=places
-savePlacesCache()
+
+localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
 
 }
 
@@ -320,12 +319,15 @@ show()
 
 }
 
+/* SHOW CARD */
+
 function show(){
 
 let p=places[index]
 
-name.innerText=p.name
-rating.innerText="⭐ "+(p.rating||"")
+name.innerText=p.name||"Ukjent sted"
+
+rating.innerText=p.rating?"⭐ "+p.rating:""
 
 photos=[]
 
@@ -339,11 +341,15 @@ photos.push(p.photos[i].getUrl({maxWidth:1200}))
 
 }
 
+if(photos.length===0){
+
+photos=["https://images.unsplash.com/photo-1414235077428-338989a2e8c0"]
+
+}
+
 photoIndex=0
 
-if(photos.length>0){
 photo.src=photos[0]
-}
 
 renderIndicator()
 
@@ -351,11 +357,11 @@ renderIndicator()
 
 photo.onclick=function(){
 
-if(photos.length<2) return
+if(photos.length<2)return
 
 photoIndex++
 
-if(photoIndex>=photos.length) photoIndex=0
+if(photoIndex>=photos.length)photoIndex=0
 
 photo.src=photos[photoIndex]
 
@@ -370,9 +376,10 @@ indicator.innerHTML=""
 photos.forEach((p,i)=>{
 
 let bar=document.createElement("div")
+
 bar.className="photo-bar"
 
-if(i===photoIndex) bar.classList.add("active")
+if(i===photoIndex)bar.classList.add("active")
 
 indicator.appendChild(bar)
 
@@ -384,11 +391,9 @@ function animate(dir){
 
 card.style.transition="transform 0.35s"
 
-if(dir==="right"){
-card.style.transform="translateX(600px) rotate(25deg)"
-}else{
-card.style.transform="translateX(-600px) rotate(-25deg)"
-}
+card.style.transform=dir==="right"
+?"translateX(600px) rotate(25deg)"
+:"translateX(-600px) rotate(-25deg)"
 
 setTimeout(()=>{
 card.style.transition=""
@@ -405,7 +410,7 @@ function next(){
 
 index++
 
-if(index>=places.length) index=0
+if(index>=places.length)index=0
 
 show()
 
@@ -436,7 +441,9 @@ container.innerHTML=""
 favorites[type].forEach(place=>{
 
 let div=document.createElement("div")
+
 div.className="fav-item"
+
 div.innerText=place.name
 
 div.onclick=function(){
@@ -463,11 +470,7 @@ function toggleFav(type){
 
 let list=document.getElementById("fav-"+type)
 
-if(list.style.display==="block"){
-list.style.display="none"
-}else{
-list.style.display="block"
-}
+list.style.display=list.style.display==="block"?"none":"block"
 
 }
 
