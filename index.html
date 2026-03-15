@@ -37,15 +37,7 @@ cursor:pointer;
 font-size:18px;
 }
 
-.fav-list{display:none;margin-bottom:10px;}
-
-.fav-item{
-background:#333;
-padding:12px;
-margin-top:4px;
-border-radius:10px;
-cursor:pointer;
-}
+/* CARD STACK */
 
 #cardStack{
 position:relative;
@@ -61,13 +53,20 @@ height:100%;
 border-radius:26px;
 overflow:hidden;
 background:#000;
+transition:transform .35s ease;
 }
+
+.card:nth-child(1){transform:scale(1)}
+.card:nth-child(2){transform:scale(.96) translateY(12px)}
+.card:nth-child(3){transform:scale(.92) translateY(24px)}
 
 .photo{
 width:100%;
 height:100%;
 object-fit:cover;
 }
+
+/* ICONS */
 
 .back{
 position:absolute;
@@ -89,6 +88,8 @@ cursor:pointer;
 z-index:10;
 }
 
+/* TEXT */
+
 .overlay{
 position:absolute;
 bottom:110px;
@@ -96,9 +97,18 @@ left:22px;
 z-index:10;
 }
 
-.name{font-size:30px;font-weight:600;}
+.name{
+font-size:30px;
+font-weight:600;
+}
 
-.rating{color:#FFD54F;font-size:18px;margin-top:6px;}
+.rating{
+color:#FFD54F;
+font-size:18px;
+margin-top:6px;
+}
+
+/* PHOTO INDICATOR */
 
 .photo-indicator{
 position:absolute;
@@ -117,7 +127,9 @@ border-radius:3px;
 background:rgba(255,255,255,0.3);
 }
 
-.photo-bar.active{background:white;}
+.photo-bar.active{background:white}
+
+/* BUTTONS */
 
 .buttons{
 position:absolute;
@@ -149,45 +161,13 @@ cursor:pointer;
 <div class="category" onclick="openCategory('wine')">Vinbar</div>
 <div class="category" onclick="openCategory('cocktail')">Cocktailbar</div>
 
-<div class="category" onclick="toggleFav('restaurant')">Favoritt restaurant</div>
-<div class="fav-list" id="fav-restaurant"></div>
-
-<div class="category" onclick="toggleFav('wine')">Favoritt vinbar</div>
-<div class="fav-list" id="fav-wine"></div>
-
-<div class="category" onclick="toggleFav('cocktail')">Favoritt cocktailbar</div>
-<div class="fav-list" id="fav-cocktail"></div>
-
 </div>
 
 <div id="cardStack">
 
-<div class="card" id="card">
-
-<div class="back" onclick="back()">⬅</div>
-<div class="favorite" onclick="favoriteSwipe()">⭐</div>
-
-<div class="photo-indicator" id="indicator"></div>
-
-<img class="photo" id="photo">
-
-<div class="overlay">
-
-<div class="name" id="name"></div>
-<div class="rating" id="rating"></div>
-
-</div>
-
-<div class="buttons">
-
-<div class="action" onclick="skip()">❌</div>
-<div class="action" onclick="maps()">📍</div>
-<div class="action" onclick="maps()">📅</div>
-<div class="action" onclick="like()">❤️</div>
-
-</div>
-
-</div>
+<div class="card" id="card1"></div>
+<div class="card" id="card2"></div>
+<div class="card" id="card3"></div>
 
 </div>
 
@@ -196,11 +176,9 @@ cursor:pointer;
 let service
 let places=[]
 let index=0
+
 let photos=[]
 let photoIndex=0
-let currentCategory=""
-
-/* FAVORITES */
 
 let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
 restaurant:[],
@@ -208,16 +186,14 @@ wine:[],
 cocktail:[]
 }
 
+let placesCache=JSON.parse(localStorage.getItem("savorlyPlacesCache"))||{}
+let cacheVersion=localStorage.getItem("savorlyPlacesVersion")||""
+
 function saveFavorites(){
 localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
 }
 
-/* CACHE */
-
-let placesCache=JSON.parse(localStorage.getItem("savorlyPlacesCache"))||{}
-let cacheVersion=localStorage.getItem("savorlyPlacesVersion")||""
-
-/* INIT MAP */
+/* MAP */
 
 function initMap(){
 
@@ -228,27 +204,23 @@ document.getElementById("map"),
 
 service=new google.maps.places.PlacesService(map)
 
-updateFavorites()
-
 }
 
-/* OPEN CATEGORY */
+/* CATEGORY */
 
 async function openCategory(type){
-
-currentCategory=type
 
 let res=await fetch("data/places.json")
 
 let text=await res.text()
 
-let newVersion=text.length
+let version=text.length
 
-if(newVersion!==cacheVersion){
+if(version!==cacheVersion){
 
 placesCache={}
 localStorage.setItem("savorlyPlacesCache","{}")
-localStorage.setItem("savorlyPlacesVersion",newVersion)
+localStorage.setItem("savorlyPlacesVersion",version)
 
 }
 
@@ -279,30 +251,26 @@ if(status==="OK"){
 
 service.getDetails({
 placeId:results[0].place_id,
-fields:["name","rating","photos"]
+fields:["rating","photos"]
 },(place)=>{
 
-place.name=place.name||name
-
-resolve(place)
+resolve({
+name:name,
+rating:place.rating,
+photos:place.photos
+})
 
 })
 
-}else{
-
-resolve({name:name})
-
-}
-
-})
+}else resolve({name:name})
 
 })
 
 })
 
-let results=await Promise.all(requests)
+})
 
-places=results.filter(p=>p)
+places=(await Promise.all(requests)).filter(p=>p)
 
 placesCache[type]=places
 
@@ -312,167 +280,122 @@ localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
 
 index=0
 
-start.style.display="none"
-cardStack.style.display="block"
+document.getElementById("start").style.display="none"
+document.getElementById("cardStack").style.display="block"
 
-show()
-
-}
-
-/* SHOW CARD */
-
-function show(){
-
-let p=places[index]
-
-name.innerText=p.name||"Ukjent sted"
-
-rating.innerText=p.rating?"⭐ "+p.rating:""
-
-photos=[]
-
-if(p.photos){
-
-for(let i=0;i<Math.min(3,p.photos.length);i++){
-
-photos.push(p.photos[i].getUrl({maxWidth:1200}))
+renderStack()
 
 }
 
-}
+/* RENDER STACK */
 
-if(photos.length===0){
+function renderStack(){
 
-photos=["https://images.unsplash.com/photo-1414235077428-338989a2e8c0"]
+renderCard("card1",places[index])
 
-}
+renderCard("card2",places[index+1])
 
-photoIndex=0
-
-photo.src=photos[0]
-
-renderIndicator()
+renderCard("card3",places[index+2])
 
 }
 
-photo.onclick=function(){
+/* RENDER CARD */
 
-if(photos.length<2)return
+function renderCard(id,data){
 
-photoIndex++
+if(!data)return
 
-if(photoIndex>=photos.length)photoIndex=0
+let card=document.getElementById(id)
 
-photo.src=photos[photoIndex]
+let image="https://images.unsplash.com/photo-1414235077428-338989a2e8c0"
 
-renderIndicator()
+let imgs=[]
+
+if(data.photos){
+
+for(let i=0;i<Math.min(3,data.photos.length);i++){
+imgs.push(data.photos[i].getUrl({maxWidth:1200}))
+}
 
 }
 
-function renderIndicator(){
+if(imgs.length>0)image=imgs[0]
 
-indicator.innerHTML=""
+card.innerHTML=`
 
-photos.forEach((p,i)=>{
+<div class="back" onclick="back()">⬅</div>
 
-let bar=document.createElement("div")
+<div class="favorite" onclick="favoriteSwipe()">⭐</div>
 
-bar.className="photo-bar"
+<img class="photo" src="${image}" onclick="nextPhoto(${id})">
 
-if(i===photoIndex)bar.classList.add("active")
+<div class="overlay">
 
-indicator.appendChild(bar)
+<div class="name">${data.name}</div>
 
-})
+<div class="rating">${data.rating?"⭐ "+data.rating:""}</div>
+
+</div>
+
+<div class="buttons">
+
+<div class="action" onclick="skip()">❌</div>
+<div class="action" onclick="maps()">📍</div>
+<div class="action" onclick="maps()">📅</div>
+<div class="action" onclick="like()">❤️</div>
+
+</div>
+
+`
 
 }
 
-function animate(dir){
+/* SWIPE */
 
-card.style.transition="transform 0.35s"
+function like(){
+swipe("right")
+}
 
-card.style.transform=dir==="right"
-?"translateX(600px) rotate(25deg)"
-:"translateX(-600px) rotate(-25deg)"
+function skip(){
+swipe("left")
+}
+
+function swipe(dir){
+
+let card=document.getElementById("card1")
+
+card.style.transform=
+dir==="right"
+?"translateX(500px) rotate(20deg)"
+:"translateX(-500px) rotate(-20deg)"
 
 setTimeout(()=>{
-card.style.transition=""
-card.style.transform=""
-next()
-},350)
-
-}
-
-function like(){animate("right")}
-function skip(){animate("left")}
-
-function next(){
 
 index++
 
 if(index>=places.length)index=0
 
-show()
+renderStack()
+
+card.style.transform=""
+
+},300)
 
 }
+
+/* FAVORITE */
 
 function favoriteSwipe(){
 
-let p=places[index]
-
-favorites[currentCategory].push(p)
+favorites.restaurant.push(places[index])
 
 saveFavorites()
 
-updateFavorites()
-
-animate("right")
+swipe("right")
 
 }
 
-function updateFavorites(){
-
-["restaurant","wine","cocktail"].forEach(type=>{
-
-let container=document.getElementById("fav-"+type)
-
-container.innerHTML=""
-
-favorites[type].forEach(place=>{
-
-let div=document.createElement("div")
-
-div.className="fav-item"
-
-div.innerText=place.name
-
-div.onclick=function(){
-
-places=[place]
-index=0
-
-start.style.display="none"
-cardStack.style.display="block"
-
-show()
-
-}
-
-container.appendChild(div)
-
-})
-
-})
-
-}
-
-function toggleFav(type){
-
-let list=document.getElementById("fav-"+type)
-
-list.style.display=list.style.display==="block"?"none":"block"
-
-}
+/* MAP */
 
 function maps(){
 
@@ -484,8 +407,8 @@ window.open("https://maps.google.com/?q="+p.name)
 
 function back(){
 
-cardStack.style.display="none"
-start.style.display="block"
+document.getElementById("cardStack").style.display="none"
+document.getElementById("start").style.display="block"
 
 }
 
