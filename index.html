@@ -21,7 +21,7 @@ align-items:center;
 
 #map{width:1px;height:1px;opacity:0}
 
-/* START SCREEN */
+/* START */
 
 #start{
 margin-top:80px;
@@ -39,15 +39,12 @@ cursor:pointer;
 font-size:18px;
 }
 
-.fav-list{
-display:none;
-margin-bottom:10px;
-}
+.fav-list{display:none}
 
 .fav-item{
 background:#333;
 padding:12px;
-margin-top:4px;
+margin:4px;
 border-radius:10px;
 cursor:pointer;
 }
@@ -95,17 +92,15 @@ position:absolute;
 top:18px;
 left:20px;
 font-size:24px;
-text-shadow:0 0 12px black;
 cursor:pointer;
 z-index:10;
 }
 
-.favorite{
+.prev{
 position:absolute;
 top:18px;
-right:30px;
+right:20px;
 font-size:24px;
-text-shadow:0 0 12px black;
 cursor:pointer;
 z-index:10;
 }
@@ -119,22 +114,15 @@ left:22px;
 z-index:10;
 }
 
-.name{
-font-size:30px;
-font-weight:600;
-}
+.name{font-size:30px;font-weight:600}
 
-.rating{
-color:#FFD54F;
-font-size:18px;
-margin-top:6px;
-}
+.rating{color:#FFD54F;font-size:18px}
 
-/* PHOTO INDICATOR */
+/* PHOTO BAR */
 
 .photo-indicator{
 position:absolute;
-top:12px;
+top:10px;
 left:50%;
 transform:translateX(-50%);
 display:flex;
@@ -149,9 +137,7 @@ border-radius:3px;
 background:rgba(255,255,255,.3);
 }
 
-.photo-bar.active{
-background:white;
-}
+.photo-bar.active{background:white}
 
 /* BUTTONS */
 
@@ -166,7 +152,6 @@ z-index:10;
 
 .action{
 font-size:28px;
-text-shadow:0 0 12px black;
 cursor:pointer;
 }
 
@@ -208,11 +193,9 @@ cursor:pointer;
 let service
 let places=[]
 let index=0
-let photos=[]
-let photoIndex=0
 let currentCategory=""
 
-/* FAVORITES */
+let historyStack=[]
 
 let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
 restaurant:[],
@@ -223,13 +206,6 @@ cocktail:[]
 function saveFavorites(){
 localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
 }
-
-/* CACHE */
-
-let placesCache=JSON.parse(localStorage.getItem("savorlyPlacesCache"))||{}
-let cacheVersion=localStorage.getItem("savorlyPlacesVersion")||""
-
-/* MAP */
 
 function initMap(){
 
@@ -250,32 +226,13 @@ async function openCategory(type){
 
 currentCategory=type
 
-let res=await fetch("data/places.json")
-let text=await res.text()
-
-let version=text.length
-
-if(version!==cacheVersion){
-
-placesCache={}
-localStorage.setItem("savorlyPlacesCache","{}")
-localStorage.setItem("savorlyPlacesVersion",version)
-
-}
-
-let data=JSON.parse(text)
+let data=await fetch("data/places.json").then(r=>r.json())
 
 let list=[]
 
-if(type==="restaurant") list=data.restaurants
-if(type==="wine") list=data.winebars
-if(type==="cocktail") list=data.cocktailbars
-
-if(placesCache[type]){
-
-places=placesCache[type]
-
-}else{
+if(type==="restaurant")list=data.restaurants
+if(type==="wine")list=data.winebars
+if(type==="cocktail")list=data.cocktailbars
 
 const requests=list.map(name=>{
 
@@ -311,11 +268,6 @@ photos:place.photos
 
 places=(await Promise.all(requests)).filter(p=>p)
 
-placesCache[type]=places
-localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
-
-}
-
 index=0
 
 start.style.display="none"
@@ -330,6 +282,7 @@ renderCards()
 function renderCards(){
 
 renderCard(activeCard,places[index])
+
 renderCard(nextCard,places[index+1])
 
 }
@@ -354,17 +307,16 @@ if(imgs.length===0){
 imgs=["https://images.unsplash.com/photo-1414235077428-338989a2e8c0"]
 }
 
-photos=imgs
-photoIndex=0
+let photoIndex=0
 
 card.innerHTML=`
 
 <div class="back" onclick="back()">⬅</div>
-<div class="favorite" onclick="favoriteSwipe()">⭐</div>
+<div class="prev" onclick="goBack()">↩</div>
 
-<div class="photo-indicator" id="indicator"></div>
+<div class="photo-indicator"></div>
 
-<img class="photo" id="photo" src="${imgs[0]}">
+<img class="photo">
 
 <div class="overlay">
 
@@ -383,53 +335,55 @@ card.innerHTML=`
 </div>
 `
 
-renderIndicator()
-
-document.getElementById("photo").onclick=nextPhoto
-
-enableSwipe()
-
-}
-
-/* PHOTO SWITCH */
-
-function nextPhoto(){
-
-if(photos.length<2)return
-
-photoIndex++
-
-if(photoIndex>=photos.length)photoIndex=0
-
-document.getElementById("photo").src=photos[photoIndex]
-
-renderIndicator()
-
-}
+let img=card.querySelector(".photo")
+let indicator=card.querySelector(".photo-indicator")
 
 function renderIndicator(){
 
-let container=document.getElementById("indicator")
-if(!container)return
+indicator.innerHTML=""
 
-container.innerHTML=""
-
-photos.forEach((p,i)=>{
+imgs.forEach((p,i)=>{
 
 let bar=document.createElement("div")
 bar.className="photo-bar"
 
 if(i===photoIndex)bar.classList.add("active")
 
-container.appendChild(bar)
+indicator.appendChild(bar)
 
 })
+
+}
+
+renderIndicator()
+
+img.src=imgs[0]
+
+img.onclick=()=>{
+
+if(imgs.length<2)return
+
+photoIndex++
+
+if(photoIndex>=imgs.length)photoIndex=0
+
+img.src=imgs[photoIndex]
+
+renderIndicator()
+
+}
+
+enableSwipe()
 
 }
 
 /* SWIPE */
 
 function swipe(dir){
+
+historyStack.push(index)
+
+if(dir==="right")addFavorite()
 
 activeCard.style.transform=
 dir==="right"
@@ -439,8 +393,6 @@ dir==="right"
 setTimeout(()=>{
 
 index++
-
-if(index>=places.length)index=0
 
 activeCard.style.transform=""
 
@@ -453,57 +405,25 @@ renderCards()
 function like(){swipe("right")}
 function skip(){swipe("left")}
 
-/* TOUCH DRAG */
+/* FAVORITE */
 
-function enableSwipe(){
-
-let startX=0
-let currentX=0
-let dragging=false
-
-activeCard.onpointerdown=e=>{
-dragging=true
-startX=e.clientX
-}
-
-window.onpointermove=e=>{
-if(!dragging)return
-
-currentX=e.clientX-startX
-activeCard.style.transform=`translateX(${currentX}px) rotate(${currentX/10}deg)`
-}
-
-window.onpointerup=()=>{
-
-if(!dragging)return
-
-dragging=false
-
-if(currentX>120) swipe("right")
-else if(currentX<-120) swipe("left")
-else activeCard.style.transform=""
-
-currentX=0
-
-}
-
-}
-
-/* FAVORITES */
-
-function favoriteSwipe(){
+function addFavorite(){
 
 let place=places[index]
 
 let exists=favorites[currentCategory].some(p=>p.name===place.name)
 
 if(!exists){
-favorites[currentCategory].push(place)
+
+favorites[currentCategory].push({
+name:place.name,
+index:index
+})
+
 saveFavorites()
 updateFavorites()
-}
 
-swipe("right")
+}
 
 }
 
@@ -520,13 +440,13 @@ container.innerHTML=""
 favorites[type].forEach(place=>{
 
 let div=document.createElement("div")
+
 div.className="fav-item"
 div.innerText=place.name
 
 div.onclick=function(){
 
-places=[place]
-index=0
+index=place.index
 
 start.style.display="none"
 cardStack.style.display="block"
@@ -567,6 +487,58 @@ function back(){
 
 cardStack.style.display="none"
 start.style.display="block"
+
+}
+
+/* PREVIOUS */
+
+function goBack(){
+
+if(historyStack.length===0)return
+
+index=historyStack.pop()
+
+renderCards()
+
+}
+
+/* SWIPE DRAG */
+
+function enableSwipe(){
+
+let startX=0
+let currentX=0
+let dragging=false
+
+activeCard.onpointerdown=e=>{
+dragging=true
+startX=e.clientX
+}
+
+window.onpointermove=e=>{
+
+if(!dragging)return
+
+currentX=e.clientX-startX
+
+activeCard.style.transform=
+`translateX(${currentX}px) rotate(${currentX/10}deg)`
+
+}
+
+window.onpointerup=()=>{
+
+if(!dragging)return
+
+dragging=false
+
+if(currentX>120)swipe("right")
+else if(currentX<-120)swipe("left")
+else activeCard.style.transform=""
+
+currentX=0
+
+}
 
 }
 
