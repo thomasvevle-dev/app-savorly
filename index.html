@@ -43,10 +43,11 @@ font-size:18px;
 
 .fav-item{
 background:#333;
-padding:12px;
-margin:4px;
+padding:14px;
+margin:6px;
 border-radius:10px;
 cursor:pointer;
+touch-action:none;
 }
 
 /* CARD STACK */
@@ -70,6 +71,11 @@ transition:transform .3s ease;
 
 .card.next{
 transform:scale(.95) translateY(12px);
+z-index:1;
+}
+
+.card.third{
+transform:scale(.9) translateY(24px);
 z-index:0;
 }
 
@@ -122,7 +128,7 @@ z-index:10;
 
 .photo-indicator{
 position:absolute;
-top:10px;
+top:12px;
 left:50%;
 transform:translateX(-50%);
 display:flex;
@@ -183,8 +189,9 @@ cursor:pointer;
 
 <div id="cardStack">
 
-<div class="card active" id="activeCard"></div>
-<div class="card next" id="nextCard"></div>
+<div class="card active" id="card1"></div>
+<div class="card next" id="card2"></div>
+<div class="card third" id="card3"></div>
 
 </div>
 
@@ -194,7 +201,6 @@ let service
 let places=[]
 let index=0
 let currentCategory=""
-
 let historyStack=[]
 
 let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
@@ -206,6 +212,8 @@ cocktail:[]
 function saveFavorites(){
 localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
 }
+
+/* MAP */
 
 function initMap(){
 
@@ -273,17 +281,17 @@ index=0
 start.style.display="none"
 cardStack.style.display="block"
 
-renderCards()
+renderStack()
 
 }
 
-/* RENDER */
+/* RENDER STACK */
 
-function renderCards(){
+function renderStack(){
 
-renderCard(activeCard,places[index])
-
-renderCard(nextCard,places[index+1])
+renderCard(card1,places[index])
+renderCard(card2,places[index+1])
+renderCard(card3,places[index+2])
 
 }
 
@@ -361,14 +369,10 @@ img.src=imgs[0]
 
 img.onclick=()=>{
 
-if(imgs.length<2)return
-
 photoIndex++
-
 if(photoIndex>=imgs.length)photoIndex=0
 
 img.src=imgs[photoIndex]
-
 renderIndicator()
 
 }
@@ -385,7 +389,7 @@ historyStack.push(index)
 
 if(dir==="right")addFavorite()
 
-activeCard.style.transform=
+card1.style.transform=
 dir==="right"
 ?"translateX(500px) rotate(20deg)"
 :"translateX(-500px) rotate(-20deg)"
@@ -394,9 +398,9 @@ setTimeout(()=>{
 
 index++
 
-activeCard.style.transform=""
+card1.style.transform=""
 
-renderCards()
+renderStack()
 
 },250)
 
@@ -437,12 +441,14 @@ let container=document.getElementById("fav-"+type)
 
 container.innerHTML=""
 
-favorites[type].forEach(place=>{
+favorites[type].forEach((place,i)=>{
 
 let div=document.createElement("div")
 
 div.className="fav-item"
 div.innerText=place.name
+
+/* open card */
 
 div.onclick=function(){
 
@@ -451,7 +457,30 @@ index=place.index
 start.style.display="none"
 cardStack.style.display="block"
 
-renderCards()
+renderStack()
+
+}
+
+/* swipe delete */
+
+let startX=0
+
+div.onpointerdown=e=>{
+startX=e.clientX
+}
+
+div.onpointerup=e=>{
+
+let diff=e.clientX-startX
+
+if(Math.abs(diff)>80){
+
+favorites[type].splice(i,1)
+
+saveFavorites()
+updateFavorites()
+
+}
 
 }
 
@@ -498,11 +527,11 @@ if(historyStack.length===0)return
 
 index=historyStack.pop()
 
-renderCards()
+renderStack()
 
 }
 
-/* SWIPE DRAG */
+/* DRAG SWIPE */
 
 function enableSwipe(){
 
@@ -510,7 +539,7 @@ let startX=0
 let currentX=0
 let dragging=false
 
-activeCard.onpointerdown=e=>{
+card1.onpointerdown=e=>{
 dragging=true
 startX=e.clientX
 }
@@ -521,7 +550,7 @@ if(!dragging)return
 
 currentX=e.clientX-startX
 
-activeCard.style.transform=
+card1.style.transform=
 `translateX(${currentX}px) rotate(${currentX/10}deg)`
 
 }
@@ -534,7 +563,7 @@ dragging=false
 
 if(currentX>120)swipe("right")
 else if(currentX<-120)swipe("left")
-else activeCard.style.transform=""
+else card1.style.transform=""
 
 currentX=0
 
