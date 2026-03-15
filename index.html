@@ -26,8 +26,6 @@ height:1px;
 opacity:0;
 }
 
-/* START */
-
 #start{
 margin-top:120px;
 text-align:center;
@@ -42,7 +40,7 @@ cursor:pointer;
 font-size:18px;
 }
 
-/* CARD STACK */
+/* CARD */
 
 #cardStack{
 position:relative;
@@ -60,43 +58,32 @@ overflow:hidden;
 background:#000;
 }
 
-.card.top{
-z-index:3;
-}
-
-.card.middle{
-z-index:2;
-transform:scale(0.96) translateY(10px);
-}
-
-.card.bottom{
-z-index:1;
-transform:scale(0.92) translateY(20px);
-}
-
 .photo{
 width:100%;
 height:100%;
 object-fit:cover;
 }
 
-/* TOP BAR */
+/* TOP ICONS */
 
-.topbar{
+.back{
 position:absolute;
 top:18px;
-left:0;
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:0 28px;
+left:20px;
+font-size:24px;
+text-shadow:0 0 12px black;
+cursor:pointer;
 z-index:10;
 }
 
-.icon{
-font-size:22px;
-text-shadow:0 0 12px rgba(0,0,0,0.9);
+.favorite{
+position:absolute;
+top:18px;
+right:28px;
+font-size:24px;
+text-shadow:0 0 12px black;
 cursor:pointer;
+z-index:10;
 }
 
 /* PHOTO INDICATOR */
@@ -155,7 +142,7 @@ z-index:10;
 
 .action{
 font-size:28px;
-text-shadow:0 0 12px rgba(0,0,0,0.8);
+text-shadow:0 0 12px black;
 cursor:pointer;
 }
 
@@ -203,18 +190,11 @@ text-align:center;
 
 <div id="cardStack">
 
-<div class="card bottom"></div>
+<div class="card" id="card">
 
-<div class="card middle"></div>
+<div class="back" onclick="back()">⬅</div>
 
-<div class="card top" id="card">
-
-<div class="topbar">
-
-<div class="icon" onclick="back()">⬅</div>
-<div class="icon" onclick="openFavorites()">⭐</div>
-
-</div>
+<div class="favorite" id="favIcon" onclick="toggleFavorite()">☆</div>
 
 <div class="photo-indicator" id="indicator"></div>
 
@@ -223,6 +203,7 @@ text-align:center;
 <div class="overlay">
 
 <div class="name" id="name"></div>
+
 <div class="rating" id="rating"></div>
 
 </div>
@@ -246,7 +227,7 @@ text-align:center;
 
 <div id="favoritesList"></div>
 
-<div class="back-button" onclick="backToCards()">Tilbake til kort</div>
+<div class="back-button" onclick="backToCards()">Tilbake</div>
 
 </div>
 
@@ -275,6 +256,7 @@ service=new google.maps.places.PlacesService(map)
 async function loadCategory(type){
 
 let res=await fetch("data/places.json")
+
 let data=await res.json()
 
 let list=[]
@@ -286,33 +268,45 @@ if(type==="cocktail") list=data.cocktailbars
 places=[]
 index=0
 
-let loaded=0
+for(let name of list){
 
-list.forEach(name=>{
+await new Promise(resolve=>{
 
 service.findPlaceFromQuery({
 
 query:name+" oslo",
-fields:["name","rating","photos"]
+fields:["place_id"]
 
 },(results,status)=>{
 
-loaded++
+if(status==="OK"){
 
-if(status==="OK") places.push(results[0])
+service.getDetails({
 
-if(loaded===list.length){
+placeId:results[0].place_id,
+fields:["name","rating","photos"]
 
-document.getElementById("start").style.display="none"
-document.getElementById("cardStack").style.display="block"
+},(place)=>{
 
-show()
+places.push(place)
+
+resolve()
+
+})
+
+}else resolve()
+
+})
+
+})
 
 }
 
-})
+document.getElementById("start").style.display="none"
 
-})
+document.getElementById("cardStack").style.display="block"
+
+show()
 
 }
 
@@ -323,13 +317,14 @@ function show(){
 let p=places[index]
 
 document.getElementById("name").innerText=p.name
+
 document.getElementById("rating").innerText="⭐ "+(p.rating||"")
 
 photos=[]
 
 if(p.photos){
 
-for(let i=0;i<3 && i<p.photos.length;i++){
+for(let i=0;i<Math.min(3,p.photos.length);i++){
 
 photos.push(p.photos[i].getUrl({maxWidth:1200}))
 
@@ -339,13 +334,19 @@ photos.push(p.photos[i].getUrl({maxWidth:1200}))
 
 photoIndex=0
 
-document.getElementById("photo").src=photos[0]
+if(photos.length>0){
 
-renderIndicator()
+document.getElementById("photo").src=photos[0]
 
 }
 
-/* PHOTO INDICATOR */
+renderIndicator()
+
+updateFavIcon()
+
+}
+
+/* INDICATOR */
 
 function renderIndicator(){
 
@@ -371,15 +372,16 @@ container.appendChild(bar)
 
 let startX=0
 
-document.getElementById("photo").addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
+photo.addEventListener("pointerdown",e=>{
+startX=e.clientX
 })
 
-document.getElementById("photo").addEventListener("touchend",e=>{
+photo.addEventListener("pointerup",e=>{
 
-let endX=e.changedTouches[0].clientX
+let endX=e.clientX
 
 if(endX-startX>50) prevPhoto()
+
 if(startX-endX>50) nextPhoto()
 
 })
@@ -390,7 +392,7 @@ photoIndex++
 
 if(photoIndex>=photos.length) photoIndex=0
 
-document.getElementById("photo").src=photos[photoIndex]
+photo.src=photos[photoIndex]
 
 renderIndicator()
 
@@ -402,7 +404,7 @@ photoIndex--
 
 if(photoIndex<0) photoIndex=photos.length-1
 
-document.getElementById("photo").src=photos[photoIndex]
+photo.src=photos[photoIndex]
 
 renderIndicator()
 
@@ -412,43 +414,45 @@ renderIndicator()
 
 let card=document.getElementById("card")
 
-let start=0
+let dragStart=0
 
-card.addEventListener("touchstart",e=>{
-start=e.touches[0].clientX
+card.addEventListener("pointerdown",e=>{
+dragStart=e.clientX
 })
 
-card.addEventListener("touchend",e=>{
+card.addEventListener("pointerup",e=>{
 
-let end=e.changedTouches[0].clientX
+let delta=e.clientX-dragStart
 
-if(end-start>120) like()
-if(start-end>120) skip()
+if(delta>120) like()
+
+if(delta<-120) skip()
 
 })
 
-function animate(direction){
+function animate(dir){
 
-card.style.transition="transform 0.4s"
+card.style.transition="transform 0.35s"
 
-if(direction==="right"){
+if(dir==="right"){
 
-card.style.transform="translateX(600px) rotate(30deg)"
+card.style.transform="translateX(600px) rotate(25deg)"
 
 }else{
 
-card.style.transform="translateX(-600px) rotate(-30deg)"
+card.style.transform="translateX(-600px) rotate(-25deg)"
 
 }
 
 setTimeout(()=>{
 
-card.style.transition="none"
-card.style.transform="translateX(0)"
+card.style.transition=""
+
+card.style.transform=""
 
 next()
 
-},400)
+},350)
 
 }
 
@@ -486,55 +490,41 @@ window.open("https://maps.google.com/?q="+p.name)
 
 /* FAVORITES */
 
-function openFavorites(){
+function toggleFavorite(){
 
-document.getElementById("cardStack").style.display="none"
+if(favorites.includes(index)){
 
-document.getElementById("favoritesPage").style.display="block"
+favorites=favorites.filter(f=>f!==index)
 
-const list=document.getElementById("favoritesList")
+}else{
 
-list.innerHTML=""
-
-favorites.forEach(i=>{
-
-let item=document.createElement("div")
-
-item.className="favorite-item"
-
-item.innerText=places[i].name
-
-item.onclick=function(){
-
-index=i
-
-document.getElementById("favoritesPage").style.display="none"
-
-document.getElementById("cardStack").style.display="block"
-
-show()
+favorites.push(index)
 
 }
 
-list.appendChild(item)
-
-})
+updateFavIcon()
 
 }
 
-function backToCards(){
+function updateFavIcon(){
 
-document.getElementById("favoritesPage").style.display="none"
+let icon=document.getElementById("favIcon")
 
-document.getElementById("cardStack").style.display="block"
+if(favorites.includes(index)){
+
+icon.innerText="⭐"
+
+}else{
+
+icon.innerText="☆"
+
+}
 
 }
 
 function back(){
 
 document.getElementById("cardStack").style.display="none"
-
-document.getElementById("favoritesPage").style.display="none"
 
 document.getElementById("start").style.display="block"
 
