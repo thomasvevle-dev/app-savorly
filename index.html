@@ -111,7 +111,7 @@ cursor:pointer;
 .x-btn{
 position:absolute;
 left:15px;
-bottom:80px;
+bottom:90px;
 width:60px;
 height:60px;
 border-radius:50%;
@@ -124,7 +124,7 @@ cursor:pointer;
 .like-btn{
 position:absolute;
 right:15px;
-bottom:80px;
+bottom:90px;
 width:60px;
 height:60px;
 border-radius:50%;
@@ -175,8 +175,9 @@ let index=0
 function initMap(){
 
 const map=new google.maps.Map(document.createElement("div"))
-
 const service=new google.maps.places.PlacesService(map)
+
+let loaded=0
 
 curatedPlaces.forEach(name=>{
 
@@ -187,7 +188,7 @@ fields:["place_id"]
 
 },(results,status)=>{
 
-if(status!=="OK") return
+if(status==="OK"){
 
 service.getDetails({
 
@@ -196,15 +197,23 @@ fields:["name","rating","photos"]
 
 },(place,status)=>{
 
-if(status!=="OK") return
-
-if(!place.rating || place.rating<4) return
+if(status==="OK" && place.rating>=4){
 
 places.push(place)
 
+}
+
+loaded++
+
+if(loaded===curatedPlaces.length){
 renderCards()
+}
 
 })
+
+}else{
+loaded++
+}
 
 })
 
@@ -256,13 +265,13 @@ card.innerHTML=`
 
 card.querySelector(".nav").onclick=()=>{
 
-window.open(\`https://www.google.com/maps/search/?api=1&query=\${place.name}\`)
+window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
 
 }
 
 card.querySelector(".book").onclick=()=>{
 
-window.open(\`https://www.google.com/maps/search/?api=1&query=\${place.name}\`)
+window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
 
 }
 
@@ -310,7 +319,7 @@ const list=document.getElementById("favorites-page")
 
 list.innerHTML=""
 
-favorites.forEach((place,i)=>{
+favorites.forEach(place=>{
 
 let div=document.createElement("div")
 
@@ -320,7 +329,7 @@ div.innerText=place.name
 
 div.onclick=()=>{
 
-index=i
+index=places.findIndex(p=>p.name===place.name)
 
 document.getElementById("favorites-page").style.display="none"
 document.getElementById("card-stack").style.display="block"
@@ -344,7 +353,7 @@ document.getElementById("card-stack").style.display="none"
 
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap" async defer></script>
 
 </body>
 </html>
