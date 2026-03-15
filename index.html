@@ -78,6 +78,8 @@ height:100%;
 object-fit:cover;
 }
 
+/* ICONS */
+
 .back{
 position:absolute;
 top:18px;
@@ -97,6 +99,28 @@ text-shadow:0 0 12px black;
 cursor:pointer;
 z-index:10;
 }
+
+/* TEXT OVERLAY */
+
+.overlay{
+position:absolute;
+bottom:110px;
+left:22px;
+z-index:10;
+}
+
+.name{
+font-size:30px;
+font-weight:600;
+}
+
+.rating{
+color:#FFD54F;
+font-size:18px;
+margin-top:6px;
+}
+
+/* PHOTO INDICATOR */
 
 .photo-indicator{
 position:absolute;
@@ -119,23 +143,7 @@ background:rgba(255,255,255,0.3);
 background:white;
 }
 
-.overlay{
-position:absolute;
-bottom:110px;
-left:22px;
-z-index:10;
-}
-
-.name{
-font-size:30px;
-font-weight:600;
-}
-
-.rating{
-color:#FFD54F;
-font-size:18px;
-margin-top:6px;
-}
+/* BUTTONS */
 
 .buttons{
 position:absolute;
@@ -183,7 +191,6 @@ cursor:pointer;
 <div class="card" id="card">
 
 <div class="back" onclick="back()">⬅</div>
-
 <div class="favorite" onclick="favoriteSwipe()">⭐</div>
 
 <div class="photo-indicator" id="indicator"></div>
@@ -219,31 +226,21 @@ let photos=[]
 let photoIndex=0
 let currentCategory=""
 
-/* FAVORITES STORAGE */
-
 let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
 restaurant:[],
 wine:[],
 cocktail:[]
 }
 
-function saveFavorites(){
-
-localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
-
-}
-
-/* PLACES CACHE */
-
 let placesCache=JSON.parse(localStorage.getItem("savorlyPlacesCache"))||{}
 
-function savePlacesCache(){
-
-localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
-
+function saveFavorites(){
+localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
 }
 
-/* INIT MAP */
+function savePlacesCache(){
+localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
+}
 
 function initMap(){
 
@@ -258,8 +255,6 @@ updateFavorites()
 
 }
 
-/* OPEN CATEGORY */
-
 async function openCategory(type){
 
 currentCategory=type
@@ -271,7 +266,6 @@ places=placesCache[type]
 }else{
 
 let res=await fetch("data/places.json")
-
 let data=await res.json()
 
 let list=[]
@@ -300,9 +294,7 @@ resolve(place)
 
 })
 
-}else{
-resolve(null)
-}
+}else resolve(null)
 
 })
 
@@ -315,7 +307,6 @@ let results=await Promise.all(requests)
 places=results.filter(p=>p!==null)
 
 placesCache[type]=places
-
 savePlacesCache()
 
 }
@@ -328,8 +319,6 @@ cardStack.style.display="block"
 show()
 
 }
-
-/* SHOW CARD */
 
 function show(){
 
@@ -353,16 +342,12 @@ photos.push(p.photos[i].getUrl({maxWidth:1200}))
 photoIndex=0
 
 if(photos.length>0){
-
 photo.src=photos[0]
-
 }
 
 renderIndicator()
 
 }
-
-/* TAP IMAGE */
 
 photo.onclick=function(){
 
@@ -378,8 +363,6 @@ renderIndicator()
 
 }
 
-/* INDICATOR */
-
 function renderIndicator(){
 
 indicator.innerHTML=""
@@ -387,7 +370,6 @@ indicator.innerHTML=""
 photos.forEach((p,i)=>{
 
 let bar=document.createElement("div")
-
 bar.className="photo-bar"
 
 if(i===photoIndex) bar.classList.add("active")
@@ -397,8 +379,6 @@ indicator.appendChild(bar)
 })
 
 }
-
-/* SWIPE */
 
 function animate(dir){
 
@@ -431,8 +411,6 @@ show()
 
 }
 
-/* FAVORITE */
-
 function favoriteSwipe(){
 
 let p=places[index]
@@ -447,8 +425,6 @@ animate("right")
 
 }
 
-/* UPDATE FAVORITES */
-
 function updateFavorites(){
 
 ["restaurant","wine","cocktail"].forEach(type=>{
@@ -460,9 +436,7 @@ container.innerHTML=""
 favorites[type].forEach(place=>{
 
 let div=document.createElement("div")
-
 div.className="fav-item"
-
 div.innerText=place.name
 
 div.onclick=function(){
@@ -485,8 +459,6 @@ container.appendChild(div)
 
 }
 
-/* TOGGLE FAVORITE LIST */
-
 function toggleFav(type){
 
 let list=document.getElementById("fav-"+type)
@@ -498,8 +470,6 @@ list.style.display="block"
 }
 
 }
-
-/* MAP */
 
 function maps(){
 
