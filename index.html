@@ -44,22 +44,6 @@ text-align:center;
 font-size:22px;
 }
 
-.section{
-width:80%;
-max-width:420px;
-margin-top:40px;
-}
-
-.favoriteItem{
-padding:16px;
-margin:8px 0;
-border-radius:16px;
-background:#111;
-border:1px solid #333;
-}
-
-.hidden{display:none}
-
 #deck{
 position:absolute;
 top:0;
@@ -103,7 +87,9 @@ border-radius:10px;
 background:rgba(255,255,255,.4);
 }
 
-.dot.active{background:white}
+.dot.active{
+background:white;
+}
 
 .info{
 position:absolute;
@@ -135,14 +121,16 @@ font-size:34px;
 position:absolute;
 top:20px;
 left:20px;
-font-size:28px;
+font-size:30px;
+z-index:20;
 }
 
 .topRight{
 position:absolute;
 top:20px;
 right:20px;
-font-size:28px;
+font-size:30px;
+z-index:20;
 }
 
 </style>
@@ -157,19 +145,6 @@ font-size:28px;
 <div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
-
-<div class="section">
-
-<div class="cat" onclick="toggleFav('restaurants')">Favoritt restaurant</div>
-<div id="fav-restaurants" class="hidden"></div>
-
-<div class="cat" onclick="toggleFav('winebars')">Favoritt vinbar</div>
-<div id="fav-winebars" class="hidden"></div>
-
-<div class="cat" onclick="toggleFav('cocktailbars')">Favoritt cocktailbar</div>
-<div id="fav-cocktailbars" class="hidden"></div>
-
-</div>
 
 </div>
 
@@ -187,18 +162,13 @@ let currentType=""
 let placesService
 const imageCache={}
 
-let favorites={
-restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
-winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
-cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
-}
-
 const deck=document.getElementById("deck")
 
 async function loadData(){
+
 const res=await fetch("data/places.json")
 data=await res.json()
-renderFavorites()
+
 }
 
 loadData()
@@ -211,21 +181,39 @@ zoom:13
 placesService=new google.maps.places.PlacesService(map)
 }
 
+function shuffle(array){
+return array.sort(()=>Math.random()-0.5)
+}
+
 function openCategory(type){
+
 currentType=type
-list=data[type]
+list=[...data[type]]
+
+shuffle(list)
+
 index=0
+
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
+
 buildDeck()
+
 }
 
 function buildDeck(){
+
 deck.innerHTML=""
-for(let i=index;i<index+3;i++){
-if(!list[i])continue
-createCard(list[i])
+
+if(index>=list.length){
+
+shuffle(list)
+index=0
+
 }
+
+createCard(list[index])
+
 }
 
 function createCard(name){
@@ -235,12 +223,17 @@ card.className="card"
 
 loadPlace(name).then(place=>{
 
-let photos=place.photos
+let photos=[...place.photos]
+
+while(photos.length<3){
+photos.push("https://source.unsplash.com/featured/?restaurant")
+}
+
 let photoIndex=0
 
 card.innerHTML=`
 
-<img src="${photos[0]}">
+<img id="photo" src="${photos[0]}">
 
 <div class="photoDots">
 <span class="dot active"></span>
@@ -248,8 +241,8 @@ card.innerHTML=`
 <span class="dot"></span>
 </div>
 
-<div class="topLeft" onclick="goHome()">←</div>
-<div class="topRight" onclick="undo()">↩</div>
+<div class="topLeft">←</div>
+<div class="topRight">↩</div>
 
 <div class="info">
 <div class="name">${place.name}</div>
@@ -264,17 +257,22 @@ card.innerHTML=`
 </div>
 `
 
-card.addEventListener("click",()=>{
+const img=card.querySelector("#photo")
+
+card.addEventListener("click",e=>{
+
+if(e.target.classList.contains("topLeft")||e.target.classList.contains("topRight")) return
 
 photoIndex=(photoIndex+1)%photos.length
-
-card.querySelector("img").src=photos[photoIndex]
+img.src=photos[photoIndex]
 
 const dots=card.querySelectorAll(".dot")
-
 dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 })
+
+card.querySelector(".topLeft").onclick=goHome
+card.querySelector(".topRight").onclick=undo
 
 enableSwipe(card)
 
@@ -305,28 +303,27 @@ if(status===google.maps.places.PlacesServiceStatus.OK){
 let p=results[0]
 
 if(p.photos){
-
-for(let i=0;i<Math.min(3,p.photos.length);i++){
-photos.push(p.photos[i].getUrl({maxWidth:1200}))
+p.photos.forEach(photo=>{
+photos.push(photo.getUrl({maxWidth:1200}))
+})
 }
 
-}
-
-}
-
-while(photos.length<3){
-photos.push("https://source.unsplash.com/featured/?restaurant")
-}
-
-let place={
-name:name,
-rating:results?.[0]?.rating||"",
+imageCache[name]={
+name:p.name,
+rating:p.rating,
 photos:photos
 }
 
-imageCache[name]=place
+resolve(imageCache[name])
 
-resolve(place)
+}else{
+
+resolve({
+name:name,
+photos:["https://source.unsplash.com/featured/?restaurant"]
+})
+
+}
 
 })
 
@@ -349,103 +346,42 @@ card.style.transform=`translateX(${diff}px) rotate(${diff/20}deg)`
 
 card.addEventListener("touchend",e=>{
 const diff=e.changedTouches[0].clientX-startX
+
 if(diff>120) like()
 else if(diff<-120) dislike()
 else card.style.transform=""
+
 })
 
 }
 
-function like(name){
-
-let arr=favorites[currentType]
-
-if(!arr.includes(name)){
-arr.push(name)
-localStorage.setItem("fav-"+currentType,JSON.stringify(arr))
-renderFavorites()
+function like(){
+history.push(index)
+index++
+buildDeck()
 }
 
-next()
-
-}
-
-function dislike(){next()}
-
-function next(){
+function dislike(){
 history.push(index)
 index++
 buildDeck()
 }
 
 function undo(){
+
 if(history.length===0)return
+
 index=history.pop()
+
 buildDeck()
+
 }
 
 function goHome(){
+
 deck.style.display="none"
 document.getElementById("home").style.display="flex"
-}
 
-function renderFavorites(){
-renderFavCategory("restaurants")
-renderFavCategory("winebars")
-renderFavCategory("cocktailbars")
-}
-
-function renderFavCategory(type){
-
-const box=document.getElementById("fav-"+type)
-box.innerHTML=""
-
-favorites[type].forEach(name=>{
-
-const el=document.createElement("div")
-el.className="favoriteItem"
-el.innerText=name
-
-enableFavSwipe(el,type,name)
-
-box.appendChild(el)
-
-})
-
-}
-
-function enableFavSwipe(el,type,name){
-
-let startX
-
-el.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
-
-el.addEventListener("touchmove",e=>{
-const diff=e.touches[0].clientX-startX
-el.style.transform=`translateX(${diff}px)`
-})
-
-el.addEventListener("touchend",e=>{
-
-let diff=e.changedTouches[0].clientX-startX
-
-if(Math.abs(diff)>120){
-favorites[type]=favorites[type].filter(x=>x!==name)
-localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
-renderFavorites()
-}
-
-el.style.transform=""
-
-})
-
-}
-
-function toggleFav(type){
-const el=document.getElementById("fav-"+type)
-el.classList.toggle("hidden")
 }
 
 function navigate(name){
