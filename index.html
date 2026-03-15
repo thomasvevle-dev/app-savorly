@@ -17,7 +17,6 @@ color:white;
 display:flex;
 flex-direction:column;
 align-items:center;
-overflow:hidden;
 }
 
 #map{
@@ -26,8 +25,10 @@ height:1px;
 opacity:0;
 }
 
+/* START */
+
 #start{
-margin-top:120px;
+margin-top:80px;
 text-align:center;
 }
 
@@ -38,6 +39,28 @@ border-radius:22px;
 margin:10px;
 cursor:pointer;
 font-size:18px;
+}
+
+/* FAVORITE SECTIONS */
+
+.fav-section{
+margin-top:30px;
+width:90%;
+max-width:380px;
+text-align:left;
+}
+
+.fav-title{
+font-size:18px;
+margin-bottom:8px;
+}
+
+.fav-item{
+background:#222;
+padding:12px;
+border-radius:10px;
+margin-bottom:6px;
+cursor:pointer;
 }
 
 /* CARD */
@@ -64,7 +87,7 @@ height:100%;
 object-fit:cover;
 }
 
-/* TOP ICONS */
+/* ICONS */
 
 .back{
 position:absolute;
@@ -79,7 +102,7 @@ z-index:10;
 .favorite{
 position:absolute;
 top:18px;
-right:28px;
+right:30px;
 font-size:24px;
 text-shadow:0 0 12px black;
 cursor:pointer;
@@ -146,31 +169,6 @@ text-shadow:0 0 12px black;
 cursor:pointer;
 }
 
-/* FAVORITES */
-
-#favoritesPage{
-display:none;
-width:90%;
-max-width:400px;
-}
-
-.favorite-item{
-background:#222;
-padding:16px;
-margin:10px 0;
-border-radius:12px;
-cursor:pointer;
-}
-
-.back-button{
-margin-top:20px;
-background:#333;
-padding:12px 20px;
-border-radius:10px;
-cursor:pointer;
-text-align:center;
-}
-
 </style>
 </head>
 
@@ -180,11 +178,32 @@ text-align:center;
 
 <div id="start">
 
-<h2>Hva vil du utforske?</h2>
+<h2>Savorly</h2>
 
 <div class="category" onclick="loadCategory('restaurant')">Restaurant</div>
 <div class="category" onclick="loadCategory('wine')">Vinbar</div>
 <div class="category" onclick="loadCategory('cocktail')">Cocktailbar</div>
+
+<div class="fav-section">
+
+<div class="fav-title">Favoritt restauranter</div>
+<div id="favRestaurants"></div>
+
+</div>
+
+<div class="fav-section">
+
+<div class="fav-title">Favoritt vinbarer</div>
+<div id="favWinebars"></div>
+
+</div>
+
+<div class="fav-section">
+
+<div class="fav-title">Favoritt cocktailbarer</div>
+<div id="favCocktails"></div>
+
+</div>
 
 </div>
 
@@ -194,7 +213,7 @@ text-align:center;
 
 <div class="back" onclick="back()">⬅</div>
 
-<div class="favorite" id="favIcon" onclick="toggleFavorite()">☆</div>
+<div class="favorite" id="favIcon" onclick="favoriteSwipe()">☆</div>
 
 <div class="photo-indicator" id="indicator"></div>
 
@@ -203,7 +222,6 @@ text-align:center;
 <div class="overlay">
 
 <div class="name" id="name"></div>
-
 <div class="rating" id="rating"></div>
 
 </div>
@@ -221,16 +239,6 @@ text-align:center;
 
 </div>
 
-<div id="favoritesPage">
-
-<h2>Favoritter</h2>
-
-<div id="favoritesList"></div>
-
-<div class="back-button" onclick="backToCards()">Tilbake</div>
-
-</div>
-
 <script>
 
 let service
@@ -238,7 +246,16 @@ let places=[]
 let index=0
 let photos=[]
 let photoIndex=0
-let favorites=[]
+
+let favorites={
+restaurant:[],
+wine:[],
+cocktail:[]
+}
+
+let currentCategory=""
+
+/* INIT MAP */
 
 function initMap(){
 
@@ -255,15 +272,12 @@ service=new google.maps.places.PlacesService(map)
 
 async function loadCategory(type){
 
-let res=await fetch("data/places.json")
+currentCategory=type
 
+let res=await fetch("data/places.json")
 let data=await res.json()
 
-let list=[]
-
-if(type==="restaurant") list=data.restaurants
-if(type==="wine") list=data.winebars
-if(type==="cocktail") list=data.cocktailbars
+let list=data[type+"s"]
 
 places=[]
 index=0
@@ -303,7 +317,6 @@ resolve()
 }
 
 document.getElementById("start").style.display="none"
-
 document.getElementById("cardStack").style.display="block"
 
 show()
@@ -317,7 +330,6 @@ function show(){
 let p=places[index]
 
 document.getElementById("name").innerText=p.name
-
 document.getElementById("rating").innerText="⭐ "+(p.rating||"")
 
 photos=[]
@@ -336,57 +348,17 @@ photoIndex=0
 
 if(photos.length>0){
 
-document.getElementById("photo").src=photos[0]
+photo.src=photos[0]
 
 }
 
 renderIndicator()
 
-updateFavIcon()
-
 }
 
-/* INDICATOR */
+/* PHOTO CHANGE ON TAP */
 
-function renderIndicator(){
-
-const container=document.getElementById("indicator")
-
-container.innerHTML=""
-
-photos.forEach((p,i)=>{
-
-let bar=document.createElement("div")
-
-bar.className="photo-bar"
-
-if(i===photoIndex) bar.classList.add("active")
-
-container.appendChild(bar)
-
-})
-
-}
-
-/* IMAGE SWIPE */
-
-let startX=0
-
-photo.addEventListener("pointerdown",e=>{
-startX=e.clientX
-})
-
-photo.addEventListener("pointerup",e=>{
-
-let endX=e.clientX
-
-if(endX-startX>50) prevPhoto()
-
-if(startX-endX>50) nextPhoto()
-
-})
-
-function nextPhoto(){
+photo.onclick=function(){
 
 photoIndex++
 
@@ -398,37 +370,26 @@ renderIndicator()
 
 }
 
-function prevPhoto(){
+/* INDICATOR */
 
-photoIndex--
+function renderIndicator(){
 
-if(photoIndex<0) photoIndex=photos.length-1
+indicator.innerHTML=""
 
-photo.src=photos[photoIndex]
+photos.forEach((p,i)=>{
 
-renderIndicator()
+let bar=document.createElement("div")
+bar.className="photo-bar"
+
+if(i===photoIndex) bar.classList.add("active")
+
+indicator.appendChild(bar)
+
+})
 
 }
 
-/* SWIPE CARD */
-
-let card=document.getElementById("card")
-
-let dragStart=0
-
-card.addEventListener("pointerdown",e=>{
-dragStart=e.clientX
-})
-
-card.addEventListener("pointerup",e=>{
-
-let delta=e.clientX-dragStart
-
-if(delta>120) like()
-
-if(delta<-120) skip()
-
-})
+/* SWIPE */
 
 function animate(dir){
 
@@ -447,7 +408,6 @@ card.style.transform="translateX(-600px) rotate(-25deg)"
 setTimeout(()=>{
 
 card.style.transition=""
-
 card.style.transform=""
 
 next()
@@ -457,17 +417,11 @@ next()
 }
 
 function like(){
-
-favorites.push(index)
-
 animate("right")
-
 }
 
 function skip(){
-
 animate("left")
-
 }
 
 function next(){
@@ -480,6 +434,64 @@ show()
 
 }
 
+/* FAVORITE WITH SWIPE */
+
+function favoriteSwipe(){
+
+let p=places[index]
+
+favorites[currentCategory].push(p)
+
+updateFavorites()
+
+animate("right")
+
+}
+
+/* UPDATE FAVORITES */
+
+function updateFavorites(){
+
+const r=document.getElementById("favRestaurants")
+const w=document.getElementById("favWinebars")
+const c=document.getElementById("favCocktails")
+
+r.innerHTML=""
+w.innerHTML=""
+c.innerHTML=""
+
+favorites.restaurant.forEach(p=>{
+
+let div=document.createElement("div")
+div.className="fav-item"
+div.innerText=p.name
+
+r.appendChild(div)
+
+})
+
+favorites.wine.forEach(p=>{
+
+let div=document.createElement("div")
+div.className="fav-item"
+div.innerText=p.name
+
+w.appendChild(div)
+
+})
+
+favorites.cocktail.forEach(p=>{
+
+let div=document.createElement("div")
+div.className="fav-item"
+div.innerText=p.name
+
+c.appendChild(div)
+
+})
+
+}
+
 function maps(){
 
 let p=places[index]
@@ -488,44 +500,9 @@ window.open("https://maps.google.com/?q="+p.name)
 
 }
 
-/* FAVORITES */
-
-function toggleFavorite(){
-
-if(favorites.includes(index)){
-
-favorites=favorites.filter(f=>f!==index)
-
-}else{
-
-favorites.push(index)
-
-}
-
-updateFavIcon()
-
-}
-
-function updateFavIcon(){
-
-let icon=document.getElementById("favIcon")
-
-if(favorites.includes(index)){
-
-icon.innerText="⭐"
-
-}else{
-
-icon.innerText="☆"
-
-}
-
-}
-
 function back(){
 
 document.getElementById("cardStack").style.display="none"
-
 document.getElementById("start").style.display="block"
 
 }
