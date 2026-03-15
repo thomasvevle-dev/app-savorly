@@ -115,17 +115,20 @@ cursor:pointer;
 <div id="fav-list"></div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places"></script>
-
 <script>
 
 let places=[]
 let favorites=[]
 let index=0
 
-function initPlaces(){
+function initMap(){
 
-const service = new google.maps.places.PlacesService(document.createElement("div"))
+const map = new google.maps.Map(document.createElement("div"), {
+center:{lat:59.9139,lng:10.7522},
+zoom:13
+})
+
+const service = new google.maps.places.PlacesService(map)
 
 service.nearbySearch({
 
@@ -161,7 +164,7 @@ stack.innerHTML=""
 
 places.slice(index,index+5).forEach((place,i)=>{
 
-let photo=""
+let photo="https://via.placeholder.com/400x240"
 
 if(place.photos){
 photo=place.photos[0].getUrl({maxWidth:400})
@@ -277,9 +280,9 @@ renderCards()
 
 }
 
-initPlaces()
-
 </script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap" async defer></script>
 
 </body>
 </html>
