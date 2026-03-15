@@ -27,7 +27,7 @@ padding-top:40px;
 }
 
 .logo{
-width:240px;
+width:260px;
 margin-bottom:30px;
 }
 
@@ -101,7 +101,7 @@ object-fit:cover;
 
 .place-info{
 position:absolute;
-bottom:130px;
+bottom:140px;
 left:20px;
 text-align:left;
 }
@@ -164,20 +164,11 @@ font-size:28px;
 
 <div class="divider"></div>
 
-<div class="fav-header" onclick="toggleFav('fav-rest')">
-Favoritt restaurant
+<div class="fav-header" onclick="toggleFav('fav-list')">
+Favoritter
 </div>
-<div id="fav-rest" class="fav-list"></div>
 
-<div class="fav-header" onclick="toggleFav('fav-wine')">
-Favoritt vinbar
-</div>
-<div id="fav-wine" class="fav-list"></div>
-
-<div class="fav-header" onclick="toggleFav('fav-cocktail')">
-Favoritt cocktailbar
-</div>
-<div id="fav-cocktail" class="fav-list"></div>
+<div id="fav-list" class="fav-list"></div>
 
 </div>
 
@@ -219,8 +210,21 @@ let imageIndex=0
 
 async function loadPlaces(){
 
-let res=await fetch("data/places.json")
+try{
+
+let res=await fetch("./data/places.json")
 places=await res.json()
+
+if(!Array.isArray(places)){
+alert("places.json må starte med [ ]")
+return
+}
+
+}catch(e){
+
+alert("Kunne ikke laste places.json")
+
+}
 
 }
 
@@ -229,7 +233,11 @@ function start(){
 document.getElementById("home").style.display="none"
 document.getElementById("swipe").style.display="block"
 
+if(places.length===0){
+loadPlaces().then(showPlace)
+}else{
 showPlace()
+}
 
 }
 
@@ -237,11 +245,16 @@ function showPlace(){
 
 let p=places[index]
 
+if(!p){
+index=0
+p=places[index]
+}
+
 imageIndex=0
 
 document.getElementById("name").innerText=p.name
 document.getElementById("rating").innerText="⭐ "+p.rating
-document.getElementById("image").src=p.images[imageIndex]
+document.getElementById("image").src=p.images[0]
 
 }
 
@@ -322,6 +335,20 @@ document.getElementById("home").style.display="block"
 
 }
 
+function toggleFav(id){
+
+let el=document.getElementById(id)
+
+if(el.style.display==="block"){
+el.style.display="none"
+}else{
+el.style.display="block"
+}
+
+}
+
+loadPlaces()
+
 /* SWIPE */
 
 let card=document.getElementById("card")
@@ -342,8 +369,7 @@ if(!dragging)return
 currentX=e.touches[0].clientX
 let diff=currentX-startX
 
-card.style.transform=
-"translateX("+diff+"px) rotate("+(diff/20)+"deg)"
+card.style.transform="translateX("+diff+"px) rotate("+(diff/20)+"deg)"
 
 })
 
@@ -356,7 +382,6 @@ let diff=currentX-startX
 if(diff>120){
 like()
 }
-
 else if(diff<-120){
 dislike()
 }
@@ -364,20 +389,6 @@ dislike()
 card.style.transform="translateX(0)"
 
 })
-
-function toggleFav(id){
-
-let el=document.getElementById(id)
-
-if(el.style.display==="block"){
-el.style.display="none"
-}else{
-el.style.display="block"
-}
-
-}
-
-loadPlaces()
 
 </script>
 
