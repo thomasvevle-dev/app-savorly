@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Savorly</title>
 
 <style>
@@ -17,14 +19,11 @@ flex-direction:column;
 align-items:center;
 }
 
-/* hidden map */
 #map{
 width:1px;
 height:1px;
 opacity:0;
 }
-
-/* start */
 
 #start{
 margin-top:120px;
@@ -39,12 +38,6 @@ margin:10px;
 cursor:pointer;
 font-size:18px;
 }
-
-.category:hover{
-background:#4CAF50;
-}
-
-/* card */
 
 #card{
 width:360px;
@@ -76,8 +69,6 @@ font-weight:bold;
 color:#FFD700;
 }
 
-/* buttons */
-
 .buttons{
 position:absolute;
 bottom:20px;
@@ -94,6 +85,34 @@ border:none;
 font-size:20px;
 background:#333;
 color:white;
+cursor:pointer;
+}
+
+.topbar{
+position:absolute;
+top:15px;
+width:100%;
+display:flex;
+justify-content:space-between;
+padding:0 15px;
+}
+
+.icon{
+font-size:24px;
+cursor:pointer;
+}
+
+#favoritesPage{
+display:none;
+width:90%;
+max-width:400px;
+}
+
+.favorite-item{
+background:#222;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
 cursor:pointer;
 }
 
@@ -116,6 +135,11 @@ cursor:pointer;
 
 <div id="card">
 
+<div class="topbar">
+<div class="icon" onclick="back()">⬅️</div>
+<div class="icon" onclick="openFavorites()">⭐</div>
+</div>
+
 <img id="photo">
 
 <div class="overlay">
@@ -130,46 +154,43 @@ cursor:pointer;
 <button onclick="next()">❌</button>
 <button onclick="maps()">📍</button>
 <button onclick="maps()">📅</button>
-<button onclick="next()">❤️</button>
+<button onclick="like()">❤️</button>
 
 </div>
+
+</div>
+
+<div id="favoritesPage">
+
+<h2>Favoritter</h2>
+<div id="favoritesList"></div>
 
 </div>
 
 <script>
 
-const restaurants=[
-"Libertine",
-"Skaal Matbar",
-"Arakataka",
-"Le Benjamin",
-"Kolonialen"
-]
+const restaurants = 
+["Maaemo","Kontrast","Statholdergaarden","Sabi Omakase Oslo","Hot Shop","Credo","Plah","À L'aise","Mon Oncle","Savage","Arakataka","Katla","Vaaghals","Hrimnir","Brasserie Blanche","Le Benjamin","Lofoten Fiskerestaurant","The Salmon","Hos Thea","Palace Grill","Kolonialen","Stallen","Varemottaket","Smia Galleri","Statholderens Mat & Vinkjeller","Smalhans","Fyr Bistronomi","Bass Oslo","Der Peppern Gror","Sushi Sho","Ylajali","Brutus","Brasserie France","Kafeteria August","Code Restaurant","Dinner","Südøst","Aymara","Louise Restaurant & Bar","Nodee","Ling Ling","Sanguine","Galt","Happolati","Grand Café","Fjord Restaurant","Alex Sushi","Nodee Sky","Kverneriet","Hyde","Sjømagasinet","Lorry","Kaffistova","Brasserie Rivoli","Oslo Raw","Eik Annen Etage","Eik Servering","Palmen","Stock","Feinschmecker","Tjuvholmen Sjømagasin","Solsiden Restaurant","Park 29","Fru K","Lysverket","Rest","Basso"]
 
-const wineBars=[
-"Territoriet",
-"Nektar Vinbar",
-"Radegast"
-]
+const wineBars =
+["Territoriet","Nektar Vinbar","Radegast","Andre til Høyre","Becco","Vintage Kitchen","Lasarett Vinbar","Vin Vin","Vinhuset","Oslo Vinfabrikk","Gutta fra Havet Vinbar","Nord Vinbar","Syd Vinbar","Bar Lardo","Bar Boca","Skaal Matbar","Fuglen Vinbar","Vinbar Frogner","Vinhuset Nøden","Parksalongen","Vinbaren på Bristol","Vinbaren på Hotel Continental","Dråpen Vinbar","Vinhuset Oslo","Vinoteket","Nedre Foss Vinbar","Mathallen Vinbar","Einer","Vini Divini","Håndverkeren Vinbar"]
 
-const cocktailBars=[
-"Himkok",
-"Bettola",
-"Svanen"
-]
+const cocktailBars =
+["Himkok","Bettola","Svanen","Torggata Botaniske","Fuglen","Bar Boca","Aku Aku","Andre til Høyre","Ostara","Pier 42","The Thief Bar","Gimle Kino Bar","Jaeger","Ingensteds","Oslo Street Food Bar","Bar Vulkan","The Villa","Angst Bar","Internasjonalen","Blå Bar","Tilt Bar","London Pub","Skaugum","Svanen Cocktail Bar","Bar Boman","Pier 42","Torggata Botaniske","Himkok Lab","Bettola Bar","Ostara Bar"]
 
 let service
 let places=[]
 let index=0
 let photos=[]
 let photoIndex=0
+let favorites=[]
 
 function initMap(){
 
-const map=new google.maps.Map(
-document.getElementById("map"),
-{center:{lat:59.91,lng:10.75},zoom:13}
-)
+const map=new google.maps.Map(document.getElementById("map"),{
+center:{lat:59.91,lng:10.75},
+zoom:13
+})
 
 service=new google.maps.places.PlacesService(map)
 
@@ -191,18 +212,14 @@ let loaded=0
 list.forEach(name=>{
 
 service.findPlaceFromQuery({
-
 query:name+" oslo",
 fields:["name","rating","photos"]
-
 },(results,status)=>{
 
 loaded++
 
 if(status==="OK"){
-
 places.push(results[0])
-
 }
 
 if(loaded===list.length){
@@ -240,7 +257,6 @@ photos.push(p.photos[i].getUrl({maxWidth:800}))
 }
 
 photoIndex=0
-
 document.getElementById("photo").src=photos[0]
 
 }
@@ -258,18 +274,59 @@ document.getElementById("photo").src=photos[photoIndex]
 function next(){
 
 index++
-
 if(index>=places.length) index=0
-
 show()
+
+}
+
+function like(){
+
+favorites.push(index)
+next()
 
 }
 
 function maps(){
 
 let p=places[index]
-
 window.open("https://maps.google.com/?q="+p.name)
+
+}
+
+function openFavorites(){
+
+document.getElementById("card").style.display="none"
+document.getElementById("favoritesPage").style.display="block"
+
+const list=document.getElementById("favoritesList")
+list.innerHTML=""
+
+favorites.forEach(i=>{
+
+let item=document.createElement("div")
+item.className="favorite-item"
+item.innerText=places[i].name
+
+item.onclick=function(){
+
+index=i
+document.getElementById("favoritesPage").style.display="none"
+document.getElementById("card").style.display="block"
+show()
+
+}
+
+list.appendChild(item)
+
+})
+
+}
+
+function back(){
+
+document.getElementById("card").style.display="none"
+document.getElementById("favoritesPage").style.display="none"
+document.getElementById("start").style.display="block"
 
 }
 
