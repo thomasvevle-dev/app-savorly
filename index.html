@@ -1,178 +1,98 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Savorly</title>
 
 <style>
 
 body{
 margin:0;
-font-family:-apple-system,BlinkMacSystemFont,Arial;
+font-family:Arial;
 background:#000;
 color:white;
-height:100vh;
-overflow:hidden;
-}
-
-/* START SCREEN */
-
-#start{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100vh;
-overflow-y:auto;
-padding-top:80px;
 text-align:center;
-z-index:20;
+overflow-x:hidden;
 }
 
-/* CATEGORY BUTTONS */
+#home{
+padding-top:40px;
+padding-bottom:120px;
+overflow-y:auto;
+height:100vh;
+}
 
-.category{
-background:#222;
-padding:18px;
-border-radius:22px;
-margin:10px auto;
-width:260px;
+.logo{
+width:160px;
+margin:auto;
+margin-bottom:30px;
+}
+
+.categories{
+display:flex;
+flex-direction:column;
+gap:16px;
+padding:0 30px;
+}
+
+.category-btn{
+background:#111;
+border:1px solid #333;
+padding:16px;
+border-radius:14px;
+font-size:18px;
+color:white;
 cursor:pointer;
 }
 
-/* FAVORITES SECTION */
+.category-btn:hover{
+background:#1a1a1a;
+}
+
+.divider{
+height:1px;
+background:#333;
+margin:40px 40px;
+}
 
 .favorites-section{
-margin-top:50px;
-padding-bottom:80px;
+padding:0 30px;
+}
+
+.fav-title{
+font-size:20px;
+margin-bottom:20px;
+text-align:left;
+}
+
+.fav-category{
+margin-bottom:20px;
+}
+
+.fav-header{
+background:#111;
+border:1px solid #333;
+padding:14px;
+border-radius:12px;
+cursor:pointer;
+text-align:left;
 }
 
 .fav-list{
 display:none;
+margin-top:10px;
 }
 
 .fav-item{
-background:#333;
-padding:14px;
-margin:6px auto;
-width:260px;
-border-radius:10px;
+background:#1a1a1a;
+padding:10px;
+margin-bottom:6px;
+border-radius:8px;
 cursor:pointer;
-touch-action:none;
-}
-
-/* CARD */
-
-#cardStack{
-position:fixed;
-top:0;
-left:0;
-width:100vw;
-height:100vh;
-display:none;
-}
-
-.card{
-position:absolute;
-width:100%;
-height:100%;
-border-radius:24px;
-overflow:hidden;
-}
-
-.photo{
-width:100%;
-height:100%;
-object-fit:cover;
-}
-
-/* TEXT */
-
-.overlay{
-position:absolute;
-bottom:140px;
-left:24px;
-z-index:10;
-}
-
-.name{
-font-size:32px;
-font-weight:600;
-}
-
-.rating{
-color:#FFD54F;
-font-size:18px;
-}
-
-/* IMAGE INDICATOR */
-
-.indicator{
-position:absolute;
-top:16px;
-left:50%;
-transform:translateX(-50%);
-display:flex;
-gap:6px;
-z-index:10;
-}
-
-.bar{
-width:28px;
-height:4px;
-background:rgba(255,255,255,.3);
-border-radius:2px;
-}
-
-.bar.active{
-background:white;
-}
-
-/* ICONS */
-
-.back{
-position:absolute;
-top:20px;
-left:20px;
-font-size:26px;
-cursor:pointer;
-z-index:10;
-}
-
-.prev{
-position:absolute;
-top:20px;
-right:20px;
-font-size:26px;
-cursor:pointer;
-z-index:10;
-}
-
-/* BUTTONS */
-
-.buttons{
-position:absolute;
-bottom:40px;
-width:100%;
-display:flex;
-justify-content:space-evenly;
-align-items:center;
-z-index:10;
-}
-
-.action{
-font-size:34px;
-cursor:pointer;
-width:70px;
-text-align:center;
-}
-
-#map{
-width:1px;
-height:1px;
-opacity:0;
-position:absolute;
+text-align:left;
 }
 
 </style>
@@ -180,379 +100,87 @@ position:absolute;
 
 <body>
 
-<div id="map"></div>
+<div id="home">
 
-<div id="start">
+<img class="logo" src="logo.png">
 
-<h2>Savorly</h2>
+<div class="categories">
 
-<div class="category" onclick="openCategory('restaurant')">Restaurant</div>
-<div class="category" onclick="openCategory('wine')">Vinbar</div>
-<div class="category" onclick="openCategory('cocktail')">Cocktailbar</div>
+<button class="category-btn" onclick="startCategory('restaurant')">
+Restaurant
+</button>
+
+<button class="category-btn" onclick="startCategory('winebar')">
+Vinbar
+</button>
+
+<button class="category-btn" onclick="startCategory('cocktailbar')">
+Cocktailbar
+</button>
+
+</div>
+
+<div class="divider"></div>
 
 <div class="favorites-section">
 
-<div class="category" onclick="toggleFav('restaurant')">Favoritt restaurant</div>
-<div class="fav-list" id="fav-restaurant"></div>
+<div class="fav-category">
 
-<div class="category" onclick="toggleFav('wine')">Favoritt vinbar</div>
-<div class="fav-list" id="fav-wine"></div>
+<div class="fav-header" onclick="toggleFav('fav-restaurants')">
+Favoritt restaurant
+</div>
 
-<div class="category" onclick="toggleFav('cocktail')">Favoritt cocktailbar</div>
-<div class="fav-list" id="fav-cocktail"></div>
+<div class="fav-list" id="fav-restaurants"></div>
+
+</div>
+
+<div class="fav-category">
+
+<div class="fav-header" onclick="toggleFav('fav-winebars')">
+Favoritt vinbar
+</div>
+
+<div class="fav-list" id="fav-winebars"></div>
+
+</div>
+
+<div class="fav-category">
+
+<div class="fav-header" onclick="toggleFav('fav-cocktails')">
+Favoritt cocktailbar
+</div>
+
+<div class="fav-list" id="fav-cocktails"></div>
 
 </div>
 
 </div>
 
-<div id="cardStack">
-<div class="card" id="card1"></div>
 </div>
 
 <script>
 
-let map
-let service
+function toggleFav(id){
 
-let places=[]
-let index=0
-let historyStack=[]
-let currentCategory=""
+let el=document.getElementById(id)
 
-let photoList=[]
-let photoIndex=0
-
-let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
-restaurant:[],
-wine:[],
-cocktail:[]
-}
-
-function saveFavorites(){
-localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
-}
-
-function initMap(){
-
-map=new google.maps.Map(
-document.getElementById("map"),
-{center:{lat:59.91,lng:10.75},zoom:13}
-)
-
-service=new google.maps.places.PlacesService(map)
-
-}
-
-async function openCategory(type){
-
-currentCategory=type
-
-let data=await fetch("data/places.json").then(r=>r.json())
-
-if(type==="restaurant")places=data.restaurants
-if(type==="wine")places=data.winebars
-if(type==="cocktail")places=data.cocktailbars
-
-index=0
-
-start.style.display="none"
-cardStack.style.display="block"
-
-loadPlace()
-
-}
-
-function loadPlace(){
-
-let name=places[index]
-
-service.findPlaceFromQuery({
-query:name+" oslo",
-fields:["place_id"]
-},(results,status)=>{
-
-if(status!=="OK"){
-renderCard(name,[],0)
-return
-}
-
-service.getDetails({
-placeId:results[0].place_id,
-fields:["rating","photos"]
-},(place)=>{
-
-let photos=[]
-
-if(place.photos){
-
-for(let i=0;i<Math.min(3,place.photos.length);i++){
-photos.push(place.photos[i].getUrl({maxWidth:1200}))
+if(el.style.display==="block"){
+el.style.display="none"
+}else{
+el.style.display="block"
 }
 
 }
 
-renderCard(name,photos,place.rating)
+function startCategory(type){
 
-})
+localStorage.setItem("category",type)
 
-})
-
-}
-
-function renderCard(name,photos,rating){
-
-photoList=photos.length?photos:["https://source.unsplash.com/featured/?restaurant"]
-
-photoIndex=0
-
-card1.innerHTML=`
-
-<div class="back" onclick="back()">⬅</div>
-<div class="prev" onclick="goBack()">↩</div>
-
-<div class="indicator"></div>
-
-<img class="photo" id="photo">
-
-<div class="overlay">
-<div class="name">${name}</div>
-<div class="rating">${rating?"⭐ "+rating:""}</div>
-</div>
-
-<div class="buttons">
-
-<div class="action" onclick="skip()">❌</div>
-<div class="action" onclick="navigate()">📍</div>
-<div class="action" onclick="book()">📅</div>
-<div class="action" onclick="like()">❤️</div>
-
-</div>
-
-`
-
-let img=document.getElementById("photo")
-
-img.src=photoList[0]
-
-img.onclick=function(){
-
-photoIndex++
-
-if(photoIndex>=photoList.length)photoIndex=0
-
-img.src=photoList[photoIndex]
-
-updateIndicator()
+window.location.href="swipe.html"
 
 }
-
-updateIndicator()
-
-enableSwipe(card1)
-
-}
-
-function updateIndicator(){
-
-let indicator=document.querySelector(".indicator")
-
-indicator.innerHTML=""
-
-photoList.forEach((p,i)=>{
-
-let bar=document.createElement("div")
-bar.className="bar"
-
-if(i===photoIndex)bar.classList.add("active")
-
-indicator.appendChild(bar)
-
-})
-
-}
-
-function navigate(){
-
-let place=places[index]
-
-let url="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(place+" Oslo")
-
-window.open(url)
-
-}
-
-function book(){
-
-let place=places[index]
-
-let url="https://www.google.com/search?q="+encodeURIComponent(place+" restaurant booking")
-
-window.open(url)
-
-}
-
-function swipe(dir){
-
-historyStack.push(index)
-
-if(dir==="right")addFavorite()
-
-card1.style.transform=
-dir==="right"
-?"translateX(600px) rotate(20deg)"
-:"translateX(-600px) rotate(-20deg)"
-
-setTimeout(()=>{
-
-index++
-
-card1.style.transform=""
-
-loadPlace()
-
-},250)
-
-}
-
-function like(){swipe("right")}
-function skip(){swipe("left")}
-
-function enableSwipe(card){
-
-let startX=0
-let currentX=0
-let dragging=false
-
-card.onpointerdown=e=>{
-dragging=true
-startX=e.clientX
-}
-
-window.onpointermove=e=>{
-
-if(!dragging)return
-
-currentX=e.clientX-startX
-
-card.style.transform=
-`translateX(${currentX}px) rotate(${currentX/10}deg)`
-
-}
-
-window.onpointerup=()=>{
-
-if(!dragging)return
-
-dragging=false
-
-if(currentX>120)swipe("right")
-else if(currentX<-120)swipe("left")
-else card.style.transform=""
-
-currentX=0
-
-}
-
-}
-
-function addFavorite(){
-
-let place=places[index]
-
-if(!favorites[currentCategory].includes(place)){
-
-favorites[currentCategory].push(place)
-
-saveFavorites()
-updateFavorites()
-
-}
-
-}
-
-function updateFavorites(){
-
-["restaurant","wine","cocktail"].forEach(type=>{
-
-let container=document.getElementById("fav-"+type)
-
-container.innerHTML=""
-
-favorites[type].forEach((place,i)=>{
-
-let div=document.createElement("div")
-
-div.className="fav-item"
-div.innerText=place
-
-div.onclick=function(){
-
-index=places.indexOf(place)
-
-start.style.display="none"
-cardStack.style.display="block"
-
-loadPlace()
-
-}
-
-let startX=0
-
-div.onpointerdown=e=>startX=e.clientX
-
-div.onpointerup=e=>{
-
-let diff=e.clientX-startX
-
-if(Math.abs(diff)>80){
-
-favorites[type].splice(i,1)
-
-saveFavorites()
-updateFavorites()
-
-}
-
-}
-
-container.appendChild(div)
-
-})
-
-})
-
-}
-
-function toggleFav(type){
-
-let list=document.getElementById("fav-"+type)
-
-list.style.display=list.style.display==="block"?"none":"block"
-
-}
-
-function back(){
-
-cardStack.style.display="none"
-start.style.display="block"
-
-}
-
-function goBack(){
-
-if(historyStack.length===0)return
-
-index=historyStack.pop()
-
-loadPlace()
-
-}
-
-updateFavorites()
 
 </script>
-
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap"></script>
 
 </body>
 </html>
