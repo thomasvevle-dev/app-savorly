@@ -12,50 +12,42 @@
 body{
 margin:0;
 font-family:-apple-system,BlinkMacSystemFont,Arial;
-background:#111;
-color:white;
-display:flex;
-flex-direction:column;
-align-items:center;
+background:#000;
+overflow:hidden;
 }
+
+/* MAP */
 
 #map{width:1px;height:1px;opacity:0}
 
-/* START */
+/* START SCREEN */
 
 #start{
-margin-top:80px;
+position:absolute;
+top:80px;
+width:100%;
 text-align:center;
-width:90%;
-max-width:380px;
+z-index:20;
+color:white;
 }
 
 .category{
 background:#222;
-padding:18px 26px;
+padding:18px;
 border-radius:22px;
-margin:10px;
+margin:10px auto;
+width:260px;
 cursor:pointer;
-font-size:18px;
-}
-
-.fav-list{display:none}
-
-.fav-item{
-background:#333;
-padding:14px;
-margin:6px;
-border-radius:10px;
-cursor:pointer;
-touch-action:none;
 }
 
 /* CARD STACK */
 
 #cardStack{
-position:relative;
-width:360px;
-height:580px;
+position:fixed;
+top:0;
+left:0;
+width:100vw;
+height:100vh;
 display:none;
 }
 
@@ -63,24 +55,18 @@ display:none;
 position:absolute;
 width:100%;
 height:100%;
-border-radius:26px;
+border-radius:24px;
 overflow:hidden;
-background:#000;
 transition:transform .3s ease;
+background:#000;
 }
 
 .card.next{
-transform:scale(.95) translateY(12px);
-z-index:1;
+transform:scale(.96) translateY(12px);
 }
 
 .card.third{
-transform:scale(.9) translateY(24px);
-z-index:0;
-}
-
-.card.active{
-z-index:2;
+transform:scale(.92) translateY(24px);
 }
 
 /* IMAGE */
@@ -95,70 +81,104 @@ object-fit:cover;
 
 .back{
 position:absolute;
-top:18px;
+top:20px;
 left:20px;
-font-size:24px;
-cursor:pointer;
+font-size:26px;
 z-index:10;
+cursor:pointer;
+color:white;
 }
 
 .prev{
 position:absolute;
-top:18px;
+top:20px;
 right:20px;
-font-size:24px;
-cursor:pointer;
+font-size:26px;
 z-index:10;
+cursor:pointer;
+color:white;
 }
 
 /* TEXT */
 
 .overlay{
 position:absolute;
-bottom:110px;
-left:22px;
+bottom:120px;
+left:24px;
+color:white;
 z-index:10;
 }
 
-.name{font-size:30px;font-weight:600}
+.name{
+font-size:32px;
+font-weight:600;
+}
 
-.rating{color:#FFD54F;font-size:18px}
+.rating{
+color:#FFD54F;
+font-size:18px;
+}
 
-/* PHOTO BAR */
+/* PHOTO INDICATOR */
 
 .photo-indicator{
 position:absolute;
-top:12px;
+top:16px;
 left:50%;
 transform:translateX(-50%);
 display:flex;
-gap:6px;
+gap:8px;
 z-index:10;
 }
 
 .photo-bar{
-width:30px;
+width:32px;
 height:4px;
 border-radius:3px;
 background:rgba(255,255,255,.3);
 }
 
-.photo-bar.active{background:white}
+.photo-bar.active{
+background:white;
+}
 
 /* BUTTONS */
 
 .buttons{
 position:absolute;
-bottom:25px;
+bottom:40px;
 width:100%;
 display:flex;
 justify-content:space-evenly;
 z-index:10;
+color:white;
 }
 
 .action{
-font-size:28px;
+font-size:32px;
 cursor:pointer;
+}
+
+/* SWIPE OVERLAY */
+
+.swipeLike{
+position:absolute;
+top:100px;
+right:40px;
+font-size:80px;
+color:#00ff88;
+opacity:0;
+transform:rotate(20deg);
+}
+
+.swipeNope{
+position:absolute;
+top:100px;
+left:40px;
+font-size:80px;
+color:#ff3b3b;
+opacity:0;
+transform:rotate(-20deg);
 }
 
 </style>
@@ -176,20 +196,11 @@ cursor:pointer;
 <div class="category" onclick="openCategory('wine')">Vinbar</div>
 <div class="category" onclick="openCategory('cocktail')">Cocktailbar</div>
 
-<div class="category" onclick="toggleFav('restaurant')">Favoritt restaurant</div>
-<div class="fav-list" id="fav-restaurant"></div>
-
-<div class="category" onclick="toggleFav('wine')">Favoritt vinbar</div>
-<div class="fav-list" id="fav-wine"></div>
-
-<div class="category" onclick="toggleFav('cocktail')">Favoritt cocktailbar</div>
-<div class="fav-list" id="fav-cocktail"></div>
-
 </div>
 
 <div id="cardStack">
 
-<div class="card active" id="card1"></div>
+<div class="card" id="card1"></div>
 <div class="card next" id="card2"></div>
 <div class="card third" id="card3"></div>
 
@@ -200,20 +211,10 @@ cursor:pointer;
 let service
 let places=[]
 let index=0
-let currentCategory=""
-let historyStack=[]
 
-let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
-restaurant:[],
-wine:[],
-cocktail:[]
-}
-
-function saveFavorites(){
-localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
-}
-
-/* MAP */
+let startX=0
+let currentX=0
+let dragging=false
 
 function initMap(){
 
@@ -224,15 +225,11 @@ document.getElementById("map"),
 
 service=new google.maps.places.PlacesService(map)
 
-updateFavorites()
-
 }
 
 /* CATEGORY */
 
 async function openCategory(type){
-
-currentCategory=type
 
 let data=await fetch("data/places.json").then(r=>r.json())
 
@@ -315,12 +312,22 @@ if(imgs.length===0){
 imgs=["https://images.unsplash.com/photo-1414235077428-338989a2e8c0"]
 }
 
+/* PRELOAD */
+
+imgs.forEach(src=>{
+let img=new Image()
+img.src=src
+})
+
 let photoIndex=0
 
 card.innerHTML=`
 
 <div class="back" onclick="back()">⬅</div>
-<div class="prev" onclick="goBack()">↩</div>
+<div class="prev" onclick="prevCard()">↩</div>
+
+<div class="swipeLike">❤️</div>
+<div class="swipeNope">❌</div>
 
 <div class="photo-indicator"></div>
 
@@ -345,6 +352,8 @@ card.innerHTML=`
 
 let img=card.querySelector(".photo")
 let indicator=card.querySelector(".photo-indicator")
+let likeOverlay=card.querySelector(".swipeLike")
+let nopeOverlay=card.querySelector(".swipeNope")
 
 function renderIndicator(){
 
@@ -370,14 +379,17 @@ img.src=imgs[0]
 img.onclick=()=>{
 
 photoIndex++
+
 if(photoIndex>=imgs.length)photoIndex=0
 
 img.src=imgs[photoIndex]
+
 renderIndicator()
 
 }
 
-enableSwipe()
+card.likeOverlay=likeOverlay
+card.nopeOverlay=nopeOverlay
 
 }
 
@@ -385,20 +397,18 @@ enableSwipe()
 
 function swipe(dir){
 
-historyStack.push(index)
-
-if(dir==="right")addFavorite()
-
 card1.style.transform=
 dir==="right"
-?"translateX(500px) rotate(20deg)"
-:"translateX(-500px) rotate(-20deg)"
+?"translateX(600px) rotate(20deg)"
+:"translateX(-600px) rotate(-20deg)"
 
 setTimeout(()=>{
 
 index++
 
 card1.style.transform=""
+card1.likeOverlay.style.opacity=0
+card1.nopeOverlay.style.opacity=0
 
 renderStack()
 
@@ -409,96 +419,57 @@ renderStack()
 function like(){swipe("right")}
 function skip(){swipe("left")}
 
-/* FAVORITE */
+/* DRAG SWIPE */
 
-function addFavorite(){
-
-let place=places[index]
-
-let exists=favorites[currentCategory].some(p=>p.name===place.name)
-
-if(!exists){
-
-favorites[currentCategory].push({
-name:place.name,
-index:index
-})
-
-saveFavorites()
-updateFavorites()
-
-}
-
-}
-
-/* FAVORITE LIST */
-
-function updateFavorites(){
-
-["restaurant","wine","cocktail"].forEach(type=>{
-
-let container=document.getElementById("fav-"+type)
-
-container.innerHTML=""
-
-favorites[type].forEach((place,i)=>{
-
-let div=document.createElement("div")
-
-div.className="fav-item"
-div.innerText=place.name
-
-/* open card */
-
-div.onclick=function(){
-
-index=place.index
-
-start.style.display="none"
-cardStack.style.display="block"
-
-renderStack()
-
-}
-
-/* swipe delete */
-
-let startX=0
-
-div.onpointerdown=e=>{
+cardStack.addEventListener("pointerdown",e=>{
+dragging=true
 startX=e.clientX
+})
+
+cardStack.addEventListener("pointermove",e=>{
+
+if(!dragging)return
+
+currentX=e.clientX-startX
+
+card1.style.transform=
+`translateX(${currentX}px) rotate(${currentX/10}deg)`
+
+let percent=Math.abs(currentX)/150
+
+if(currentX>0){
+
+card1.likeOverlay.style.opacity=percent
+card1.nopeOverlay.style.opacity=0
+
+}else{
+
+card1.nopeOverlay.style.opacity=percent
+card1.likeOverlay.style.opacity=0
+
 }
-
-div.onpointerup=e=>{
-
-let diff=e.clientX-startX
-
-if(Math.abs(diff)>80){
-
-favorites[type].splice(i,1)
-
-saveFavorites()
-updateFavorites()
-
-}
-
-}
-
-container.appendChild(div)
 
 })
 
+cardStack.addEventListener("pointerup",()=>{
+
+if(!dragging)return
+
+dragging=false
+
+if(currentX>120)swipe("right")
+else if(currentX<-120)swipe("left")
+else{
+
+card1.style.transform=""
+card1.likeOverlay.style.opacity=0
+card1.nopeOverlay.style.opacity=0
+
+}
+
+currentX=0
+
 })
-
-}
-
-function toggleFav(type){
-
-let list=document.getElementById("fav-"+type)
-
-list.style.display=list.style.display==="block"?"none":"block"
-
-}
 
 /* MAP */
 
@@ -510,8 +481,6 @@ window.open("https://maps.google.com/?q="+p.name)
 
 }
 
-/* BACK */
-
 function back(){
 
 cardStack.style.display="none"
@@ -519,55 +488,13 @@ start.style.display="block"
 
 }
 
-/* PREVIOUS */
+function prevCard(){
 
-function goBack(){
+if(index===0)return
 
-if(historyStack.length===0)return
-
-index=historyStack.pop()
+index--
 
 renderStack()
-
-}
-
-/* DRAG SWIPE */
-
-function enableSwipe(){
-
-let startX=0
-let currentX=0
-let dragging=false
-
-card1.onpointerdown=e=>{
-dragging=true
-startX=e.clientX
-}
-
-window.onpointermove=e=>{
-
-if(!dragging)return
-
-currentX=e.clientX-startX
-
-card1.style.transform=
-`translateX(${currentX}px) rotate(${currentX/10}deg)`
-
-}
-
-window.onpointerup=()=>{
-
-if(!dragging)return
-
-dragging=false
-
-if(currentX>120)swipe("right")
-else if(currentX<-120)swipe("left")
-else card1.style.transform=""
-
-currentX=0
-
-}
 
 }
 
