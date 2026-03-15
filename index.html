@@ -29,7 +29,7 @@ overflow-y:auto;
 
 .logo{
 width:220px;
-margin-bottom:50px;
+margin-bottom:40px;
 }
 
 .cat{
@@ -92,11 +92,6 @@ font-size:34px;
 font-weight:600;
 }
 
-.rating{
-font-size:20px;
-color:#FFD54F;
-}
-
 .buttons{
 position:absolute;
 bottom:30px;
@@ -113,13 +108,8 @@ top:30px;
 font-size:28px;
 }
 
-.back{
-left:20px;
-}
-
-.undo{
-right:20px;
-}
+.back{ left:20px; }
+.undo{ right:20px; }
 
 .photoDots{
 position:absolute;
@@ -166,14 +156,11 @@ background:white;
 
 <script>
 
-const API_KEY="AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ";
-
 let data;
 let list=[];
 let index=0;
 let history=[];
-
-let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
+let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
 
 const deck=document.getElementById("deck");
 
@@ -188,10 +175,15 @@ renderFavorites();
 
 loadData();
 
-
 function openCategory(type){
 
 list=data[type];
+
+if(!list || list.length===0){
+alert("Ingen steder funnet i "+type);
+return;
+}
+
 index=0;
 
 document.getElementById("home").style.display="none";
@@ -209,20 +201,22 @@ for(let i=index;i<index+3;i++){
 
 if(!list[i]) continue;
 
-createCard(list[i],i);
+createCard(list[i]);
 
 }
 
 }
 
-async function createCard(name){
+function createCard(name){
 
 const card=document.createElement("div");
 card.className="card";
 
-let place=await getPlace(name);
-
-let photos=place.photos;
+let photos=[
+"https://source.unsplash.com/featured/?restaurant",
+"https://source.unsplash.com/featured/?food",
+"https://source.unsplash.com/featured/?cocktail"
+];
 
 let photoIndex=0;
 
@@ -240,5 +234,154 @@ card.innerHTML=`
 <div class="topbtn undo" onclick="undo()">↩</div>
 
 <div class="info">
-<div class="name">${place.name}</div>
-<div class="rating">
+<div class="name">${name}</div>
+</div>
+
+<div class="buttons">
+<div onclick="dislike()">❌</div>
+<div onclick="navigate('${name}')">📍</div>
+<div onclick="book('${name}')">📅</div>
+<div onclick="like('${name}')">❤️</div>
+</div>
+
+`;
+
+card.onclick=()=>{
+
+photoIndex=(photoIndex+1)%3;
+
+card.querySelector("img").src=photos[photoIndex];
+
+const dots=card.querySelectorAll(".dot");
+
+dots.forEach((d,x)=>d.classList.toggle("active",x===photoIndex));
+
+};
+
+enableSwipe(card);
+
+deck.appendChild(card);
+
+}
+
+function enableSwipe(card){
+
+let startX;
+
+card.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX;
+});
+
+card.addEventListener("touchmove",e=>{
+
+const diff=e.touches[0].clientX-startX;
+
+card.style.transform=`translateX(${diff}px) rotate(${diff/20}deg)`;
+
+});
+
+card.addEventListener("touchend",e=>{
+
+const diff=e.changedTouches[0].clientX-startX;
+
+if(diff>120) like();
+else if(diff<-120) dislike();
+else card.style.transform="";
+
+});
+
+}
+
+function like(name){
+
+if(name && !favorites.includes(name)){
+favorites.push(name);
+localStorage.setItem("favorites",JSON.stringify(favorites));
+renderFavorites();
+}
+
+next();
+
+}
+
+function dislike(){
+next();
+}
+
+function next(){
+
+history.push(index);
+index++;
+buildDeck();
+
+}
+
+function undo(){
+
+if(history.length===0) return;
+
+index=history.pop();
+buildDeck();
+
+}
+
+function goHome(){
+
+deck.style.display="none";
+document.getElementById("home").style.display="flex";
+
+}
+
+function renderFavorites(){
+
+const box=document.getElementById("favorites");
+
+box.innerHTML="";
+
+favorites.forEach(f=>{
+
+const el=document.createElement("div");
+el.className="favoriteItem";
+el.innerText=f;
+
+el.onclick=()=>openFromFavorite(f);
+
+box.appendChild(el);
+
+});
+
+}
+
+function openFromFavorite(name){
+
+const pos=list.indexOf(name);
+
+if(pos>=0){
+
+index=pos;
+
+document.getElementById("home").style.display="none";
+deck.style.display="flex";
+
+buildDeck();
+
+}
+
+}
+
+function navigate(name){
+
+window.open(`https://maps.google.com/?q=${encodeURIComponent(name+" Oslo")}`);
+
+}
+
+function book(name){
+
+window.open(`https://www.google.com/search?q=${encodeURIComponent(name+" booking")}`);
+
+}
+
+</script>
+
+</body>
+</html>
