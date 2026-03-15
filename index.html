@@ -25,11 +25,11 @@ height:1px;
 opacity:0;
 }
 
-/* START */
-
 #start{
 margin-top:80px;
 text-align:center;
+width:90%;
+max-width:380px;
 }
 
 .category{
@@ -41,25 +41,16 @@ cursor:pointer;
 font-size:18px;
 }
 
-/* FAVORITE SECTIONS */
-
-.fav-section{
-margin-top:30px;
-width:90%;
-max-width:380px;
-text-align:left;
-}
-
-.fav-title{
-font-size:18px;
-margin-bottom:8px;
+.fav-list{
+display:none;
+margin-bottom:10px;
 }
 
 .fav-item{
-background:#222;
+background:#333;
 padding:12px;
+margin-top:4px;
 border-radius:10px;
-margin-bottom:6px;
 cursor:pointer;
 }
 
@@ -86,8 +77,6 @@ width:100%;
 height:100%;
 object-fit:cover;
 }
-
-/* ICONS */
 
 .back{
 position:absolute;
@@ -132,8 +121,6 @@ background:rgba(255,255,255,0.3);
 background:white;
 }
 
-/* TEXT */
-
 .overlay{
 position:absolute;
 bottom:110px;
@@ -151,8 +138,6 @@ color:#FFD54F;
 font-size:18px;
 margin-top:6px;
 }
-
-/* BUTTONS */
 
 .buttons{
 position:absolute;
@@ -184,26 +169,14 @@ cursor:pointer;
 <div class="category" onclick="loadCategory('wine')">Vinbar</div>
 <div class="category" onclick="loadCategory('cocktail')">Cocktailbar</div>
 
-<div class="fav-section">
+<div class="category" onclick="toggleFav('restaurant')">Favoritt restaurant</div>
+<div class="fav-list" id="fav-restaurant"></div>
 
-<div class="fav-title">Favoritt restauranter</div>
-<div id="favRestaurants"></div>
+<div class="category" onclick="toggleFav('wine')">Favoritt vinbar</div>
+<div class="fav-list" id="fav-wine"></div>
 
-</div>
-
-<div class="fav-section">
-
-<div class="fav-title">Favoritt vinbarer</div>
-<div id="favWinebars"></div>
-
-</div>
-
-<div class="fav-section">
-
-<div class="fav-title">Favoritt cocktailbarer</div>
-<div id="favCocktails"></div>
-
-</div>
+<div class="category" onclick="toggleFav('cocktail')">Favoritt cocktailbar</div>
+<div class="fav-list" id="fav-cocktail"></div>
 
 </div>
 
@@ -213,7 +186,7 @@ cursor:pointer;
 
 <div class="back" onclick="back()">⬅</div>
 
-<div class="favorite" id="favIcon" onclick="favoriteSwipe()">☆</div>
+<div class="favorite" onclick="favoriteSwipe()">⭐</div>
 
 <div class="photo-indicator" id="indicator"></div>
 
@@ -246,14 +219,21 @@ let places=[]
 let index=0
 let photos=[]
 let photoIndex=0
+let currentCategory=""
 
-let favorites={
+/* LOAD FAVORITES FROM STORAGE */
+
+let favorites=JSON.parse(localStorage.getItem("savorlyFavorites"))||{
 restaurant:[],
 wine:[],
 cocktail:[]
 }
 
-let currentCategory=""
+function saveFavorites(){
+
+localStorage.setItem("savorlyFavorites",JSON.stringify(favorites))
+
+}
 
 /* INIT MAP */
 
@@ -265,6 +245,8 @@ document.getElementById("map"),
 )
 
 service=new google.maps.places.PlacesService(map)
+
+updateFavorites()
 
 }
 
@@ -316,8 +298,8 @@ resolve()
 
 }
 
-document.getElementById("start").style.display="none"
-document.getElementById("cardStack").style.display="block"
+start.style.display="none"
+cardStack.style.display="block"
 
 show()
 
@@ -329,8 +311,8 @@ function show(){
 
 let p=places[index]
 
-document.getElementById("name").innerText=p.name
-document.getElementById("rating").innerText="⭐ "+(p.rating||"")
+name.innerText=p.name
+rating.innerText="⭐ "+(p.rating||"")
 
 photos=[]
 
@@ -346,17 +328,13 @@ photos.push(p.photos[i].getUrl({maxWidth:1200}))
 
 photoIndex=0
 
-if(photos.length>0){
-
 photo.src=photos[0]
-
-}
 
 renderIndicator()
 
 }
 
-/* PHOTO CHANGE ON TAP */
+/* TAP IMAGE */
 
 photo.onclick=function(){
 
@@ -396,33 +374,21 @@ function animate(dir){
 card.style.transition="transform 0.35s"
 
 if(dir==="right"){
-
 card.style.transform="translateX(600px) rotate(25deg)"
-
 }else{
-
 card.style.transform="translateX(-600px) rotate(-25deg)"
-
 }
 
 setTimeout(()=>{
-
 card.style.transition=""
 card.style.transform=""
-
 next()
-
 },350)
 
 }
 
-function like(){
-animate("right")
-}
-
-function skip(){
-animate("left")
-}
+function like(){animate("right")}
+function skip(){animate("left")}
 
 function next(){
 
@@ -434,13 +400,15 @@ show()
 
 }
 
-/* FAVORITE WITH SWIPE */
+/* FAVORITE */
 
 function favoriteSwipe(){
 
 let p=places[index]
 
 favorites[currentCategory].push(p)
+
+saveFavorites()
 
 updateFavorites()
 
@@ -452,43 +420,49 @@ animate("right")
 
 function updateFavorites(){
 
-const r=document.getElementById("favRestaurants")
-const w=document.getElementById("favWinebars")
-const c=document.getElementById("favCocktails")
+["restaurant","wine","cocktail"].forEach(type=>{
 
-r.innerHTML=""
-w.innerHTML=""
-c.innerHTML=""
+let container=document.getElementById("fav-"+type)
 
-favorites.restaurant.forEach(p=>{
+container.innerHTML=""
+
+favorites[type].forEach(place=>{
 
 let div=document.createElement("div")
 div.className="fav-item"
-div.innerText=p.name
+div.innerText=place.name
 
-r.appendChild(div)
+div.onclick=function(){
+
+places=[place]
+index=0
+
+start.style.display="none"
+cardStack.style.display="block"
+
+show()
+
+}
+
+container.appendChild(div)
+
+})
 
 })
 
-favorites.wine.forEach(p=>{
+}
 
-let div=document.createElement("div")
-div.className="fav-item"
-div.innerText=p.name
+/* TOGGLE LIST */
 
-w.appendChild(div)
+function toggleFav(type){
 
-})
+let list=document.getElementById("fav-"+type)
 
-favorites.cocktail.forEach(p=>{
-
-let div=document.createElement("div")
-div.className="fav-item"
-div.innerText=p.name
-
-c.appendChild(div)
-
-})
+if(list.style.display==="block"){
+list.style.display="none"
+}else{
+list.style.display="block"
+}
 
 }
 
@@ -502,8 +476,8 @@ window.open("https://maps.google.com/?q="+p.name)
 
 function back(){
 
-document.getElementById("cardStack").style.display="none"
-document.getElementById("start").style.display="block"
+cardStack.style.display="none"
+start.style.display="block"
 
 }
 
