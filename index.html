@@ -58,9 +58,7 @@ background:#111;
 border:1px solid #333;
 }
 
-.hidden{
-display:none;
-}
+.hidden{display:none}
 
 #deck{
 position:absolute;
@@ -105,9 +103,7 @@ border-radius:10px;
 background:rgba(255,255,255,.4);
 }
 
-.dot.active{
-background:white;
-}
+.dot.active{background:white}
 
 .info{
 position:absolute;
@@ -133,6 +129,20 @@ right:0;
 display:flex;
 justify-content:space-evenly;
 font-size:34px;
+}
+
+.topLeft{
+position:absolute;
+top:20px;
+left:20px;
+font-size:28px;
+}
+
+.topRight{
+position:absolute;
+top:20px;
+right:20px;
+font-size:28px;
 }
 
 </style>
@@ -175,7 +185,6 @@ let index=0
 let history=[]
 let currentType=""
 let placesService
-
 const imageCache={}
 
 let favorites={
@@ -239,6 +248,9 @@ card.innerHTML=`
 <span class="dot"></span>
 </div>
 
+<div class="topLeft" onclick="goHome()">←</div>
+<div class="topRight" onclick="undo()">↩</div>
+
 <div class="info">
 <div class="name">${place.name}</div>
 <div class="rating">⭐ ${place.rating||""}</div>
@@ -252,18 +264,17 @@ card.innerHTML=`
 </div>
 `
 
-card.onclick=()=>{
+card.addEventListener("click",()=>{
 
 photoIndex=(photoIndex+1)%photos.length
+
 card.querySelector("img").src=photos[photoIndex]
 
 const dots=card.querySelectorAll(".dot")
 
-dots.forEach((d,i)=>{
-d.classList.toggle("active",i===photoIndex)
-})
+dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
-}
+})
 
 enableSwipe(card)
 
@@ -294,41 +305,33 @@ if(status===google.maps.places.PlacesServiceStatus.OK){
 let p=results[0]
 
 if(p.photos){
+
 for(let i=0;i<Math.min(3,p.photos.length);i++){
 photos.push(p.photos[i].getUrl({maxWidth:1200}))
 }
+
+}
+
+}
+
+while(photos.length<3){
+photos.push("https://source.unsplash.com/featured/?restaurant")
 }
 
 let place={
-name:p.name,
-rating:p.rating,
-photos:photos.length?photos:fallbackImages()
+name:name,
+rating:results?.[0]?.rating||"",
+photos:photos
 }
 
 imageCache[name]=place
+
 resolve(place)
 
-}else{
-
-resolve({
-name:name,
-photos:fallbackImages()
-})
-
-}
-
 })
 
 })
 
-}
-
-function fallbackImages(){
-return[
-"https://source.unsplash.com/featured/?restaurant",
-"https://source.unsplash.com/featured/?food",
-"https://source.unsplash.com/featured/?cocktail"
-]
 }
 
 function enableSwipe(card){
@@ -373,6 +376,17 @@ function next(){
 history.push(index)
 index++
 buildDeck()
+}
+
+function undo(){
+if(history.length===0)return
+index=history.pop()
+buildDeck()
+}
+
+function goHome(){
+deck.style.display="none"
+document.getElementById("home").style.display="flex"
 }
 
 function renderFavorites(){
@@ -430,15 +444,8 @@ el.style.transform=""
 }
 
 function toggleFav(type){
-
 const el=document.getElementById("fav-"+type)
-
-if(el.classList.contains("hidden")){
-el.classList.remove("hidden")
-}else{
-el.classList.add("hidden")
-}
-
+el.classList.toggle("hidden")
 }
 
 function navigate(name){
