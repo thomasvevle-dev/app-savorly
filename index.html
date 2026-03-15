@@ -11,16 +11,15 @@
 
 body{
 margin:0;
-font-family:"DIN Round","DINRoundPro",Arial;
+font-family:"DIN Round",Arial;
 background:#111;
 color:white;
 display:flex;
 flex-direction:column;
 align-items:center;
-overflow:hidden;
 }
 
-/* START */
+/* START SCREEN */
 
 #start-screen{
 margin-top:120px;
@@ -50,13 +49,13 @@ color:white;
 cursor:pointer;
 }
 
-/* CARD */
+/* CARD STACK */
 
 #card-stack{
 position:relative;
 width:360px;
 height:540px;
-margin-top:10px;
+margin-top:20px;
 }
 
 .card{
@@ -65,7 +64,7 @@ width:100%;
 height:100%;
 border-radius:20px;
 overflow:hidden;
-touch-action:none;
+background:#000;
 }
 
 .card img{
@@ -74,7 +73,7 @@ height:100%;
 object-fit:cover;
 }
 
-/* TOP */
+/* TOP BUTTONS */
 
 .back-btn{
 position:absolute;
@@ -98,7 +97,7 @@ color:white;
 cursor:pointer;
 }
 
-/* INFO */
+/* TEXT */
 
 .overlay{
 position:absolute;
@@ -131,12 +130,12 @@ height:50px;
 border-radius:50%;
 border:none;
 font-size:20px;
-cursor:pointer;
 background:#333;
 color:white;
+cursor:pointer;
 }
 
-/* FAVORITTER */
+/* FAVORITES */
 
 #favorites-page{
 display:none;
@@ -178,23 +177,26 @@ cursor:pointer;
 
 <script>
 
-let userLocation=null
+/* DATA */
 
-navigator.geolocation.getCurrentPosition(pos=>{
-userLocation={
-lat:pos.coords.latitude,
-lng:pos.coords.longitude
-}
-})
+const restaurants=[
+"Libertine","Skaal Matbar","Arakataka","Le Benjamin","Hyde","Kverneriet","Kolonialen"
+]
 
-const restaurants=[/* dine 67 restauranter */]
-const wineBars=[/* dine 30 vinbarer */]
-const cocktailBars=[/* dine 30 cocktailbarer */]
+const wineBars=[
+"Territoriet","Nektar Vinbar","Radegast","Vinoteket","Andre til Høyre"
+]
+
+const cocktailBars=[
+"Himkok","Bettola","Svanen","Torggata Botaniske","Fuglen"
+]
 
 let places=[]
 let favorites=[]
 let index=0
 let selectedType=null
+
+/* CATEGORY SELECT */
 
 document.querySelectorAll(".category").forEach(el=>{
 
@@ -210,6 +212,8 @@ selectedType=el.dataset.type
 
 })
 
+/* START */
+
 function start(){
 
 if(!selectedType){
@@ -224,15 +228,11 @@ if(selectedType==="cocktail") places=[...cocktailBars]
 document.getElementById("start-screen").style.display="none"
 document.getElementById("card-stack").style.display="block"
 
-shuffle()
-
 renderCards()
 
 }
 
-function shuffle(){
-places.sort(()=>Math.random()-0.5)
-}
+/* RENDER */
 
 function renderCards(){
 
@@ -250,8 +250,8 @@ card.innerHTML=`
 
 <img src="https://source.unsplash.com/600x800/?restaurant">
 
-<button class="back-btn" onclick="goBack()">⬅</button>
-<button class="fav-btn" onclick="showFavorites()">⭐</button>
+<button class="back-btn">⬅</button>
+<button class="fav-btn">⭐</button>
 
 <div class="overlay">
 
@@ -271,15 +271,14 @@ card.innerHTML=`
 
 `
 
-addSwipe(card,name)
+card.querySelector(".back-btn").onclick=goBack
+card.querySelector(".fav-btn").onclick=showFavorites
+
+card.querySelector(".skip").onclick=next
 
 card.querySelector(".like").onclick=()=>{
 favorites.push(name)
 updateFavorites()
-next()
-}
-
-card.querySelector(".skip").onclick=()=>{
 next()
 }
 
@@ -291,31 +290,27 @@ card.querySelector(".book").onclick=()=>{
 window.open("https://maps.google.com/search/"+name)
 }
 
+addSwipe(card,name)
+
 stack.appendChild(card)
 
 })
 
 }
 
+/* SWIPE */
+
 function addSwipe(card,name){
 
-let startX=0
+let startX=null
 
 card.addEventListener("pointerdown",e=>{
 startX=e.clientX
 })
 
-card.addEventListener("pointermove",e=>{
-
-if(!startX) return
-
-let diff=e.clientX-startX
-
-card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
-
-})
-
 card.addEventListener("pointerup",e=>{
+
+if(startX===null) return
 
 let diff=e.clientX-startX
 
@@ -325,19 +320,17 @@ updateFavorites()
 next()
 }
 
-else if(diff<-120){
+if(diff<-120){
 next()
 }
 
-else{
-card.style.transform=""
-}
-
-startX=0
+startX=null
 
 })
 
 }
+
+/* NEXT */
 
 function next(){
 
@@ -345,21 +338,15 @@ index++
 
 if(index>=places.length){
 index=0
-shuffle()
 }
 
 renderCards()
 
 }
 
-function goBack(){
+/* FAVORITES */
 
-document.getElementById("card-stack").style.display="none"
-document.getElementById("start-screen").style.display="block"
-
-}
-
-function showFavorites(){
+function updateFavorites(){
 
 const list=document.getElementById("favorites-page")
 
@@ -388,12 +375,23 @@ list.appendChild(div)
 
 })
 
+}
+
+function showFavorites(){
+
 document.getElementById("favorites-page").style.display="block"
 document.getElementById("card-stack").style.display="none"
 
 }
 
-function updateFavorites(){}
+/* BACK */
+
+function goBack(){
+
+document.getElementById("card-stack").style.display="none"
+document.getElementById("start-screen").style.display="block"
+
+}
 
 </script>
 
