@@ -131,8 +131,8 @@ color:white;
 <h2>Hva vil du utforske?</h2>
 
 <div class="category" data-type="restaurant">Restaurant</div>
-<div class="category" data-type="bar">Vinbar</div>
-<div class="category" data-type="night_club">Cocktailbar</div>
+<div class="category" data-type="wine">Vinbar</div>
+<div class="category" data-type="cocktail">Cocktailbar</div>
 
 <br>
 
@@ -175,50 +175,27 @@ alert("Velg kategori")
 return
 }
 
-userLocation = JSON.parse(localStorage.getItem("userLocation"))
-
-if(userLocation){
-initPlaces()
-}
-else{
-getLocation()
-}
-
-}
-
-/* GET GPS */
-
-function getLocation(){
-
-navigator.geolocation.getCurrentPosition(
-
-pos=>{
+navigator.geolocation.getCurrentPosition(pos=>{
 
 userLocation={
 lat:pos.coords.latitude,
 lng:pos.coords.longitude
 }
 
-localStorage.setItem("userLocation",JSON.stringify(userLocation))
+initGoogle()
 
-initPlaces()
-
-},
-
-err=>{
-alert("Kunne ikke hente GPS")
-console.log(err)
-}
-
-)
+})
 
 }
 
 /* INIT GOOGLE */
 
-function initPlaces(){
+function initGoogle(){
 
-const map=new google.maps.Map(document.createElement("div"))
+const map=new google.maps.Map(document.createElement("div"),{
+center:userLocation,
+zoom:15
+})
 
 service=new google.maps.places.PlacesService(map)
 
@@ -230,17 +207,45 @@ searchPlaces()
 
 function searchPlaces(){
 
-const request={
-location:new google.maps.LatLng(userLocation.lat,userLocation.lng),
+let request
+
+if(selectedType==="restaurant"){
+
+request={
+location:userLocation,
 radius:3000,
-type:selectedType
+type:"restaurant"
+}
+
+}
+
+if(selectedType==="wine"){
+
+request={
+location:userLocation,
+radius:3000,
+keyword:"wine bar"
+}
+
+}
+
+if(selectedType==="cocktail"){
+
+request={
+location:userLocation,
+radius:3000,
+type:"bar"
+}
+
 }
 
 service.nearbySearch(request,(results,status)=>{
 
 if(status!==google.maps.places.PlacesServiceStatus.OK){
+
 alert("Fant ingen steder")
 return
+
 }
 
 places=results
@@ -320,6 +325,7 @@ card.innerHTML=`
 <div class="title-row">
 
 <div class="place-name">${place.name}</div>
+
 <div class="rating">${stars(place.rating)} ${place.rating}</div>
 
 </div>
