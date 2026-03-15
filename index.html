@@ -19,8 +19,6 @@ flex-direction:column;
 align-items:center;
 }
 
-/* MAP */
-
 #map{width:1px;height:1px;opacity:0}
 
 /* START SCREEN */
@@ -70,7 +68,7 @@ height:100%;
 border-radius:26px;
 overflow:hidden;
 background:#000;
-transition:transform .35s ease;
+transition:transform .3s ease;
 }
 
 .card.next{
@@ -179,8 +177,6 @@ cursor:pointer;
 
 <div id="map"></div>
 
-<!-- START -->
-
 <div id="start">
 
 <h2>Savorly</h2>
@@ -200,8 +196,6 @@ cursor:pointer;
 
 </div>
 
-<!-- CARD STACK -->
-
 <div id="cardStack">
 
 <div class="card active" id="activeCard"></div>
@@ -214,10 +208,8 @@ cursor:pointer;
 let service
 let places=[]
 let index=0
-
 let photos=[]
 let photoIndex=0
-
 let currentCategory=""
 
 /* FAVORITES */
@@ -320,7 +312,6 @@ photos:place.photos
 places=(await Promise.all(requests)).filter(p=>p)
 
 placesCache[type]=places
-
 localStorage.setItem("savorlyPlacesCache",JSON.stringify(placesCache))
 
 }
@@ -339,10 +330,11 @@ renderCards()
 function renderCards(){
 
 renderCard(activeCard,places[index])
-
 renderCard(nextCard,places[index+1])
 
 }
+
+/* CARD */
 
 function renderCard(card,data){
 
@@ -359,9 +351,7 @@ imgs.push(data.photos[i].getUrl({maxWidth:1200}))
 }
 
 if(imgs.length===0){
-
 imgs=["https://images.unsplash.com/photo-1414235077428-338989a2e8c0"]
-
 }
 
 photos=imgs
@@ -370,7 +360,6 @@ photoIndex=0
 card.innerHTML=`
 
 <div class="back" onclick="back()">⬅</div>
-
 <div class="favorite" onclick="favoriteSwipe()">⭐</div>
 
 <div class="photo-indicator" id="indicator"></div>
@@ -392,16 +381,17 @@ card.innerHTML=`
 <div class="action" onclick="like()">❤️</div>
 
 </div>
-
 `
 
 renderIndicator()
 
 document.getElementById("photo").onclick=nextPhoto
 
+enableSwipe()
+
 }
 
-/* PHOTOS */
+/* PHOTO SWITCH */
 
 function nextPhoto(){
 
@@ -420,7 +410,6 @@ renderIndicator()
 function renderIndicator(){
 
 let container=document.getElementById("indicator")
-
 if(!container)return
 
 container.innerHTML=""
@@ -457,28 +446,68 @@ activeCard.style.transform=""
 
 renderCards()
 
-},300)
+},250)
 
 }
 
 function like(){swipe("right")}
 function skip(){swipe("left")}
 
-/* FAVORITE */
+/* TOUCH DRAG */
+
+function enableSwipe(){
+
+let startX=0
+let currentX=0
+let dragging=false
+
+activeCard.onpointerdown=e=>{
+dragging=true
+startX=e.clientX
+}
+
+window.onpointermove=e=>{
+if(!dragging)return
+
+currentX=e.clientX-startX
+activeCard.style.transform=`translateX(${currentX}px) rotate(${currentX/10}deg)`
+}
+
+window.onpointerup=()=>{
+
+if(!dragging)return
+
+dragging=false
+
+if(currentX>120) swipe("right")
+else if(currentX<-120) swipe("left")
+else activeCard.style.transform=""
+
+currentX=0
+
+}
+
+}
+
+/* FAVORITES */
 
 function favoriteSwipe(){
 
-favorites[currentCategory].push(places[index])
+let place=places[index]
 
+let exists=favorites[currentCategory].some(p=>p.name===place.name)
+
+if(!exists){
+favorites[currentCategory].push(place)
 saveFavorites()
-
 updateFavorites()
+}
 
 swipe("right")
 
 }
 
-/* FAVORITES LIST */
+/* FAVORITE LIST */
 
 function updateFavorites(){
 
@@ -491,7 +520,6 @@ container.innerHTML=""
 favorites[type].forEach(place=>{
 
 let div=document.createElement("div")
-
 div.className="fav-item"
 div.innerText=place.name
 
@@ -532,6 +560,8 @@ let p=places[index]
 window.open("https://maps.google.com/?q="+p.name)
 
 }
+
+/* BACK */
 
 function back(){
 
