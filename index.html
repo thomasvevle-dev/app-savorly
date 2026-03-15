@@ -10,26 +10,61 @@
 <style>
 
 body{
+margin:0;
 font-family:Arial;
 background:#111;
 color:white;
-margin:0;
 display:flex;
 flex-direction:column;
 align-items:center;
 }
 
-/* start screen */
+/* top bar */
+
+.topbar{
+width:100%;
+display:flex;
+justify-content:space-between;
+padding:12px 20px;
+box-sizing:border-box;
+}
+
+.top-btn{
+background:#222;
+border:none;
+padding:8px 15px;
+border-radius:20px;
+color:white;
+cursor:pointer;
+}
+
+/* favorites page */
+
+#favorites-page{
+display:none;
+width:100%;
+max-width:420px;
+}
+
+.favorite-item{
+background:#222;
+padding:15px;
+margin:10px;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* category */
 
 #start-screen{
-margin-top:120px;
+margin-top:100px;
 text-align:center;
 }
 
 .category{
 background:#222;
-border-radius:30px;
-padding:15px 25px;
+padding:12px 20px;
+border-radius:20px;
 margin:10px;
 display:inline-block;
 cursor:pointer;
@@ -39,31 +74,19 @@ cursor:pointer;
 background:#4CAF50;
 }
 
-#start-btn{
-margin-top:20px;
-padding:12px 30px;
-border:none;
-border-radius:20px;
-background:#4CAF50;
-color:white;
-font-size:16px;
-cursor:pointer;
-}
-
-/* swipe cards */
+/* cards */
 
 #card-stack{
 position:relative;
 width:360px;
 height:520px;
-margin-top:30px;
+margin-top:20px;
 }
 
 .card{
 position:absolute;
 width:100%;
 height:100%;
-background:#222;
 border-radius:20px;
 overflow:hidden;
 box-shadow:0 10px 30px rgba(0,0,0,0.5);
@@ -71,50 +94,55 @@ box-shadow:0 10px 30px rgba(0,0,0,0.5);
 
 .card img{
 width:100%;
-height:300px;
+height:100%;
 object-fit:cover;
 }
 
-.info{
-padding:15px;
+/* overlay */
+
+.overlay{
+position:absolute;
+bottom:0;
+width:100%;
+padding:20px;
+background:linear-gradient(transparent, rgba(0,0,0,0.8));
 }
 
 .place-name{
-font-size:22px;
+font-size:24px;
 font-weight:bold;
 }
 
 .rating{
 color:#FFD700;
-margin-top:5px;
-}
-
-.type{
-color:#ccc;
-font-size:14px;
+margin-top:4px;
 }
 
 .buttons{
 display:flex;
-justify-content:space-between;
+gap:10px;
 margin-top:10px;
 }
 
 .small-btn{
 background:#2196F3;
 border:none;
-padding:8px 12px;
+padding:6px 10px;
 border-radius:6px;
 color:white;
-cursor:pointer;
 font-size:12px;
+cursor:pointer;
 }
 
+/* swipe buttons */
+
 .swipe-buttons{
+position:absolute;
+bottom:20px;
+width:100%;
 display:flex;
 justify-content:center;
-gap:20px;
-margin-top:15px;
+gap:25px;
 }
 
 .swipe-buttons button{
@@ -135,20 +163,27 @@ cursor:pointer;
 
 <body>
 
+<div class="topbar">
+
+<button class="top-btn" onclick="showFavorites()">⭐ Favoritter</button>
+
+</div>
+
+<div id="favorites-page"></div>
+
 <div id="start-screen">
 
-<h2>Hva vil du utforske?</h2>
+<h2>Velg kategori</h2>
 
 <div class="category" data-type="restaurant">Restaurant</div>
 <div class="category" data-type="bar">Vinbar</div>
 <div class="category" data-type="night_club">Cocktailbar</div>
 
-<br>
+<br><br>
 
-<button id="start-btn">Start</button>
+<button onclick="start()">Start</button>
 
 </div>
-
 
 <div id="card-stack" style="display:none"></div>
 
@@ -176,9 +211,10 @@ const curatedPlaces=[
 
 ]
 
-let selectedType=null
 let places=[]
+let favorites=[]
 let index=0
+let selectedType=null
 
 document.querySelectorAll(".category").forEach(el=>{
 
@@ -194,10 +230,10 @@ selectedType=el.dataset.type
 
 })
 
-document.getElementById("start-btn").onclick=()=>{
+function start(){
 
 if(!selectedType){
-alert("Velg kategori først")
+alert("Velg kategori")
 return
 }
 
@@ -219,13 +255,20 @@ curatedPlaces.forEach(name=>{
 service.findPlaceFromQuery({
 
 query:name+" oslo",
-fields:["name","photos","rating","types"]
+fields:["place_id"]
 
 },(results,status)=>{
 
-if(status==="OK"){
+if(status!=="OK") return
 
-let place=results[0]
+service.getDetails({
+
+placeId:results[0].place_id,
+fields:["name","rating","photos","types"]
+
+},(place,status)=>{
+
+if(status!=="OK") return
 
 if(!place.rating || place.rating<4) return
 
@@ -235,7 +278,7 @@ places.push(place)
 
 renderCards()
 
-}
+})
 
 })
 
@@ -254,7 +297,7 @@ places.slice(index,index+3).forEach((place,i)=>{
 let photo="https://via.placeholder.com/400"
 
 if(place.photos){
-photo=place.photos[0].getUrl({maxWidth:500})
+photo=place.photos[0].getUrl({maxWidth:600})
 }
 
 const card=document.createElement("div")
@@ -266,18 +309,17 @@ card.innerHTML=`
 
 <img src="${photo}">
 
-<div class="info">
+<div class="overlay">
 
 <div class="place-name">${place.name}</div>
-
 <div class="rating">⭐ ${place.rating}</div>
-
-<div class="type">${selectedType}</div>
 
 <div class="buttons">
 
 <button class="small-btn nav">Naviger</button>
 <button class="small-btn book">Book</button>
+
+</div>
 
 </div>
 
@@ -288,7 +330,6 @@ card.innerHTML=`
 
 </div>
 
-</div>
 `
 
 card.querySelector(".nav").onclick=()=>{
@@ -305,7 +346,12 @@ window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
 
 card.querySelector(".like").onclick=()=>{
 
+favorites.push(place)
+
+updateFavorites()
+
 card.remove()
+
 next()
 
 }
@@ -313,6 +359,7 @@ next()
 card.querySelector(".dislike").onclick=()=>{
 
 card.remove()
+
 next()
 
 }
@@ -332,6 +379,46 @@ index=0
 }
 
 renderCards()
+
+}
+
+function updateFavorites(){
+
+const list=document.getElementById("favorites-page")
+
+list.innerHTML=""
+
+favorites.forEach((place,i)=>{
+
+let div=document.createElement("div")
+
+div.className="favorite-item"
+
+div.innerText=place.name
+
+div.onclick=()=>{
+
+index=i
+
+list.style.display="none"
+
+renderCards()
+
+}
+
+list.appendChild(div)
+
+})
+
+}
+
+function showFavorites(){
+
+const page=document.getElementById("favorites-page")
+
+page.style.display="block"
+
+document.getElementById("card-stack").style.display="none"
 
 }
 
