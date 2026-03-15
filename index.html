@@ -19,18 +19,31 @@ flex-direction:column;
 align-items:center;
 }
 
-/* FAVORITT BUTTON */
+/* TOP BUTTONS */
 
-.fav-button{
-margin-top:15px;
-background:transparent;
+.top-left{
+position:absolute;
+left:15px;
+top:15px;
+background:none;
 border:none;
+font-size:22px;
 color:white;
-font-size:16px;
 cursor:pointer;
 }
 
-/* FAVORITTER SIDE */
+.top-right{
+position:absolute;
+right:15px;
+top:15px;
+background:none;
+border:none;
+font-size:18px;
+color:white;
+cursor:pointer;
+}
+
+/* FAVORITTER */
 
 #favorites-page{
 display:none;
@@ -106,11 +119,10 @@ bottom:0;
 width:100%;
 padding:20px;
 background:linear-gradient(transparent,rgba(0,0,0,0.8));
-text-align:center;
 }
 
 .place-name{
-font-size:24px;
+font-size:22px;
 font-weight:bold;
 }
 
@@ -124,30 +136,32 @@ margin-top:4px;
 .bottom-buttons{
 display:flex;
 justify-content:center;
-gap:10px;
+gap:15px;
 margin-top:10px;
 }
 
-.small-btn{
+.icon-btn{
 background:#2196F3;
 border:none;
-padding:6px 12px;
-border-radius:6px;
+width:45px;
+height:45px;
+border-radius:50%;
+font-size:18px;
 color:white;
 cursor:pointer;
 }
 
-/* LIKE / DISLIKE */
+/* LIKE DISLIKE */
 
 .x-btn{
 position:absolute;
 left:15px;
 bottom:15px;
-width:60px;
-height:60px;
+width:45px;
+height:45px;
 border-radius:50%;
 border:none;
-font-size:22px;
+font-size:20px;
 background:#ff4d4d;
 cursor:pointer;
 }
@@ -156,11 +170,11 @@ cursor:pointer;
 position:absolute;
 right:15px;
 bottom:15px;
-width:60px;
-height:60px;
+width:45px;
+height:45px;
 border-radius:50%;
 border:none;
-font-size:22px;
+font-size:20px;
 background:#4CAF50;
 cursor:pointer;
 }
@@ -170,8 +184,6 @@ cursor:pointer;
 </head>
 
 <body>
-
-<button class="fav-button" onclick="showFavorites()">⭐ Favoritter</button>
 
 <div id="favorites-page"></div>
 
@@ -194,7 +206,6 @@ cursor:pointer;
 <script>
 
 const curatedPlaces=[
-
 "Libertine",
 "Territoriet",
 "Skaal Matbar",
@@ -212,7 +223,6 @@ const curatedPlaces=[
 "Le Benjamin",
 "Hyde",
 "Brasserie France"
-
 ]
 
 let places=[]
@@ -248,6 +258,20 @@ initMap()
 
 }
 
+function goBack(){
+
+document.getElementById("card-stack").style.display="none"
+document.getElementById("start-screen").style.display="block"
+
+}
+
+function showFavorites(){
+
+document.getElementById("favorites-page").style.display="block"
+document.getElementById("card-stack").style.display="none"
+
+}
+
 function initMap(){
 
 const map=new google.maps.Map(document.createElement("div"))
@@ -277,9 +301,7 @@ fields:["name","rating","photos","types"]
 if(status==="OK" && place.rating>=4){
 
 if(place.types.includes(selectedType)){
-
 places.push(place)
-
 }
 
 }
@@ -325,6 +347,9 @@ card.innerHTML=`
 
 <img src="${photo}">
 
+<button class="top-left" onclick="goBack()">⬅</button>
+<button class="top-right" onclick="showFavorites()">⭐</button>
+
 <div class="overlay">
 
 <div class="place-name">${place.name}</div>
@@ -332,8 +357,8 @@ card.innerHTML=`
 
 <div class="bottom-buttons">
 
-<button class="small-btn nav">Naviger</button>
-<button class="small-btn book">Book</button>
+<button class="icon-btn nav">📍</button>
+<button class="icon-btn book">📅</button>
 
 </div>
 
@@ -359,11 +384,8 @@ window.open(`https://www.google.com/maps/search/?api=1&query=${place.name}`)
 card.querySelector(".like-btn").onclick=()=>{
 
 favorites.push(place)
-
 updateFavorites()
-
 card.remove()
-
 next()
 
 }
@@ -371,7 +393,6 @@ next()
 card.querySelector(".x-btn").onclick=()=>{
 
 card.remove()
-
 next()
 
 }
@@ -422,13 +443,6 @@ renderCards()
 list.appendChild(div)
 
 })
-
-}
-
-function showFavorites(){
-
-document.getElementById("favorites-page").style.display="block"
-document.getElementById("card-stack").style.display="none"
 
 }
 
