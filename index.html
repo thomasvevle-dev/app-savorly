@@ -15,6 +15,8 @@ overflow:hidden;
 color:white;
 }
 
+/* MAP */
+
 #map{
 width:1px;
 height:1px;
@@ -54,7 +56,7 @@ cursor:pointer;
 touch-action:none;
 }
 
-/* CARD STACK */
+/* CARD */
 
 #cardStack{
 position:fixed;
@@ -71,7 +73,6 @@ width:100%;
 height:100%;
 border-radius:24px;
 overflow:hidden;
-transition:transform .3s ease;
 }
 
 .photo{
@@ -84,7 +85,7 @@ object-fit:cover;
 
 .overlay{
 position:absolute;
-bottom:120px;
+bottom:140px;
 left:24px;
 z-index:10;
 }
@@ -150,12 +151,15 @@ bottom:40px;
 width:100%;
 display:flex;
 justify-content:space-evenly;
+align-items:center;
 z-index:10;
 }
 
 .action{
-font-size:32px;
+font-size:34px;
 cursor:pointer;
+width:70px;
+text-align:center;
 }
 
 </style>
@@ -311,8 +315,15 @@ card1.innerHTML=`
 </div>
 
 <div class="buttons">
+
 <div class="action" onclick="skip()">❌</div>
+
+<div class="action" onclick="navigate()">📍</div>
+
+<div class="action" onclick="book()">📅</div>
+
 <div class="action" onclick="like()">❤️</div>
+
 </div>
 
 `
@@ -357,6 +368,33 @@ if(i===photoIndex)bar.classList.add("active")
 indicator.appendChild(bar)
 
 })
+
+}
+
+/* NAVIGATE */
+
+function navigate(){
+
+let place=places[index]
+
+let url=
+"https://www.google.com/maps/search/?api=1&query="
++encodeURIComponent(place+" Oslo")
+
+window.open(url)
+
+}
+
+/* BOOKING */
+
+function book(){
+
+let place=places[index]
+
+let url="https://www.google.com/search?q="
++encodeURIComponent(place+" restaurant booking")
+
+window.open(url)
 
 }
 
