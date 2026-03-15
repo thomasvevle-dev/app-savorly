@@ -114,15 +114,6 @@ justify-content:space-evenly;
 font-size:34px;
 }
 
-.topbtn{
-position:absolute;
-top:30px;
-font-size:28px;
-}
-
-.back{left:20px}
-.undo{right:20px}
-
 </style>
 </head>
 
@@ -164,6 +155,8 @@ let history=[]
 let currentType=""
 let placesService
 
+const imageCache={}
+
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
 winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
@@ -173,12 +166,9 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 const deck=document.getElementById("deck")
 
 async function loadData(){
-
 const res=await fetch("data/places.json")
 data=await res.json()
-
 renderFavorites()
-
 }
 
 loadData()
@@ -192,16 +182,12 @@ placesService=new google.maps.places.PlacesService(map)
 }
 
 function openCategory(type){
-
 currentType=type
 list=data[type]
 index=0
-
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
-
 buildDeck()
-
 }
 
 function buildDeck(){
@@ -209,11 +195,8 @@ function buildDeck(){
 deck.innerHTML=""
 
 for(let i=index;i<index+3;i++){
-
 if(!list[i])continue
-
 createCard(list[i])
-
 }
 
 }
@@ -223,31 +206,15 @@ function createCard(name){
 const card=document.createElement("div")
 card.className="card"
 
-searchPlace(name,(place)=>{
+loadPlace(name).then(place=>{
 
-let photos=[]
-
-if(place.photos){
-for(let i=0;i<Math.min(3,place.photos.length);i++){
-photos.push(place.photos[i].getUrl({maxWidth:1200}))
-}
-}
-
-if(photos.length===0){
-photos=[
-"https://source.unsplash.com/featured/?restaurant",
-"https://source.unsplash.com/featured/?food",
-"https://source.unsplash.com/featured/?wine"
-]
-}
+let photos=place.photos
 
 let photoIndex=0
 
 card.innerHTML=`
-<img src="${photos[0]}">
 
-<div class="topbtn back" onclick="goHome()">←</div>
-<div class="topbtn undo" onclick="undo()">↩</div>
+<img src="${photos[0]}">
 
 <div class="info">
 <div class="name">${place.name}</div>
@@ -275,20 +242,69 @@ deck.appendChild(card)
 
 }
 
-function searchPlace(name,callback){
+function loadPlace(name){
+
+return new Promise(resolve=>{
+
+if(imageCache[name]){
+resolve(imageCache[name])
+return
+}
 
 placesService.findPlaceFromQuery({
 query:name+" Oslo",
 fields:["name","rating","photos"]
 },(results,status)=>{
 
+let photos=[]
+
 if(status===google.maps.places.PlacesServiceStatus.OK){
-callback(results[0])
+
+let p=results[0]
+
+if(p.photos){
+
+for(let i=0;i<Math.min(3,p.photos.length);i++){
+photos.push(p.photos[i].getUrl({maxWidth:1200}))
+}
+
+}
+
+let place={
+name:p.name,
+rating:p.rating,
+photos:photos
+}
+
+if(photos.length===0){
+place.photos=fallbackImages()
+}
+
+imageCache[name]=place
+resolve(place)
+
 }else{
-callback({name:name})
+
+resolve({
+name:name,
+photos:fallbackImages()
+})
+
 }
 
 })
+
+})
+
+}
+
+function fallbackImages(){
+
+return[
+"https://source.unsplash.com/featured/?restaurant",
+"https://source.unsplash.com/featured/?food",
+"https://source.unsplash.com/featured/?cocktail"
+]
 
 }
 
@@ -336,17 +352,6 @@ index++
 buildDeck()
 }
 
-function undo(){
-if(history.length===0)return
-index=history.pop()
-buildDeck()
-}
-
-function goHome(){
-deck.style.display="none"
-document.getElementById("home").style.display="flex"
-}
-
 function renderFavorites(){
 renderFavCategory("restaurants")
 renderFavCategory("winebars")
@@ -366,9 +371,31 @@ el.innerText=name
 
 enableFavSwipe(el,type,name)
 
-el.onclick=()=>openFromFavorite(type,name)
-
 box.appendChild(el)
+
+})
+
+}
+
+function enableFavSwipe(el,type,name){
+
+let startX
+
+el.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+})
+
+el.addEventListener("touchend",e=>{
+
+let diff=e.changedTouches[0].clientX-startX
+
+if(Math.abs(diff)>120){
+
+favorites[type]=favorites[type].filter(x=>x!==name)
+localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
+renderFavorites()
+
+}
 
 })
 
@@ -383,38 +410,6 @@ el.classList.remove("hidden")
 }else{
 el.classList.add("hidden")
 }
-
-}
-
-function enableFavSwipe(el,type,name){
-
-let startX
-
-el.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
-
-el.addEventListener("touchend",e=>{
-let diff=e.changedTouches[0].clientX-startX
-
-if(Math.abs(diff)>120){
-favorites[type]=favorites[type].filter(x=>x!==name)
-localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
-renderFavorites()
-}
-})
-
-}
-
-function openFromFavorite(type,name){
-
-list=data[type]
-index=list.indexOf(name)
-
-document.getElementById("home").style.display="none"
-deck.style.display="flex"
-
-buildDeck()
 
 }
 
