@@ -22,7 +22,7 @@ align-items:center;
 #card-stack{
 position:relative;
 width:340px;
-height:470px;
+height:480px;
 margin-top:30px;
 }
 
@@ -36,10 +36,37 @@ overflow:hidden;
 box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
 
-.card img{
+.image-container{
+position:relative;
 width:100%;
 height:240px;
+overflow:hidden;
+}
+
+.image-container img{
+width:100%;
+height:100%;
 object-fit:cover;
+}
+
+.photo-dots{
+position:absolute;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:6px;
+}
+
+.dot{
+width:8px;
+height:8px;
+border-radius:50%;
+background:#aaa;
+}
+
+.dot.active{
+background:white;
 }
 
 .info{
@@ -79,8 +106,8 @@ background:#ff4d4d;
 background:#4CAF50;
 }
 
-.map-btn{
-margin-top:10px;
+.action-btn{
+margin-top:8px;
 background:#2196F3;
 padding:8px;
 border-radius:8px;
@@ -130,23 +157,43 @@ zoom:13
 
 const service = new google.maps.places.PlacesService(map)
 
+let types=["restaurant","bar","night_club"]
+
+types.forEach(type=>{
+
 service.nearbySearch({
 
 location:{lat:59.9139,lng:10.7522},
-radius:3000,
-type:"restaurant"
+radius:3500,
+type:type
 
 },(results,status)=>{
 
 if(status===google.maps.places.PlacesServiceStatus.OK){
 
-places=results.filter(p=>p.rating && p.rating>=4.2)
+let filtered = results.filter(place => {
+
+if(!place.rating) return false
+if(place.rating < 4) return false
+
+let name = place.name.toLowerCase()
+
+if(name.includes("hotel")) return false
+if(name.includes("hostel")) return false
+
+return true
+
+})
+
+places=[...places,...filtered]
 
 shufflePlaces()
 
 renderCards()
 
 }
+
+})
 
 })
 
@@ -164,11 +211,21 @@ stack.innerHTML=""
 
 places.slice(index,index+5).forEach((place,i)=>{
 
-let photo="https://via.placeholder.com/400x240"
+let photos=[]
 
 if(place.photos){
-photo=place.photos[0].getUrl({maxWidth:400})
+
+place.photos.slice(0,3).forEach(p=>{
+photos.push(p.getUrl({maxWidth:400}))
+})
+
 }
+
+if(photos.length===0){
+photos=["https://via.placeholder.com/400x240"]
+}
+
+let photoIndex=0
 
 const card=document.createElement("div")
 
@@ -177,7 +234,15 @@ card.style.zIndex=100-i
 
 card.innerHTML=`
 
-<img src="${photo}">
+<div class="image-container">
+
+<img src="${photos[0]}" class="photo">
+
+<div class="photo-dots">
+${photos.map((_,i)=>`<div class="dot ${i==0?"active":""}"></div>`).join("")}
+</div>
+
+</div>
 
 <div class="info">
 
@@ -185,7 +250,9 @@ card.innerHTML=`
 
 <div class="rating">⭐ ${place.rating}</div>
 
-<button class="map-btn">📍 Naviger hit</button>
+<button class="action-btn nav">📍 Naviger</button>
+
+<button class="action-btn book">📅 Book bord</button>
 
 <div class="buttons">
 
@@ -197,17 +264,44 @@ card.innerHTML=`
 </div>
 `
 
-addEvents(card,place)
+const img=card.querySelector(".photo")
+const dots=card.querySelectorAll(".dot")
 
-stack.appendChild(card)
+let startX=0
+
+card.querySelector(".image-container").addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+})
+
+card.querySelector(".image-container").addEventListener("touchend",e=>{
+
+let diff=e.changedTouches[0].clientX-startX
+
+if(diff<-50 && photoIndex<photos.length-1){
+photoIndex++
+}
+
+if(diff>50 && photoIndex>0){
+photoIndex--
+}
+
+img.src=photos[photoIndex]
+
+dots.forEach((d,i)=>{
+d.classList.toggle("active",i===photoIndex)
+})
 
 })
 
+card.querySelector(".nav").onclick=()=>{
+
+window.open(
+`https://www.google.com/maps/search/?api=1&query=${place.name}`
+)
+
 }
 
-function addEvents(card,place){
-
-card.querySelector(".map-btn").onclick=()=>{
+card.querySelector(".book").onclick=()=>{
 
 window.open(
 `https://www.google.com/maps/search/?api=1&query=${place.name}`
@@ -225,6 +319,10 @@ card.querySelector(".dislike").onclick=()=>{
 card.remove()
 next()
 }
+
+stack.appendChild(card)
+
+})
 
 }
 
