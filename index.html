@@ -44,6 +44,12 @@ background:#111;
 border:1px solid #333;
 text-align:center;
 font-size:22px;
+cursor:pointer;
+opacity:.5;
+}
+
+.cat.active{
+opacity:1;
 }
 
 .favoriteItem{
@@ -186,6 +192,7 @@ border-radius:16px;
 padding:14px 18px;
 font-size:28px;
 color:black;
+cursor:pointer;
 }
 
 </style>
@@ -197,9 +204,9 @@ color:black;
 
 <img src="logo.png" class="logo">
 
-<div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
-<div class="cat" onclick="openCategory('winebars')">Vinbar</div>
-<div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
+<div class="cat" id="cat-restaurants">Restaurant</div>
+<div class="cat" id="cat-winebars">Vinbar</div>
+<div class="cat" id="cat-cocktailbars">Cocktailbar</div>
 
 <div style="margin-top:40px;width:80%;max-width:420px">
 
@@ -229,21 +236,38 @@ let currentType=""
 let placesService
 let imageCache={}
 
+const deck=document.getElementById("deck")
+
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
 winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
 cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 }
 
-const deck=document.getElementById("deck")
-
 async function loadData(){
+
 const res=await fetch("data/places.json")
 data=await res.json()
+
+activateCategories()
+
 renderFavorites()
+
 }
 
 loadData()
+
+function activateCategories(){
+
+document.querySelectorAll(".cat").forEach(el=>{
+el.classList.add("active")
+})
+
+document.getElementById("cat-restaurants").onclick=()=>openCategory("restaurants")
+document.getElementById("cat-winebars").onclick=()=>openCategory("winebars")
+document.getElementById("cat-cocktailbars").onclick=()=>openCategory("cocktailbars")
+
+}
 
 function initMap(){
 const map=new google.maps.Map(document.getElementById("map"),{
@@ -259,6 +283,8 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
+if(!data) return
+
 currentType=type
 list=[...data[type]]
 
@@ -270,7 +296,6 @@ document.getElementById("home").style.display="none"
 deck.style.display="flex"
 
 preloadNext()
-
 buildDeck()
 
 }
@@ -378,7 +403,7 @@ loadPlace(next)
 function enableSwipe(card){
 
 let startX
-let currentX
+let currentX=0
 
 card.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
@@ -487,7 +512,6 @@ let name=list[index]
 if(!favorites[currentType].includes(name)){
 
 favorites[currentType].push(name)
-
 localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
 
 renderFavorites()
@@ -515,7 +539,6 @@ function undo(){
 if(history.length===0)return
 
 index=history.pop()
-
 buildDeck()
 
 }
@@ -585,7 +608,6 @@ let diff=e.changedTouches[0].clientX-startX
 if(Math.abs(diff)>100){
 
 favorites[type]=favorites[type].filter(x=>x!==name)
-
 localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
 
 renderFavorites()
