@@ -59,7 +59,7 @@ border:1px solid #333;
 
 .hidden{display:none}
 
-/* ---------- CARD DECK ---------- */
+/* ---------- DECK ---------- */
 
 #deck{
 position:absolute;
@@ -72,6 +72,8 @@ justify-content:center;
 align-items:center;
 }
 
+/* ---------- CARD ---------- */
+
 .card{
 position:absolute;
 width:95%;
@@ -81,11 +83,14 @@ overflow:hidden;
 background:black;
 transition:transform .35s ease;
 will-change:transform;
+z-index:2;
+touch-action:none;
 }
 
 .card.next{
 transform:scale(.96) translateY(10px);
 opacity:.55;
+z-index:1;
 }
 
 .card img{
@@ -112,7 +117,7 @@ rgba(0,0,0,.9)
 pointer-events:none;
 }
 
-/* bilde indikator */
+/* ---------- DOTS ---------- */
 
 .photoDots{
 position:absolute;
@@ -135,14 +140,14 @@ background:rgba(255,255,255,.4);
 background:white;
 }
 
-/* topp knapper */
+/* ---------- TOP BUTTONS ---------- */
 
 .topLeft,
 .topRight{
 position:absolute;
 top:24px;
 font-size:26px;
-background:rgba(255,255,255,.85);
+background:rgba(255,255,255,0.85);
 border-radius:14px;
 padding:10px 14px;
 color:black;
@@ -152,7 +157,7 @@ cursor:pointer;
 .topLeft{ left:20px }
 .topRight{ right:20px }
 
-/* info */
+/* ---------- INFO ---------- */
 
 .info{
 position:absolute;
@@ -170,7 +175,7 @@ font-size:18px;
 color:#E6C27A;
 }
 
-/* knapper */
+/* ---------- BUTTONS ---------- */
 
 .buttons{
 position:absolute;
@@ -226,9 +231,6 @@ cursor:pointer;
 /* ---------- STATE ---------- */
 
 let data=null
-let dataReady=false
-let placesReady=false
-
 let list=[]
 let index=0
 let history=[]
@@ -238,8 +240,6 @@ let placesService
 let imageCache={}
 
 const deck=document.getElementById("deck")
-
-/* ---------- FAVORITES ---------- */
 
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
@@ -252,13 +252,9 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 async function loadData(){
 
 try{
-
 const res=await fetch("data/places.json")
 data=await res.json()
-
 }catch(e){
-
-console.log("places.json ikke funnet")
 
 data={
 restaurants:[],
@@ -268,14 +264,13 @@ cocktailbars:[]
 
 }
 
-dataReady=true
 renderFavorites()
 
 }
 
 loadData()
 
-/* ---------- GOOGLE MAPS ---------- */
+/* ---------- MAP ---------- */
 
 function initMap(){
 
@@ -286,18 +281,11 @@ zoom:13
 
 placesService=new google.maps.places.PlacesService(map)
 
-placesReady=true
-
 }
 
 /* ---------- CATEGORY ---------- */
 
 function openCategory(type){
-
-if(!dataReady){
-alert("Laster steder...")
-return
-}
 
 currentType=type
 list=[...data[type]]
@@ -339,7 +327,7 @@ createCard(list[index+1],true)
 
 }
 
-/* ---------- CARD ---------- */
+/* ---------- CREATE CARD ---------- */
 
 function createCard(name,isNext){
 
@@ -388,7 +376,7 @@ setupGallery(card,place.photos)
 
 }
 
-/* ---------- RENDER ---------- */
+/* ---------- RENDER PLACE ---------- */
 
 function renderPlace(card,place){
 
@@ -398,7 +386,7 @@ card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
 
 }
 
-/* ---------- PHOTO GALLERY ---------- */
+/* ---------- PHOTO NAV ---------- */
 
 function setupGallery(card,photos){
 
@@ -434,12 +422,13 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 function enableSwipe(card){
 
 let startX
-let currentX
+let currentX=0
 let dragging=false
 
 card.addEventListener("pointerdown",e=>{
 dragging=true
 startX=e.clientX
+currentX=e.clientX
 })
 
 card.addEventListener("pointermove",e=>{
@@ -485,11 +474,9 @@ function like(){
 let name=list[index]
 
 if(!favorites[currentType].includes(name)){
-
 favorites[currentType].push(name)
 localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
 renderFavorites()
-
 }
 
 history.push(index)
@@ -571,7 +558,7 @@ function book(name){
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
-/* ---------- GOOGLE PLACES ---------- */
+/* ---------- GOOGLE PLACE ---------- */
 
 function loadPlace(name){
 
