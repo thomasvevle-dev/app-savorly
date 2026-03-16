@@ -16,7 +16,7 @@ background:#000;
 color:white;
 }
 
-/* ---------- HOME ---------- */
+/* HOME */
 
 #home{
 position:absolute;
@@ -59,7 +59,7 @@ border:1px solid #333;
 
 .hidden{display:none}
 
-/* ---------- DECK ---------- */
+/* DECK */
 
 #deck{
 position:absolute;
@@ -72,7 +72,7 @@ justify-content:center;
 align-items:center;
 }
 
-/* ---------- CARD ---------- */
+/* CARD */
 
 .card{
 position:absolute;
@@ -99,7 +99,7 @@ height:100%;
 object-fit:cover;
 }
 
-/* gradient nederste del */
+/* Lysere gradient */
 
 .card::after{
 content:"";
@@ -107,17 +107,17 @@ position:absolute;
 left:0;
 right:0;
 bottom:0;
-top:55%;
+top:60%;
 background:linear-gradient(
 to bottom,
 rgba(0,0,0,0),
-rgba(0,0,0,.45),
-rgba(0,0,0,.9)
+rgba(0,0,0,.35),
+rgba(0,0,0,.65)
 );
 pointer-events:none;
 }
 
-/* ---------- DOTS ---------- */
+/* DOTS */
 
 .photoDots{
 position:absolute;
@@ -140,14 +140,14 @@ background:rgba(255,255,255,.4);
 background:white;
 }
 
-/* ---------- TOP BUTTONS ---------- */
+/* TOP BUTTONS */
 
 .topLeft,
 .topRight{
 position:absolute;
 top:24px;
 font-size:26px;
-background:rgba(255,255,255,0.85);
+background:rgba(255,255,255,0.9);
 border-radius:14px;
 padding:10px 14px;
 color:black;
@@ -157,7 +157,7 @@ cursor:pointer;
 .topLeft{ left:20px }
 .topRight{ right:20px }
 
-/* ---------- INFO ---------- */
+/* INFO */
 
 .info{
 position:absolute;
@@ -175,23 +175,28 @@ font-size:18px;
 color:#E6C27A;
 }
 
-/* ---------- BUTTONS ---------- */
+/* PREMIUM BUTTON BAR */
 
 .buttons{
 position:absolute;
-bottom:30px;
+bottom:50px;
 left:20px;
 right:20px;
+
 display:flex;
 justify-content:space-around;
-background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.4));
+
+background:rgba(20,20,20,0.55);
 backdrop-filter:blur(20px);
+
 border-radius:26px;
 padding:18px;
+
+border:1px solid rgba(255,255,255,0.15);
 }
 
 .buttons div{
-font-size:28px;
+font-size:32px;
 cursor:pointer;
 }
 
@@ -228,17 +233,15 @@ cursor:pointer;
 
 <script>
 
-/* ---------- STATE ---------- */
+/* STATE */
 
 let data=null
 let list=[]
 let index=0
 let history=[]
 let currentType=""
-
 let placesService
 let imageCache={}
-
 const deck=document.getElementById("deck")
 
 let favorites={
@@ -247,7 +250,7 @@ winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
 cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 }
 
-/* ---------- LOAD DATA ---------- */
+/* DATA */
 
 async function loadData(){
 
@@ -255,13 +258,7 @@ try{
 const res=await fetch("data/places.json")
 data=await res.json()
 }catch(e){
-
-data={
-restaurants:[],
-winebars:[],
-cocktailbars:[]
-}
-
+data={restaurants:[],winebars:[],cocktailbars:[]}
 }
 
 renderFavorites()
@@ -270,7 +267,7 @@ renderFavorites()
 
 loadData()
 
-/* ---------- MAP ---------- */
+/* MAP */
 
 function initMap(){
 
@@ -283,7 +280,7 @@ placesService=new google.maps.places.PlacesService(map)
 
 }
 
-/* ---------- CATEGORY ---------- */
+/* CATEGORY */
 
 function openCategory(type){
 
@@ -302,13 +299,13 @@ buildDeck()
 
 }
 
-/* ---------- SHUFFLE ---------- */
+/* SHUFFLE */
 
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
-/* ---------- BUILD DECK ---------- */
+/* BUILD DECK */
 
 function buildDeck(){
 
@@ -327,7 +324,7 @@ createCard(list[index+1],true)
 
 }
 
-/* ---------- CREATE CARD ---------- */
+/* CREATE CARD */
 
 function createCard(name,isNext){
 
@@ -355,10 +352,10 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="dislike()">❌</div>
+<div onclick="swipeLeft()">❌</div>
 <div onclick="navigate('${name}')">📍</div>
 <div onclick="book('${name}')">📅</div>
-<div onclick="like()">❤️</div>
+<div onclick="swipeRight()">❤️</div>
 </div>
 `
 
@@ -376,7 +373,7 @@ setupGallery(card,place.photos)
 
 }
 
-/* ---------- RENDER PLACE ---------- */
+/* PLACE RENDER */
 
 function renderPlace(card,place){
 
@@ -386,7 +383,7 @@ card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
 
 }
 
-/* ---------- PHOTO NAV ---------- */
+/* PHOTO TAP NAVIGATION */
 
 function setupGallery(card,photos){
 
@@ -417,7 +414,7 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 }
 
-/* ---------- SWIPE ---------- */
+/* SWIPE */
 
 function enableSwipe(card){
 
@@ -467,7 +464,33 @@ card.style.transform="translate3d(0,0,0)"
 
 }
 
-/* ---------- ACTIONS ---------- */
+/* BUTTON SWIPES */
+
+function swipeRight(){
+
+const card=document.querySelector(".card:not(.next)")
+if(!card) return
+
+card.style.transition="transform .35s ease"
+card.style.transform="translate3d(120vw,0,0) rotate(20deg)"
+
+setTimeout(like,250)
+
+}
+
+function swipeLeft(){
+
+const card=document.querySelector(".card:not(.next)")
+if(!card) return
+
+card.style.transition="transform .35s ease"
+card.style.transform="translate3d(-120vw,0,0) rotate(-20deg)"
+
+setTimeout(dislike,250)
+
+}
+
+/* ACTIONS */
 
 function like(){
 
@@ -505,7 +528,7 @@ buildDeck()
 
 }
 
-/* ---------- FAVORITES ---------- */
+/* FAVORITES */
 
 function toggleFav(type){
 document.getElementById("fav-"+type).classList.toggle("hidden")
@@ -548,7 +571,7 @@ buildDeck()
 
 }
 
-/* ---------- LINKS ---------- */
+/* LINKS */
 
 function navigate(name){
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
@@ -558,7 +581,7 @@ function book(name){
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
-/* ---------- GOOGLE PLACE ---------- */
+/* GOOGLE PLACE */
 
 function loadPlace(name){
 
@@ -610,7 +633,7 @@ photos:photos
 
 }
 
-/* ---------- FALLBACK ---------- */
+/* FALLBACK */
 
 function fallback(name){
 return{
@@ -624,7 +647,7 @@ photos:[
 }
 }
 
-/* ---------- HOME ---------- */
+/* HOME */
 
 function goHome(){
 deck.style.display="none"
