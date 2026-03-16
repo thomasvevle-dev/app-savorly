@@ -150,11 +150,21 @@ font-size:30px;
 }
 
 .loader{
+width:40px;
+height:40px;
+border:4px solid rgba(255,255,255,.2);
+border-top:4px solid white;
+border-radius:50%;
+animation:spin 1s linear infinite;
 position:absolute;
 top:50%;
 left:50%;
 transform:translate(-50%,-50%);
-opacity:.6;
+}
+
+@keyframes spin{
+0%{transform:rotate(0)}
+100%{transform:rotate(360deg)}
 }
 
 </style>
@@ -247,10 +257,8 @@ function buildDeck(){
 deck.innerHTML=""
 
 if(index>=list.length){
-
 shuffle(list)
 index=0
-
 }
 
 createCard(list[index],false)
@@ -268,7 +276,7 @@ card.className="card"
 
 if(isNext) card.classList.add("next")
 
-card.innerHTML=`<div class="loader">Loading…</div>`
+card.innerHTML=`<div class="loader"></div>`
 
 loadPlace(name).then(place=>{
 
@@ -326,137 +334,22 @@ deck.appendChild(card)
 
 }
 
-function loadPlace(name){
+function openFavorite(type,name){
 
-return new Promise(resolve=>{
+currentType=type
+list=[...data[type]]
 
-if(imageCache[name]){
-resolve(imageCache[name])
-return
-}
+let i=list.indexOf(name)
 
-placesService.findPlaceFromQuery({
-query:name+" Oslo",
-fields:["place_id"]
-},(results,status)=>{
+if(i===-1) return
 
-if(status!==google.maps.places.PlacesServiceStatus.OK){
-resolve(fallback(name))
-return
-}
+index=i
 
-placesService.getDetails({
-placeId:results[0].place_id,
-fields:["name","rating","photos"]
-},(place,status)=>{
-
-let photos=[]
-
-if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
-
-for(let i=0;i<Math.min(3,place.photos.length);i++){
-photos.push(place.photos[i].getUrl({maxWidth:1200}))
-}
-
-}
-
-while(photos.length<3){
-photos.push("https://source.unsplash.com/featured/?restaurant")
-}
-
-let result={
-name:place?.name||name,
-rating:place?.rating||"",
-photos:photos
-}
-
-imageCache[name]=result
-
-resolve(result)
-
-})
-
-})
-
-})
-
-}
-
-function enableSwipe(card){
-
-let startX
-
-card.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
-
-card.addEventListener("touchmove",e=>{
-const diff=e.touches[0].clientX-startX
-card.style.transform=`translateX(${diff}px) rotate(${diff/20}deg)`
-})
-
-card.addEventListener("touchend",e=>{
-
-const diff=e.changedTouches[0].clientX-startX
-
-if(diff>120) like()
-else if(diff<-120) dislike()
-else card.style.transform=""
-
-})
-
-}
-
-function like(){
-
-let name=list[index]
-
-if(!favorites[currentType].includes(name)){
-
-favorites[currentType].push(name)
-
-localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
-
-renderFavorites()
-
-}
-
-next()
-
-}
-
-function dislike(){next()}
-
-function next(){
-
-history.push(index)
-
-index++
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
 
 buildDeck()
 
-}
-
-function undo(){
-
-if(history.length===0)return
-
-index=history.pop()
-
-buildDeck()
-
-}
-
-function goHome(){
-
-deck.style.display="none"
-
-document.getElementById("home").style.display="flex"
-
-}
-
-function toggleFav(type){
-document.getElementById("fav-"+type).classList.toggle("hidden")
 }
 
 function renderFavorites(){
@@ -471,6 +364,8 @@ favorites[type].forEach(name=>{
 const el=document.createElement("div")
 el.className="favoriteItem"
 el.innerText=name
+
+el.onclick=()=>openFavorite(type,name)
 
 enableFavSwipe(el,type,name)
 
