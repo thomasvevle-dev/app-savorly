@@ -149,24 +149,6 @@ right:20px;
 font-size:30px;
 }
 
-.loader{
-width:40px;
-height:40px;
-border:4px solid rgba(255,255,255,.2);
-border-top:4px solid white;
-border-radius:50%;
-animation:spin 1s linear infinite;
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-}
-
-@keyframes spin{
-0%{transform:rotate(0)}
-100%{transform:rotate(360deg)}
-}
-
 </style>
 </head>
 
@@ -276,16 +258,9 @@ card.className="card"
 
 if(isNext) card.classList.add("next")
 
-card.innerHTML=`<div class="loader"></div>`
-
-loadPlace(name).then(place=>{
-
-let photos=place.photos
-let photoIndex=0
-
 card.innerHTML=`
 
-<img id="photo" src="${photos[0]}">
+<img id="photo" src="https://source.unsplash.com/featured/?restaurant">
 
 <div class="photoDots">
 <span class="dot active"></span>
@@ -297,19 +272,37 @@ card.innerHTML=`
 <div class="topRight">↩</div>
 
 <div class="info">
-<div class="name">${place.name}</div>
-<div class="rating">⭐ ${place.rating||""}</div>
+<div class="name">${name}</div>
+<div class="rating">⭐</div>
 </div>
 
 <div class="buttons">
 <div onclick="dislike()">❌</div>
-<div onclick="navigate('${place.name}')">📍</div>
-<div onclick="book('${place.name}')">📅</div>
+<div onclick="navigate('${name}')">📍</div>
+<div onclick="book('${name}')">📅</div>
 <div onclick="like()">❤️</div>
 </div>
+
 `
 
+deck.appendChild(card)
+
+card.querySelector(".topLeft").onclick=goHome
+card.querySelector(".topRight").onclick=undo
+
+enableSwipe(card)
+
+loadPlace(name).then(place=>{
+
+let photos=place.photos
+let photoIndex=0
+
 const img=card.querySelector("#photo")
+
+img.src=photos[0]
+
+card.querySelector(".name").innerText=place.name
+card.querySelector(".rating").innerText="⭐ "+(place.rating||"")
 
 card.addEventListener("click",e=>{
 
@@ -323,14 +316,7 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 })
 
-card.querySelector(".topLeft").onclick=goHome
-card.querySelector(".topRight").onclick=undo
-
-enableSwipe(card)
-
 })
-
-deck.appendChild(card)
 
 }
 
@@ -408,23 +394,15 @@ card.addEventListener("touchend",e=>{
 const diff=e.changedTouches[0].clientX-startX
 
 if(diff>120){
-
 card.style.transform="translateX(120vw) rotate(25deg)"
 setTimeout(like,200)
-
 }
-
 else if(diff<-120){
-
 card.style.transform="translateX(-120vw) rotate(-25deg)"
 setTimeout(dislike,200)
-
 }
-
 else{
-
 card.style.transform=""
-
 }
 
 })
