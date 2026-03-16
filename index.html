@@ -72,12 +72,12 @@ height:92%;
 border-radius:26px;
 overflow:hidden;
 background:black;
-transition:transform .35s ease, opacity .35s ease;
+transition:transform .35s ease;
 z-index:2;
 }
 
 .card.next{
-transform:scale(.96) translateY(8px);
+transform:scale(.96) translateY(10px);
 opacity:.55;
 z-index:1;
 }
@@ -230,6 +230,8 @@ index=0
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
 
+preloadNext()
+
 buildDeck()
 
 }
@@ -322,17 +324,64 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 function preloadNext(){
 
-for(let i=1;i<=3;i++){
+for(let i=1;i<=5;i++){
 
 const next=list[index+i]
 
 if(next && !imageCache[next]){
-
 loadPlace(next)
-
 }
 
 }
+
+}
+
+function enableSwipe(card){
+
+let startX
+let currentX
+
+card.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+})
+
+card.addEventListener("touchmove",e=>{
+
+currentX=e.touches[0].clientX
+const diff=currentX-startX
+
+card.style.transition="none"
+card.style.transform=`translateX(${diff}px) rotate(${diff/12}deg)`
+
+})
+
+card.addEventListener("touchend",()=>{
+
+const diff=currentX-startX
+
+card.style.transition="transform .35s ease"
+
+if(diff>120){
+
+card.style.transform="translateX(120vw) rotate(25deg)"
+setTimeout(like,250)
+
+}
+
+else if(diff<-120){
+
+card.style.transform="translateX(-120vw) rotate(-25deg)"
+setTimeout(dislike,250)
+
+}
+
+else{
+
+card.style.transform="translateX(0px) rotate(0deg)"
+
+}
+
+})
 
 }
 
@@ -392,55 +441,6 @@ resolve(result)
 
 }
 
-function enableSwipe(card){
-
-let startX
-let currentX
-
-card.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
-
-card.addEventListener("touchmove",e=>{
-
-currentX=e.touches[0].clientX
-const diff=currentX-startX
-
-card.style.transition="none"
-card.style.transform=`translateX(${diff}px) rotate(${diff/12}deg)`
-
-})
-
-card.addEventListener("touchend",()=>{
-
-const diff=currentX-startX
-
-card.style.transition="transform .35s ease"
-
-if(diff>120){
-
-card.style.transform="translateX(120vw) rotate(25deg)"
-setTimeout(like,250)
-
-}
-
-else if(diff<-120){
-
-card.style.transform="translateX(-120vw) rotate(-25deg)"
-setTimeout(dislike,250)
-
-}
-
-else{
-
-card.style.transform="translateX(0px) rotate(0deg)"
-
-}
-
-})
-
-}
-
 function like(){
 
 let name=list[index]
@@ -466,8 +466,6 @@ function next(){
 history.push(index)
 
 index++
-
-preloadNext()
 
 buildDeck()
 
