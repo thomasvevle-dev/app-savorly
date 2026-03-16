@@ -16,6 +16,8 @@ background:#000;
 color:white;
 }
 
+/* ---------- HOME ---------- */
+
 #home{
 position:absolute;
 top:0;
@@ -44,6 +46,7 @@ background:#111;
 border:1px solid #333;
 text-align:center;
 font-size:22px;
+cursor:pointer;
 }
 
 .favoriteItem{
@@ -55,6 +58,8 @@ border:1px solid #333;
 }
 
 .hidden{display:none}
+
+/* ---------- CARD DECK ---------- */
 
 #deck{
 position:absolute;
@@ -75,14 +80,12 @@ border-radius:26px;
 overflow:hidden;
 background:black;
 transition:transform .35s ease;
-z-index:2;
 will-change:transform;
 }
 
 .card.next{
 transform:scale(.96) translateY(10px);
 opacity:.55;
-z-index:1;
 }
 
 .card img{
@@ -90,6 +93,8 @@ width:100%;
 height:100%;
 object-fit:cover;
 }
+
+/* gradient nederste del */
 
 .card::after{
 content:"";
@@ -101,11 +106,13 @@ top:55%;
 background:linear-gradient(
 to bottom,
 rgba(0,0,0,0),
-rgba(0,0,0,.4),
-rgba(0,0,0,.85)
+rgba(0,0,0,.45),
+rgba(0,0,0,.9)
 );
 pointer-events:none;
 }
+
+/* bilde indikator */
 
 .photoDots{
 position:absolute;
@@ -113,7 +120,6 @@ top:16px;
 left:0;
 right:0;
 text-align:center;
-z-index:5;
 }
 
 .dot{
@@ -129,39 +135,42 @@ background:rgba(255,255,255,.4);
 background:white;
 }
 
+/* topp knapper */
+
 .topLeft,
 .topRight{
 position:absolute;
 top:24px;
 font-size:26px;
-background:rgba(255,255,255,0.85);
+background:rgba(255,255,255,.85);
 border-radius:14px;
 padding:10px 14px;
 color:black;
-z-index:5;
 cursor:pointer;
 }
 
-.topLeft{ left:20px; }
-.topRight{ right:20px; }
+.topLeft{ left:20px }
+.topRight{ right:20px }
+
+/* info */
 
 .info{
 position:absolute;
 bottom:170px;
 left:24px;
-z-index:5;
 }
 
 .name{
-font-family:'Playfair Display', serif;
+font-family:'Playfair Display',serif;
 font-size:36px;
-font-weight:500;
 }
 
 .rating{
 font-size:18px;
 color:#E6C27A;
 }
+
+/* knapper */
 
 .buttons{
 position:absolute;
@@ -170,16 +179,10 @@ left:20px;
 right:20px;
 display:flex;
 justify-content:space-around;
-background:linear-gradient(
-to top,
-rgba(0,0,0,.9),
-rgba(0,0,0,.4)
-);
+background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.4));
 backdrop-filter:blur(20px);
 border-radius:26px;
-padding:18px 10px;
-border:1px solid rgba(255,255,255,0.15);
-z-index:5;
+padding:18px;
 }
 
 .buttons div{
@@ -220,15 +223,23 @@ cursor:pointer;
 
 <script>
 
-let data
+/* ---------- STATE ---------- */
+
+let data=null
+let dataReady=false
+let placesReady=false
+
 let list=[]
 let index=0
 let history=[]
 let currentType=""
+
 let placesService
 let imageCache={}
 
 const deck=document.getElementById("deck")
+
+/* ---------- FAVORITES ---------- */
 
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
@@ -236,27 +247,57 @@ winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
 cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 }
 
+/* ---------- LOAD DATA ---------- */
+
 async function loadData(){
+
+try{
+
 const res=await fetch("data/places.json")
 data=await res.json()
+
+}catch(e){
+
+console.log("places.json ikke funnet")
+
+data={
+restaurants:[],
+winebars:[],
+cocktailbars:[]
+}
+
+}
+
+dataReady=true
 renderFavorites()
+
 }
 
 loadData()
 
+/* ---------- GOOGLE MAPS ---------- */
+
 function initMap(){
+
 const map=new google.maps.Map(document.getElementById("map"),{
 center:{lat:59.91,lng:10.75},
 zoom:13
 })
+
 placesService=new google.maps.places.PlacesService(map)
+
+placesReady=true
+
 }
 
-function shuffle(arr){
-return arr.sort(()=>Math.random()-0.5)
-}
+/* ---------- CATEGORY ---------- */
 
 function openCategory(type){
+
+if(!dataReady){
+alert("Laster steder...")
+return
+}
 
 currentType=type
 list=[...data[type]]
@@ -269,10 +310,17 @@ history=[]
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
 
-preloadNext()
 buildDeck()
 
 }
+
+/* ---------- SHUFFLE ---------- */
+
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5)
+}
+
+/* ---------- BUILD DECK ---------- */
 
 function buildDeck(){
 
@@ -290,6 +338,8 @@ createCard(list[index+1],true)
 }
 
 }
+
+/* ---------- CARD ---------- */
 
 function createCard(name,isNext){
 
@@ -317,10 +367,10 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="pressDislike()">❌</div>
+<div onclick="dislike()">❌</div>
 <div onclick="navigate('${name}')">📍</div>
 <div onclick="book('${name}')">📅</div>
-<div onclick="pressLike()">❤️</div>
+<div onclick="like()">❤️</div>
 </div>
 `
 
@@ -338,6 +388,8 @@ setupGallery(card,place.photos)
 
 }
 
+/* ---------- RENDER ---------- */
+
 function renderPlace(card,place){
 
 card.querySelector(".photo").src=place.photos[0]
@@ -346,12 +398,14 @@ card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
 
 }
 
+/* ---------- PHOTO GALLERY ---------- */
+
 function setupGallery(card,photos){
 
 let photoIndex=0
 const img=card.querySelector(".photo")
 
-card.addEventListener("pointerup",e=>{
+card.addEventListener("click",e=>{
 
 if(e.target.closest(".buttons")||
 e.target.closest(".topLeft")||
@@ -375,6 +429,8 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 }
 
+/* ---------- SWIPE ---------- */
+
 function enableSwipe(card){
 
 let startX
@@ -382,11 +438,12 @@ let currentX
 let dragging=false
 
 card.addEventListener("pointerdown",e=>{
-startX=e.clientX
 dragging=true
+startX=e.clientX
 })
 
 card.addEventListener("pointermove",e=>{
+
 if(!dragging)return
 
 currentX=e.clientX
@@ -407,11 +464,11 @@ card.style.transition="transform .35s ease"
 
 if(diff>120){
 card.style.transform="translate3d(120vw,0,0)"
-setTimeout(pressLike,250)
+setTimeout(like,250)
 }
 else if(diff<-120){
 card.style.transform="translate3d(-120vw,0,0)"
-setTimeout(pressDislike,250)
+setTimeout(dislike,250)
 }
 else{
 card.style.transform="translate3d(0,0,0)"
@@ -421,14 +478,18 @@ card.style.transform="translate3d(0,0,0)"
 
 }
 
-function pressLike(){
+/* ---------- ACTIONS ---------- */
+
+function like(){
 
 let name=list[index]
 
 if(!favorites[currentType].includes(name)){
+
 favorites[currentType].push(name)
 localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
 renderFavorites()
+
 }
 
 history.push(index)
@@ -438,10 +499,13 @@ buildDeck()
 
 }
 
-function pressDislike(){
+function dislike(){
+
 history.push(index)
 index++
+
 buildDeck()
+
 }
 
 function undo(){
@@ -449,23 +513,72 @@ function undo(){
 if(history.length===0)return
 
 index=history.pop()
+
 buildDeck()
 
 }
 
-function preloadNext(){
-for(let i=1;i<=5;i++){
-const next=list[index+i]
-if(next && !imageCache[next]) loadPlace(next)
+/* ---------- FAVORITES ---------- */
+
+function toggleFav(type){
+document.getElementById("fav-"+type).classList.toggle("hidden")
 }
+
+function renderFavorites(){
+
+["restaurants","winebars","cocktailbars"].forEach(type=>{
+
+const box=document.getElementById("fav-"+type)
+box.innerHTML=""
+
+favorites[type].forEach(name=>{
+
+const el=document.createElement("div")
+el.className="favoriteItem"
+el.innerText=name
+
+el.onclick=()=>openFavorite(type,name)
+
+box.appendChild(el)
+
+})
+
+})
+
 }
+
+function openFavorite(type,name){
+
+currentType=type
+list=[...data[type]]
+
+index=list.indexOf(name)
+
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
+
+buildDeck()
+
+}
+
+/* ---------- LINKS ---------- */
+
+function navigate(name){
+window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
+}
+
+function book(name){
+window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
+}
+
+/* ---------- GOOGLE PLACES ---------- */
 
 function loadPlace(name){
 
 return new Promise(resolve=>{
 
-if(imageCache[name]){
-resolve(imageCache[name])
+if(!placesService){
+resolve(fallback(name))
 return
 }
 
@@ -496,14 +609,11 @@ while(photos.length<3){
 photos.push("https://source.unsplash.com/featured/?restaurant")
 }
 
-let result={
+resolve({
 name:place?.name||name,
 rating:place?.rating||"",
 photos:photos
-}
-
-imageCache[name]=result
-resolve(result)
+})
 
 })
 
@@ -513,84 +623,7 @@ resolve(result)
 
 }
 
-function goHome(){
-deck.style.display="none"
-document.getElementById("home").style.display="flex"
-}
-
-function toggleFav(type){
-document.getElementById("fav-"+type).classList.toggle("hidden")
-}
-
-function renderFavorites(){
-
-["restaurants","winebars","cocktailbars"].forEach(type=>{
-
-const box=document.getElementById("fav-"+type)
-box.innerHTML=""
-
-favorites[type].forEach(name=>{
-
-const el=document.createElement("div")
-el.className="favoriteItem"
-el.innerText=name
-
-el.onclick=()=>openFavorite(type,name)
-
-enableFavSwipe(el,type,name)
-
-box.appendChild(el)
-
-})
-
-})
-
-}
-
-function openFavorite(type,name){
-
-currentType=type
-list=[...data[type]]
-index=list.indexOf(name)
-
-document.getElementById("home").style.display="none"
-deck.style.display="flex"
-
-buildDeck()
-
-}
-
-function enableFavSwipe(el,type,name){
-
-let startX
-
-el.addEventListener("pointerdown",e=>{
-startX=e.clientX
-})
-
-el.addEventListener("pointerup",e=>{
-
-let diff=e.clientX-startX
-
-if(Math.abs(diff)>100){
-
-favorites[type]=favorites[type].filter(x=>x!==name)
-localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
-renderFavorites()
-
-}
-
-})
-
-}
-
-function navigate(name){
-window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
-}
-
-function book(name){
-window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
-}
+/* ---------- FALLBACK ---------- */
 
 function fallback(name){
 return{
@@ -602,6 +635,13 @@ photos:[
 "https://source.unsplash.com/featured/?wine"
 ]
 }
+}
+
+/* ---------- HOME ---------- */
+
+function goHome(){
+deck.style.display="none"
+document.getElementById("home").style.display="flex"
 }
 
 </script>
