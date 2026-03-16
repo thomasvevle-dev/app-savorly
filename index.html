@@ -320,6 +320,22 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 }
 
+function preloadNext(){
+
+for(let i=1;i<=3;i++){
+
+const next=list[index+i]
+
+if(next && !imageCache[next]){
+
+loadPlace(next)
+
+}
+
+}
+
+}
+
 function loadPlace(name){
 
 return new Promise(resolve=>{
@@ -379,30 +395,46 @@ resolve(result)
 function enableSwipe(card){
 
 let startX
+let currentX
 
 card.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
 })
 
 card.addEventListener("touchmove",e=>{
-const diff=e.touches[0].clientX-startX
-card.style.transform=`translateX(${diff}px) rotate(${diff/15}deg)`
+
+currentX=e.touches[0].clientX
+const diff=currentX-startX
+
+card.style.transition="none"
+card.style.transform=`translateX(${diff}px) rotate(${diff/12}deg)`
+
 })
 
-card.addEventListener("touchend",e=>{
+card.addEventListener("touchend",()=>{
 
-const diff=e.changedTouches[0].clientX-startX
+const diff=currentX-startX
+
+card.style.transition="transform .35s ease"
 
 if(diff>120){
+
 card.style.transform="translateX(120vw) rotate(25deg)"
-setTimeout(like,200)
+setTimeout(like,250)
+
 }
+
 else if(diff<-120){
+
 card.style.transform="translateX(-120vw) rotate(-25deg)"
-setTimeout(dislike,200)
+setTimeout(dislike,250)
+
 }
+
 else{
-card.style.transform=""
+
+card.style.transform="translateX(0px) rotate(0deg)"
+
 }
 
 })
@@ -432,7 +464,11 @@ function dislike(){next()}
 function next(){
 
 history.push(index)
+
 index++
+
+preloadNext()
+
 buildDeck()
 
 }
@@ -442,6 +478,7 @@ function undo(){
 if(history.length===0)return
 
 index=history.pop()
+
 buildDeck()
 
 }
