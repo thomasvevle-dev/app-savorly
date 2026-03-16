@@ -90,20 +90,22 @@ height:100%;
 object-fit:cover;
 }
 
+/* NY PREMIUM GRADIENT */
+
 .card::after{
 content:"";
 position:absolute;
 left:0;
 right:0;
 bottom:0;
-top:60%;
+top:65%;
 
 background:linear-gradient(
 to bottom,
 rgba(0,0,0,0) 0%,
 rgba(0,0,0,0.35) 40%,
 rgba(0,0,0,0.65) 70%,
-rgba(0,0,0,0.85) 100%
+rgba(0,0,0,0.9) 100%
 );
 
 pointer-events:none;
@@ -130,16 +132,18 @@ background:rgba(255,255,255,.4);
 background:white;
 }
 
+/* TOPP IKONER */
+
 .topLeft,
 .topRight{
 position:absolute;
 top:24px;
-font-size:28px;
-color:white;
-background:rgba(0,0,0,0.35);
-backdrop-filter:blur(8px);
-border-radius:12px;
-padding:6px 10px;
+font-size:24px;
+color:black;
+background:rgba(255,255,255,0.85);
+backdrop-filter:blur(12px);
+border-radius:14px;
+padding:10px 12px;
 }
 
 .topLeft{ left:20px; }
@@ -164,22 +168,30 @@ color:#E6C27A;
 font-weight:500;
 }
 
+/* GLASS PANEL */
+
 .buttons{
 position:absolute;
 bottom:30px;
 left:20px;
 right:20px;
+
 display:flex;
 justify-content:space-around;
+
 background:rgba(255,255,255,0.15);
 backdrop-filter:blur(20px);
+
 border-radius:26px;
 padding:18px 10px;
+
 border:1px solid rgba(255,255,255,0.25);
 }
 
+/* SVARTE IKONER */
+
 .buttons div{
-background:rgba(255,255,255,0.35);
+background:rgba(255,255,255,0.85);
 border-radius:16px;
 padding:14px 18px;
 font-size:28px;
@@ -388,7 +400,7 @@ currentX=e.touches[0].clientX
 const diff=currentX-startX
 
 card.style.transition="none"
-card.style.transform=`translateX(${diff}px) rotate(${diff/12}deg)`
+card.style.transform=\`translateX(\${diff}px) rotate(\${diff/12}deg)\`
 
 })
 
@@ -595,11 +607,11 @@ renderFavorites()
 }
 
 function navigate(name){
-window.open(`https://maps.google.com/?q=${encodeURIComponent(name+" Oslo")}`)
+window.open(\`https://maps.google.com/?q=\${encodeURIComponent(name+" Oslo")}\`)
 }
 
 function book(name){
-window.open(`https://www.google.com/search?q=${encodeURIComponent(name+" booking")}`)
+window.open(\`https://www.google.com/search?q=\${encodeURIComponent(name+" booking")}\`)
 }
 
 function fallback(name){
