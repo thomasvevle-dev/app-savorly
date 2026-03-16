@@ -77,6 +77,7 @@ overflow:hidden;
 background:black;
 transition:transform .35s ease;
 z-index:2;
+will-change:transform;
 }
 
 .card.next{
@@ -103,8 +104,8 @@ top:65%;
 background:linear-gradient(
 to bottom,
 rgba(0,0,0,0) 0%,
-rgba(0,0,0,.4) 40%,
-rgba(0,0,0,.75) 70%,
+rgba(0,0,0,.35) 30%,
+rgba(0,0,0,.7) 60%,
 rgba(0,0,0,.95) 100%
 );
 pointer-events:none;
@@ -137,7 +138,7 @@ background:white;
 position:absolute;
 top:24px;
 font-size:26px;
-background:rgba(255,255,255,0.9);
+background:rgba(255,255,255,0.85);
 border-radius:14px;
 padding:10px 14px;
 color:black;
@@ -166,6 +167,8 @@ font-size:18px;
 color:#E6C27A;
 }
 
+/* premium gradient bar */
+
 .buttons{
 position:absolute;
 bottom:30px;
@@ -173,20 +176,25 @@ left:20px;
 right:20px;
 display:flex;
 justify-content:space-around;
-background:rgba(255,255,255,0.15);
+
+background:linear-gradient(
+to top,
+rgba(0,0,0,.85),
+rgba(0,0,0,.4)
+);
+
 backdrop-filter:blur(20px);
+
 border-radius:26px;
 padding:18px 10px;
-border:1px solid rgba(255,255,255,0.25);
+
+border:1px solid rgba(255,255,255,0.15);
+
 z-index:4;
 }
 
 .buttons div{
-background:rgba(255,255,255,0.9);
-border-radius:16px;
-padding:14px 18px;
 font-size:28px;
-color:black;
 cursor:pointer;
 }
 
@@ -230,6 +238,7 @@ let history=[]
 let currentType=""
 let placesService
 let imageCache={}
+
 const deck=document.getElementById("deck")
 
 let favorites={
@@ -262,6 +271,7 @@ function openCategory(type){
 
 currentType=type
 list=[...data[type]]
+
 shuffle(list)
 
 index=0
@@ -292,23 +302,7 @@ createCard(list[index+1],true)
 
 }
 
-/* ---------- UI ---------- */
-
 function createCard(name,isNext){
-
-const card=createCardUI(name,isNext)
-deck.appendChild(card)
-
-enableSwipe(card)
-
-loadPlace(name).then(place=>{
-renderPlace(card,place)
-setupGallery(card,place.photos)
-})
-
-}
-
-function createCardUI(name,isNext){
 
 const card=document.createElement("div")
 card.className="card"
@@ -341,14 +335,19 @@ card.innerHTML=`
 </div>
 `
 
+deck.appendChild(card)
+
 card.querySelector(".topLeft").onclick=goHome
 card.querySelector(".topRight").onclick=undo
 
-return card
+enableSwipe(card)
+
+loadPlace(name).then(place=>{
+renderPlace(card,place)
+setupGallery(card,place.photos)
+})
 
 }
-
-/* ---------- Render ---------- */
 
 function renderPlace(card,place){
 
@@ -358,8 +357,6 @@ card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
 
 }
 
-/* ---------- Gallery ---------- */
-
 function setupGallery(card,photos){
 
 let photoIndex=0
@@ -367,8 +364,8 @@ const img=card.querySelector(".photo")
 
 card.onclick=e=>{
 
-if(e.target.closest(".buttons") ||
-e.target.closest(".topLeft") ||
+if(e.target.closest(".buttons")||
+e.target.closest(".topLeft")||
 e.target.closest(".topRight")) return
 
 const rect=card.getBoundingClientRect()
@@ -389,8 +386,6 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 }
 
-/* ---------- Swipe ---------- */
-
 function enableSwipe(card){
 
 let startX
@@ -403,30 +398,39 @@ startX=e.touches[0].clientX
 card.addEventListener("touchmove",e=>{
 currentX=e.touches[0].clientX
 const diff=currentX-startX
+
 card.style.transition="none"
-card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
+card.style.transform="translate3d("+diff+"px,0,0) rotate("+(diff/12)+"deg)"
+
 })
 
 card.addEventListener("touchend",()=>{
+
 const diff=currentX-startX
 card.style.transition="transform .35s ease"
 
 if(diff>120){
-card.style.transform="translateX(120vw) rotate(25deg)"
+card.style.transform="translate3d(120vw,0,0) rotate(25deg)"
 setTimeout(like,250)
 }
 else if(diff<-120){
-card.style.transform="translateX(-120vw) rotate(-25deg)"
+card.style.transform="translate3d(-120vw,0,0) rotate(-25deg)"
 setTimeout(dislike,250)
 }
 else{
-card.style.transform="translateX(0) rotate(0)"
+card.style.transform="translate3d(0,0,0)"
 }
+
 })
 
 }
 
-/* ---------- Places ---------- */
+function preloadNext(){
+for(let i=1;i<=5;i++){
+const next=list[index+i]
+if(next && !imageCache[next]) loadPlace(next)
+}
+}
 
 function loadPlace(name){
 
@@ -481,30 +485,13 @@ resolve(result)
 
 }
 
-function preloadNext(){
-for(let i=1;i<=5;i++){
-const next=list[index+i]
-if(next && !imageCache[next]) loadPlace(next)
-}
-}
-
-/* ---------- Actions ---------- */
-
 function like(){
-let name=list[index]
-
-if(!favorites[currentType].includes(name)){
-favorites[currentType].push(name)
-localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
-renderFavorites()
+history.push(index)
+index++
+buildDeck()
 }
 
-next()
-}
-
-function dislike(){next()}
-
-function next(){
+function dislike(){
 history.push(index)
 index++
 buildDeck()
