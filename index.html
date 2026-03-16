@@ -31,22 +31,41 @@ flex-direction:column;
 align-items:center;
 }
 
+/* LOGO */
+
 .logo{
 width:220px;
-margin-bottom:30px;
+margin-bottom:40px;
+filter:drop-shadow(0 8px 25px rgba(212,175,55,0.25));
 }
+
+/* CATEGORY BUTTONS */
 
 .cat{
 width:80%;
 max-width:420px;
-padding:18px;
-margin:10px;
-border-radius:20px;
-background:#111;
-border:1px solid #333;
+padding:22px;
+margin:16px;
+border-radius:22px;
+
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(20px);
+
+border:1px solid rgba(255,255,255,0.15);
+
+font-size:24px;
+font-family:'Playfair Display',serif;
+letter-spacing:.5px;
+
 text-align:center;
-font-size:22px;
 cursor:pointer;
+
+transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.cat:active{
+transform:scale(.97);
+box-shadow:0 6px 18px rgba(0,0,0,.5) inset;
 }
 
 .favoriteItem{
@@ -70,6 +89,8 @@ bottom:0;
 display:none;
 justify-content:center;
 align-items:center;
+opacity:0;
+transition:opacity .35s ease;
 }
 
 /* CARD */
@@ -99,7 +120,7 @@ height:100%;
 object-fit:cover;
 }
 
-/* Lysere gradient */
+/* GRADIENT */
 
 .card::after{
 content:"";
@@ -175,7 +196,7 @@ font-size:18px;
 color:#E6C27A;
 }
 
-/* PREMIUM BUTTON BAR */
+/* BUTTON BAR */
 
 .buttons{
 position:absolute;
@@ -186,13 +207,13 @@ right:20px;
 display:flex;
 justify-content:space-around;
 
-background:rgba(20,20,20,0.55);
+background:rgba(20,20,20,.55);
 backdrop-filter:blur(20px);
 
 border-radius:26px;
 padding:18px;
 
-border:1px solid rgba(255,255,255,0.15);
+border:1px solid rgba(255,255,255,.15);
 }
 
 .buttons div{
@@ -233,8 +254,6 @@ cursor:pointer;
 
 <script>
 
-/* STATE */
-
 let data=null
 let list=[]
 let index=0
@@ -249,8 +268,6 @@ restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
 winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
 cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 }
-
-/* DATA */
 
 async function loadData(){
 
@@ -267,8 +284,6 @@ renderFavorites()
 
 loadData()
 
-/* MAP */
-
 function initMap(){
 
 const map=new google.maps.Map(document.getElementById("map"),{
@@ -279,8 +294,6 @@ zoom:13
 placesService=new google.maps.places.PlacesService(map)
 
 }
-
-/* CATEGORY */
 
 function openCategory(type){
 
@@ -293,19 +306,17 @@ index=0
 history=[]
 
 document.getElementById("home").style.display="none"
+
 deck.style.display="flex"
+setTimeout(()=>deck.style.opacity=1,50)
 
 buildDeck()
 
 }
 
-/* SHUFFLE */
-
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
-
-/* BUILD DECK */
 
 function buildDeck(){
 
@@ -323,8 +334,6 @@ createCard(list[index+1],true)
 }
 
 }
-
-/* CREATE CARD */
 
 function createCard(name,isNext){
 
@@ -373,8 +382,6 @@ setupGallery(card,place.photos)
 
 }
 
-/* PLACE RENDER */
-
 function renderPlace(card,place){
 
 card.querySelector(".photo").src=place.photos[0]
@@ -382,8 +389,6 @@ card.querySelector(".name").innerText=place.name
 card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
 
 }
-
-/* PHOTO TAP NAVIGATION */
 
 function setupGallery(card,photos){
 
@@ -413,8 +418,6 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 })
 
 }
-
-/* SWIPE */
 
 function enableSwipe(card){
 
@@ -464,15 +467,13 @@ card.style.transform="translate3d(0,0,0)"
 
 }
 
-/* BUTTON SWIPES */
-
 function swipeRight(){
 
 const card=document.querySelector(".card:not(.next)")
 if(!card) return
 
 card.style.transition="transform .35s ease"
-card.style.transform="translate3d(120vw,0,0) rotate(20deg)"
+card.style.transform="translate3d(120vw,0,0)"
 
 setTimeout(like,250)
 
@@ -484,13 +485,11 @@ const card=document.querySelector(".card:not(.next)")
 if(!card) return
 
 card.style.transition="transform .35s ease"
-card.style.transform="translate3d(-120vw,0,0) rotate(-20deg)"
+card.style.transform="translate3d(-120vw,0,0)"
 
 setTimeout(dislike,250)
 
 }
-
-/* ACTIONS */
 
 function like(){
 
@@ -528,8 +527,6 @@ buildDeck()
 
 }
 
-/* FAVORITES */
-
 function toggleFav(type){
 document.getElementById("fav-"+type).classList.toggle("hidden")
 }
@@ -547,11 +544,39 @@ const el=document.createElement("div")
 el.className="favoriteItem"
 el.innerText=name
 
+enableFavSwipe(el,type,name)
+
 el.onclick=()=>openFavorite(type,name)
 
 box.appendChild(el)
 
 })
+
+})
+
+}
+
+function enableFavSwipe(el,type,name){
+
+let startX
+
+el.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+})
+
+el.addEventListener("touchend",e=>{
+
+let diff=e.changedTouches[0].clientX-startX
+
+if(Math.abs(diff)>100){
+
+favorites[type]=favorites[type].filter(x=>x!==name)
+
+localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
+
+renderFavorites()
+
+}
 
 })
 
@@ -566,12 +591,11 @@ index=list.indexOf(name)
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
+deck.style.opacity=1
 
 buildDeck()
 
 }
-
-/* LINKS */
 
 function navigate(name){
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
@@ -580,8 +604,6 @@ window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 function book(name){
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
-
-/* GOOGLE PLACE */
 
 function loadPlace(name){
 
@@ -633,8 +655,6 @@ photos:photos
 
 }
 
-/* FALLBACK */
-
 function fallback(name){
 return{
 name:name,
@@ -647,11 +667,15 @@ photos:[
 }
 }
 
-/* HOME */
-
 function goHome(){
+
+deck.style.opacity=0
+
+setTimeout(()=>{
 deck.style.display="none"
 document.getElementById("home").style.display="flex"
+},300)
+
 }
 
 </script>
