@@ -91,8 +91,6 @@ height:100%;
 object-fit:cover;
 }
 
-/* gradient nederste 1/3 */
-
 .card::after{
 content:"";
 position:absolute;
@@ -102,10 +100,9 @@ bottom:0;
 top:55%;
 background:linear-gradient(
 to bottom,
-rgba(0,0,0,0) 0%,
-rgba(0,0,0,.35) 30%,
-rgba(0,0,0,.7) 60%,
-rgba(0,0,0,.95) 100%
+rgba(0,0,0,0),
+rgba(0,0,0,.4),
+rgba(0,0,0,.85)
 );
 pointer-events:none;
 }
@@ -116,7 +113,7 @@ top:16px;
 left:0;
 right:0;
 text-align:center;
-z-index:4;
+z-index:5;
 }
 
 .dot{
@@ -137,11 +134,12 @@ background:white;
 position:absolute;
 top:24px;
 font-size:26px;
-background:rgba(255,255,255,.85);
+background:rgba(255,255,255,0.85);
 border-radius:14px;
 padding:10px 14px;
 color:black;
-z-index:4;
+z-index:5;
+cursor:pointer;
 }
 
 .topLeft{ left:20px; }
@@ -151,7 +149,7 @@ z-index:4;
 position:absolute;
 bottom:170px;
 left:24px;
-z-index:4;
+z-index:5;
 }
 
 .name{
@@ -170,24 +168,18 @@ position:absolute;
 bottom:30px;
 left:20px;
 right:20px;
-
 display:flex;
 justify-content:space-around;
-
 background:linear-gradient(
 to top,
 rgba(0,0,0,.9),
 rgba(0,0,0,.4)
 );
-
 backdrop-filter:blur(20px);
-
 border-radius:26px;
 padding:18px 10px;
-
 border:1px solid rgba(255,255,255,0.15);
-
-z-index:4;
+z-index:5;
 }
 
 .buttons div{
@@ -325,12 +317,11 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="dislike()">❌</div>
+<div onclick="pressDislike()">❌</div>
 <div onclick="navigate('${name}')">📍</div>
 <div onclick="book('${name}')">📅</div>
-<div onclick="like()">❤️</div>
+<div onclick="pressLike()">❤️</div>
 </div>
-
 `
 
 deck.appendChild(card)
@@ -360,7 +351,7 @@ function setupGallery(card,photos){
 let photoIndex=0
 const img=card.querySelector(".photo")
 
-card.addEventListener("click",e=>{
+card.addEventListener("pointerup",e=>{
 
 if(e.target.closest(".buttons")||
 e.target.closest(".topLeft")||
@@ -387,38 +378,78 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 function enableSwipe(card){
 
 let startX
-let currentX=0
+let currentX
+let dragging=false
 
-card.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
+card.addEventListener("pointerdown",e=>{
+startX=e.clientX
+dragging=true
 })
 
-card.addEventListener("touchmove",e=>{
-currentX=e.touches[0].clientX
+card.addEventListener("pointermove",e=>{
+if(!dragging)return
+
+currentX=e.clientX
 const diff=currentX-startX
 
 card.style.transition="none"
 card.style.transform="translate3d("+diff+"px,0,0) rotate("+(diff/12)+"deg)"
+
 })
 
-card.addEventListener("touchend",()=>{
+card.addEventListener("pointerup",()=>{
+
+dragging=false
 
 const diff=currentX-startX
+
 card.style.transition="transform .35s ease"
 
 if(diff>120){
-card.style.transform="translate3d(120vw,0,0) rotate(25deg)"
-setTimeout(like,250)
+card.style.transform="translate3d(120vw,0,0)"
+setTimeout(pressLike,250)
 }
 else if(diff<-120){
-card.style.transform="translate3d(-120vw,0,0) rotate(-25deg)"
-setTimeout(dislike,250)
+card.style.transform="translate3d(-120vw,0,0)"
+setTimeout(pressDislike,250)
 }
 else{
 card.style.transform="translate3d(0,0,0)"
 }
 
 })
+
+}
+
+function pressLike(){
+
+let name=list[index]
+
+if(!favorites[currentType].includes(name)){
+favorites[currentType].push(name)
+localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
+renderFavorites()
+}
+
+history.push(index)
+index++
+
+buildDeck()
+
+}
+
+function pressDislike(){
+history.push(index)
+index++
+buildDeck()
+}
+
+function undo(){
+
+if(history.length===0)return
+
+index=history.pop()
+buildDeck()
 
 }
 
@@ -482,34 +513,6 @@ resolve(result)
 
 }
 
-function like(){
-
-let name=list[index]
-
-if(!favorites[currentType].includes(name)){
-favorites[currentType].push(name)
-localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
-renderFavorites()
-}
-
-history.push(index)
-index++
-buildDeck()
-
-}
-
-function dislike(){
-history.push(index)
-index++
-buildDeck()
-}
-
-function undo(){
-if(history.length===0)return
-index=history.pop()
-buildDeck()
-}
-
 function goHome(){
 deck.style.display="none"
 document.getElementById("home").style.display="flex"
@@ -561,13 +564,13 @@ function enableFavSwipe(el,type,name){
 
 let startX
 
-el.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
+el.addEventListener("pointerdown",e=>{
+startX=e.clientX
 })
 
-el.addEventListener("touchend",e=>{
+el.addEventListener("pointerup",e=>{
 
-let diff=e.changedTouches[0].clientX-startX
+let diff=e.clientX-startX
 
 if(Math.abs(diff)>100){
 
