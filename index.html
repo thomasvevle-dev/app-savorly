@@ -247,8 +247,6 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 
 const deck=document.getElementById("deck")
 
-/* LOAD DATA */
-
 async function loadData(){
 const res=await fetch("data/places.json")
 data=await res.json()
@@ -257,11 +255,7 @@ renderFavorites()
 
 loadData()
 
-/* MAP INIT */
-
 function initMap(){
-
-if(!window.google) return
 
 const map=new google.maps.Map(document.getElementById("map"),{
 center:{lat:59.91,lng:10.75},
@@ -272,13 +266,9 @@ placesService=new google.maps.places.PlacesService(map)
 
 }
 
-/* SHUFFLE */
-
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
-
-/* OPEN CATEGORY */
 
 function openCategory(type){
 
@@ -298,8 +288,6 @@ buildDeck()
 
 }
 
-/* BUILD STACK */
-
 function buildDeck(){
 
 deck.innerHTML=""
@@ -316,8 +304,6 @@ createCard(list[index+1],true)
 }
 
 }
-
-/* CREATE CARD */
 
 function createCard(name,isNext){
 
@@ -385,16 +371,11 @@ photoIndex=(photoIndex+1)%photos.length
 
 img.src=photos[photoIndex]
 
-const dots=card.querySelectorAll(".dot")
-dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
-
 })
 
 })
 
 }
-
-/* PRELOAD */
 
 function preloadNext(){
 
@@ -409,8 +390,6 @@ loadPlace(next)
 }
 
 }
-
-/* SWIPE */
 
 function enableSwipe(card){
 
@@ -459,8 +438,6 @@ card.style.transform="translateX(0px) rotate(0deg)"
 
 }
 
-/* LOGIC */
-
 function like(){
 
 let name=list[index]
@@ -495,16 +472,12 @@ buildDeck()
 
 }
 
-/* HOME */
-
 function goHome(){
 
 deck.style.display="none"
 document.getElementById("home").style.display="flex"
 
 }
-
-/* FAVORITES */
 
 function toggleFav(type){
 document.getElementById("fav-"+type).classList.toggle("hidden")
@@ -549,8 +522,6 @@ buildDeck()
 
 }
 
-/* FAVORITE SWIPE */
-
 function enableFavSwipe(el,type,name){
 
 let startX
@@ -576,8 +547,6 @@ renderFavorites()
 
 }
 
-/* NAVIGATION */
-
 function navigate(name){
 
 if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){
@@ -597,8 +566,6 @@ function book(name){
 window.location.href="https://www.google.com/search?q="+encodeURIComponent(name+" booking")
 
 }
-
-/* LOAD PLACE */
 
 function loadPlace(name){
 
@@ -661,8 +628,6 @@ resolve(result)
 
 }
 
-/* FALLBACK */
-
 function fallback(name){
 return{
 name:name,
@@ -678,7 +643,7 @@ photos:[
 </script>
 
 <script async
-src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initMap">
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap">
 </script>
 
 </body>
