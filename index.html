@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>Savorly</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
@@ -24,61 +26,78 @@ top:0;
 left:0;
 right:0;
 bottom:0;
+
 overflow-y:auto;
-padding-top:100px;
+
 display:flex;
 flex-direction:column;
 align-items:center;
+
+padding-top:60px;
 }
 
 /* LOGO */
 
 .logo{
-width:220px;
-margin-bottom:40px;
-filter:drop-shadow(0 8px 25px rgba(212,175,55,0.25));
+width:170px;
+margin-bottom:30px;
 }
 
 /* CATEGORY BUTTONS */
 
 .cat{
-width:80%;
+
+width:85%;
 max-width:420px;
-padding:22px;
-margin:16px;
-border-radius:22px;
 
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(20px);
+padding:16px;
 
-border:1px solid rgba(255,255,255,0.15);
+margin:7px;
 
-font-size:24px;
-font-family:'Playfair Display',serif;
-letter-spacing:.5px;
+border-radius:18px;
+
+background:#0f0f0f;
+
+border:1px solid rgba(255,255,255,0.18);
 
 text-align:center;
-cursor:pointer;
 
-transition:transform .15s ease, box-shadow .15s ease;
+font-size:20px;
+
+letter-spacing:0.5px;
+
+box-shadow:
+0 8px 20px rgba(0,0,0,0.6),
+inset 0 1px 0 rgba(255,255,255,0.04);
+
+transition:all .15s ease;
+
 }
 
 .cat:active{
 transform:scale(.97);
-box-shadow:0 6px 18px rgba(0,0,0,.5) inset;
 }
+
+/* FAVORITES */
 
 .favoriteItem{
-padding:14px;
+padding:12px;
 margin:6px 0;
+
 border-radius:14px;
+
 background:#111;
+
 border:1px solid #333;
+
+font-size:16px;
 }
 
-.hidden{display:none}
+.hidden{
+display:none;
+}
 
-/* DECK */
+/* CARD DECK */
 
 #deck{
 position:absolute;
@@ -86,31 +105,38 @@ top:0;
 left:0;
 right:0;
 bottom:0;
+
 display:none;
+
 justify-content:center;
 align-items:center;
-opacity:0;
-transition:opacity .35s ease;
 }
 
 /* CARD */
 
 .card{
 position:absolute;
+
 width:95%;
 height:92%;
+
 border-radius:26px;
+
 overflow:hidden;
+
 background:black;
+
 transition:transform .35s ease;
-will-change:transform;
+
 z-index:2;
-touch-action:none;
 }
 
 .card.next{
+
 transform:scale(.96) translateY(10px);
+
 opacity:.55;
+
 z-index:1;
 }
 
@@ -124,36 +150,46 @@ object-fit:cover;
 
 .card::after{
 content:"";
+
 position:absolute;
+
 left:0;
 right:0;
 bottom:0;
-top:60%;
+top:65%;
+
 background:linear-gradient(
 to bottom,
-rgba(0,0,0,0),
-rgba(0,0,0,.35),
-rgba(0,0,0,.65)
+rgba(0,0,0,0) 0%,
+rgba(0,0,0,0.35) 40%,
+rgba(0,0,0,0.65) 70%,
+rgba(0,0,0,0.9) 100%
 );
+
 pointer-events:none;
 }
 
-/* DOTS */
+/* PHOTO DOTS */
 
 .photoDots{
 position:absolute;
 top:16px;
 left:0;
 right:0;
+
 text-align:center;
 }
 
 .dot{
 display:inline-block;
+
 width:26px;
 height:4px;
+
 margin:3px;
+
 border-radius:10px;
+
 background:rgba(255,255,255,.4);
 }
 
@@ -165,30 +201,44 @@ background:white;
 
 .topLeft,
 .topRight{
+
 position:absolute;
+
 top:24px;
-font-size:26px;
-background:rgba(255,255,255,0.9);
-border-radius:14px;
-padding:10px 14px;
+
+font-size:24px;
+
 color:black;
-cursor:pointer;
+
+background:rgba(255,255,255,0.85);
+
+backdrop-filter:blur(12px);
+
+border-radius:14px;
+
+padding:10px 12px;
 }
 
-.topLeft{ left:20px }
-.topRight{ right:20px }
+.topLeft{
+left:20px;
+}
+
+.topRight{
+right:20px;
+}
 
 /* INFO */
 
 .info{
 position:absolute;
-bottom:170px;
+bottom:180px;
 left:24px;
 }
 
 .name{
-font-family:'Playfair Display',serif;
+font-family:'Playfair Display', serif;
 font-size:36px;
+font-weight:500;
 }
 
 .rating{
@@ -199,26 +249,38 @@ color:#E6C27A;
 /* BUTTON BAR */
 
 .buttons{
+
 position:absolute;
-bottom:50px;
+
+bottom:30px;
 left:20px;
 right:20px;
 
 display:flex;
 justify-content:space-around;
 
-background:rgba(20,20,20,.55);
+background:rgba(0,0,0,0.55);
+
 backdrop-filter:blur(20px);
 
 border-radius:26px;
-padding:18px;
 
-border:1px solid rgba(255,255,255,.15);
+padding:18px 10px;
+
+border:1px solid rgba(255,255,255,0.25);
 }
 
 .buttons div{
-font-size:32px;
-cursor:pointer;
+
+background:rgba(255,255,255,0.85);
+
+border-radius:16px;
+
+padding:14px 18px;
+
+font-size:28px;
+
+color:black;
 }
 
 </style>
@@ -234,15 +296,24 @@ cursor:pointer;
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
 
-<div style="margin-top:40px;width:80%;max-width:420px">
+<div style="margin-top:20px;width:85%;max-width:420px">
 
-<div class="cat" onclick="toggleFav('restaurants')">Favoritt restaurant</div>
+<div class="cat" onclick="toggleFav('restaurants')">
+Favoritt restaurant
+</div>
+
 <div id="fav-restaurants" class="hidden"></div>
 
-<div class="cat" onclick="toggleFav('winebars')">Favoritt vinbar</div>
+<div class="cat" onclick="toggleFav('winebars')">
+Favoritt vinbar
+</div>
+
 <div id="fav-winebars" class="hidden"></div>
 
-<div class="cat" onclick="toggleFav('cocktailbars')">Favoritt cocktailbar</div>
+<div class="cat" onclick="toggleFav('cocktailbars')">
+Favoritt cocktailbar
+</div>
+
 <div id="fav-cocktailbars" class="hidden"></div>
 
 </div>
@@ -254,14 +325,17 @@ cursor:pointer;
 
 <script>
 
-let data=null
+/* APP STATE */
+
+let data
 let list=[]
 let index=0
 let history=[]
 let currentType=""
 let placesService
 let imageCache={}
-const deck=document.getElementById("deck")
+
+/* FAVORITES */
 
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
@@ -269,14 +343,15 @@ winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
 cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 }
 
+const deck=document.getElementById("deck")
+
+/* LOAD DATA */
+
 async function loadData(){
 
-try{
 const res=await fetch("data/places.json")
+
 data=await res.json()
-}catch(e){
-data={restaurants:[],winebars:[],cocktailbars:[]}
-}
 
 renderFavorites()
 
@@ -284,47 +359,62 @@ renderFavorites()
 
 loadData()
 
+/* MAP */
+
 function initMap(){
 
-const map=new google.maps.Map(document.getElementById("map"),{
+const map=new google.maps.Map(
+document.getElementById("map"),
+{
 center:{lat:59.91,lng:10.75},
 zoom:13
-})
+}
+)
 
 placesService=new google.maps.places.PlacesService(map)
 
 }
 
+/* SHUFFLE */
+
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5)
+}
+
+/* OPEN CATEGORY */
+
 function openCategory(type){
 
 currentType=type
+
 list=[...data[type]]
 
 shuffle(list)
 
 index=0
-history=[]
 
 document.getElementById("home").style.display="none"
 
 deck.style.display="flex"
-setTimeout(()=>deck.style.opacity=1,50)
+
+preloadNext()
 
 buildDeck()
 
 }
 
-function shuffle(arr){
-return arr.sort(()=>Math.random()-0.5)
-}
+/* BUILD DECK */
 
 function buildDeck(){
 
 deck.innerHTML=""
 
 if(index>=list.length){
+
 shuffle(list)
+
 index=0
+
 }
 
 createCard(list[index],false)
@@ -335,16 +425,19 @@ createCard(list[index+1],true)
 
 }
 
+/* CREATE CARD */
+
 function createCard(name,isNext){
 
 const card=document.createElement("div")
+
 card.className="card"
 
 if(isNext) card.classList.add("next")
 
 card.innerHTML=`
 
-<img class="photo">
+<img id="photo" src="https://source.unsplash.com/featured/?restaurant">
 
 <div class="photoDots">
 <span class="dot active"></span>
@@ -361,161 +454,244 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="swipeLeft()">❌</div>
+<div onclick="dislike()">✕</div>
 <div onclick="navigate('${name}')">📍</div>
 <div onclick="book('${name}')">📅</div>
-<div onclick="swipeRight()">❤️</div>
+<div onclick="like()">♥</div>
 </div>
+
 `
 
 deck.appendChild(card)
 
 card.querySelector(".topLeft").onclick=goHome
+
 card.querySelector(".topRight").onclick=undo
 
 enableSwipe(card)
 
 loadPlace(name).then(place=>{
-renderPlace(card,place)
-setupGallery(card,place.photos)
-})
 
-}
-
-function renderPlace(card,place){
-
-card.querySelector(".photo").src=place.photos[0]
-card.querySelector(".name").innerText=place.name
-card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
-
-}
-
-function setupGallery(card,photos){
-
+let photos=place.photos
 let photoIndex=0
-const img=card.querySelector(".photo")
+
+const img=card.querySelector("#photo")
+
+img.src=photos[0]
+
+card.querySelector(".name").innerText=place.name
+
+card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
 
 card.addEventListener("click",e=>{
 
-if(e.target.closest(".buttons")||
-e.target.closest(".topLeft")||
-e.target.closest(".topRight")) return
+if(e.target.closest(".buttons")) return
+if(e.target.classList.contains("topLeft")) return
+if(e.target.classList.contains("topRight")) return
 
-const rect=card.getBoundingClientRect()
-const x=e.clientX-rect.left
+if(e.clientX>window.innerWidth/2){
 
-if(x>rect.width/2){
 photoIndex=(photoIndex+1)%photos.length
+
 }else{
+
 photoIndex=(photoIndex-1+photos.length)%photos.length
+
 }
 
 img.src=photos[photoIndex]
 
 const dots=card.querySelectorAll(".dot")
+
 dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
+
+})
 
 })
 
 }
 
+/* PRELOAD */
+
+function preloadNext(){
+
+for(let i=1;i<=5;i++){
+
+const next=list[index+i]
+
+if(next && !imageCache[next]){
+loadPlace(next)
+}
+
+}
+
+}
+
+/* SWIPE */
+
 function enableSwipe(card){
 
 let startX
-let currentX=0
-let dragging=false
+let currentX
 
-card.addEventListener("pointerdown",e=>{
-dragging=true
-startX=e.clientX
-currentX=e.clientX
+card.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
 })
 
-card.addEventListener("pointermove",e=>{
+card.addEventListener("touchmove",e=>{
 
-if(!dragging)return
+currentX=e.touches[0].clientX
 
-currentX=e.clientX
 const diff=currentX-startX
 
 card.style.transition="none"
-card.style.transform="translate3d("+diff+"px,0,0) rotate("+(diff/12)+"deg)"
+
+card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 
 })
 
-card.addEventListener("pointerup",()=>{
-
-dragging=false
+card.addEventListener("touchend",()=>{
 
 const diff=currentX-startX
 
 card.style.transition="transform .35s ease"
 
 if(diff>120){
-card.style.transform="translate3d(120vw,0,0)"
+
+card.style.transform="translateX(120vw) rotate(25deg)"
+
 setTimeout(like,250)
+
 }
+
 else if(diff<-120){
-card.style.transform="translate3d(-120vw,0,0)"
+
+card.style.transform="translateX(-120vw) rotate(-25deg)"
+
 setTimeout(dislike,250)
+
 }
+
 else{
-card.style.transform="translate3d(0,0,0)"
+
+card.style.transform="translateX(0px) rotate(0deg)"
+
 }
 
 })
 
 }
 
-function swipeRight(){
+/* LOAD PLACE */
 
-const card=document.querySelector(".card:not(.next)")
-if(!card) return
+function loadPlace(name){
 
-card.style.transition="transform .35s ease"
-card.style.transform="translate3d(120vw,0,0)"
+return new Promise(resolve=>{
 
-setTimeout(like,250)
+if(imageCache[name]){
+resolve(imageCache[name])
+return
+}
+
+placesService.findPlaceFromQuery(
+{
+query:name+" Oslo",
+fields:["place_id"]
+},
+(results,status)=>{
+
+if(status!==google.maps.places.PlacesServiceStatus.OK){
+
+resolve(fallback(name))
+return
 
 }
 
-function swipeLeft(){
+placesService.getDetails(
+{
+placeId:results[0].place_id,
+fields:["name","rating","photos"]
+},
+(place,status)=>{
 
-const card=document.querySelector(".card:not(.next)")
-if(!card) return
+let photos=[]
 
-card.style.transition="transform .35s ease"
-card.style.transform="translate3d(-120vw,0,0)"
+if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
 
-setTimeout(dislike,250)
+for(let i=0;i<Math.min(3,place.photos.length);i++){
+
+photos.push(place.photos[i].getUrl({maxWidth:1200}))
 
 }
+
+}
+
+while(photos.length<3){
+
+photos.push("https://source.unsplash.com/featured/?restaurant")
+
+}
+
+let result={
+name:place?.name||name,
+rating:place?.rating||"",
+photos:photos
+}
+
+imageCache[name]=result
+
+resolve(result)
+
+})
+
+})
+
+})
+
+}
+
+/* LIKE */
 
 function like(){
 
 let name=list[index]
 
 if(!favorites[currentType].includes(name)){
+
 favorites[currentType].push(name)
-localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
+
+localStorage.setItem(
+"fav-"+currentType,
+JSON.stringify(favorites[currentType])
+)
+
 renderFavorites()
-}
-
-history.push(index)
-index++
-
-buildDeck()
 
 }
+
+next()
+
+}
+
+/* DISLIKE */
 
 function dislike(){
+next()
+}
+
+/* NEXT */
+
+function next(){
 
 history.push(index)
+
 index++
 
 buildDeck()
 
 }
+
+/* UNDO */
 
 function undo(){
 
@@ -527,26 +703,43 @@ buildDeck()
 
 }
 
-function toggleFav(type){
-document.getElementById("fav-"+type).classList.toggle("hidden")
+/* HOME */
+
+function goHome(){
+
+deck.style.display="none"
+
+document.getElementById("home").style.display="flex"
+
 }
+
+/* FAVORITES */
+
+function toggleFav(type){
+
+document.getElementById("fav-"+type).classList.toggle("hidden")
+
+}
+
+/* RENDER FAVORITES */
 
 function renderFavorites(){
 
 ["restaurants","winebars","cocktailbars"].forEach(type=>{
 
 const box=document.getElementById("fav-"+type)
+
 box.innerHTML=""
 
 favorites[type].forEach(name=>{
 
 const el=document.createElement("div")
+
 el.className="favoriteItem"
+
 el.innerText=name
 
 enableFavSwipe(el,type,name)
-
-el.onclick=()=>openFavorite(type,name)
 
 box.appendChild(el)
 
@@ -555,6 +748,8 @@ box.appendChild(el)
 })
 
 }
+
+/* SWIPE DELETE FAVORITES */
 
 function enableFavSwipe(el,type,name){
 
@@ -572,7 +767,10 @@ if(Math.abs(diff)>100){
 
 favorites[type]=favorites[type].filter(x=>x!==name)
 
-localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
+localStorage.setItem(
+"fav-"+type,
+JSON.stringify(favorites[type])
+)
 
 renderFavorites()
 
@@ -582,80 +780,30 @@ renderFavorites()
 
 }
 
-function openFavorite(type,name){
-
-currentType=type
-list=[...data[type]]
-
-index=list.indexOf(name)
-
-document.getElementById("home").style.display="none"
-deck.style.display="flex"
-deck.style.opacity=1
-
-buildDeck()
-
-}
+/* NAVIGATE */
 
 function navigate(name){
-window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
+
+window.open(
+"https://maps.google.com/?q="+encodeURIComponent(name+" Oslo")
+)
+
 }
+
+/* BOOK */
 
 function book(name){
-window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
-}
 
-function loadPlace(name){
-
-return new Promise(resolve=>{
-
-if(!placesService){
-resolve(fallback(name))
-return
-}
-
-placesService.findPlaceFromQuery({
-query:name+" Oslo",
-fields:["place_id"]
-},(results,status)=>{
-
-if(status!==google.maps.places.PlacesServiceStatus.OK){
-resolve(fallback(name))
-return
-}
-
-placesService.getDetails({
-placeId:results[0].place_id,
-fields:["name","rating","photos"]
-},(place)=>{
-
-let photos=[]
-
-if(place.photos){
-for(let i=0;i<Math.min(3,place.photos.length);i++){
-photos.push(place.photos[i].getUrl({maxWidth:1200}))
-}
-}
-
-while(photos.length<3){
-photos.push("https://source.unsplash.com/featured/?restaurant")
-}
-
-resolve({
-name:place?.name||name,
-rating:place?.rating||"",
-photos:photos
-})
-
-})
-
-})
-
-})
+window.open(
+"https://www.google.com/search?q="+encodeURIComponent(name+" booking")
+)
 
 }
+
+/* FALLBACK */
 
 function fallback(name){
+
 return{
 name:name,
 rating:"",
@@ -665,16 +813,6 @@ photos:[
 "https://source.unsplash.com/featured/?wine"
 ]
 }
-}
-
-function goHome(){
-
-deck.style.opacity=0
-
-setTimeout(()=>{
-deck.style.display="none"
-document.getElementById("home").style.display="flex"
-},300)
 
 }
 
