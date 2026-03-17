@@ -85,7 +85,7 @@ transition:transform .35s ease;
 
 .card.next{
 transform:scale(.96) translateY(10px);
-opacity:.55;
+opacity:.6;
 }
 
 .card img{
@@ -107,16 +107,31 @@ background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,0.45),rgba(0,0,0,0
 pointer-events:none;
 }
 
-/* gradient for name */
+/* gradient behind title */
 
 .nameGradient{
 position:absolute;
 left:0;
 right:0;
-bottom:140px;
-height:200px;
-background:linear-gradient(to top,rgba(0,0,0,0.85),rgba(0,0,0,0.4),rgba(0,0,0,0));
+bottom:150px;
+height:180px;
+background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.3),rgba(0,0,0,0));
 }
+
+/* top buttons */
+
+.topLeft,.topRight{
+position:absolute;
+top:24px;
+font-size:24px;
+color:black;
+background:rgba(255,255,255,.9);
+border-radius:14px;
+padding:10px 12px;
+}
+
+.topLeft{ left:20px }
+.topRight{ right:20px }
 
 /* dots */
 
@@ -137,24 +152,7 @@ border-radius:10px;
 background:rgba(255,255,255,.4);
 }
 
-.dot.active{
-background:white;
-}
-
-/* top buttons */
-
-.topLeft,.topRight{
-position:absolute;
-top:24px;
-font-size:24px;
-color:black;
-background:rgba(255,255,255,0.9);
-border-radius:14px;
-padding:10px 12px;
-}
-
-.topLeft{ left:20px; }
-.topRight{ right:20px; }
+.dot.active{background:white}
 
 /* info */
 
@@ -174,20 +172,17 @@ font-size:18px;
 color:#E6C27A;
 }
 
-/* buttons */
+/* bottom buttons */
 
 .buttons{
 position:absolute;
 bottom:30px;
 left:20px;
 right:20px;
-
 display:flex;
 justify-content:space-around;
-
 background:rgba(255,255,255,0.15);
 backdrop-filter:blur(20px);
-
 border-radius:26px;
 padding:18px 10px;
 }
@@ -233,6 +228,8 @@ color:black;
 
 <script>
 
+/* GLOBAL STATE */
+
 let data
 let list=[]
 let index=0
@@ -249,6 +246,8 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 
 const deck=document.getElementById("deck")
 
+/* LOAD DATA */
+
 async function loadData(){
 const res=await fetch("data/places.json")
 data=await res.json()
@@ -257,21 +256,26 @@ renderFavorites()
 
 loadData()
 
+/* GOOGLE MAP INIT */
+
 function initMap(){
+
 const map=new google.maps.Map(document.getElementById("map"),{
 center:{lat:59.91,lng:10.75},
 zoom:13
 })
+
 placesService=new google.maps.places.PlacesService(map)
+
 }
 
-/* shuffle */
+/* SHUFFLE */
 
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
-/* open category */
+/* OPEN CATEGORY */
 
 function openCategory(type){
 
@@ -289,16 +293,11 @@ buildDeck()
 
 }
 
-/* build deck */
+/* BUILD DECK */
 
 function buildDeck(){
 
 deck.innerHTML=""
-
-if(index>=list.length){
-shuffle(list)
-index=0
-}
 
 createCard(list[index],false)
 
@@ -308,7 +307,7 @@ createCard(list[index+1],true)
 
 }
 
-/* create card */
+/* CREATE CARD */
 
 function createCard(name,isNext){
 
@@ -318,7 +317,6 @@ card.className="card"
 if(isNext) card.classList.add("next")
 
 card.innerHTML=`
-
 <img>
 
 <div class="photoDots">
@@ -343,7 +341,6 @@ card.innerHTML=`
 <div onclick="book('${name}',event)">📅</div>
 <div onclick="btnLike(event)">♥</div>
 </div>
-
 `
 
 deck.appendChild(card)
@@ -356,9 +353,7 @@ enablePhotoNav(card)
 
 loadPlace(name).then(place=>{
 
-const img=card.querySelector("img")
-
-img.src=place.photos[0]
+card.querySelector("img").src=place.photos[0]
 
 card.dataset.photos=JSON.stringify(place.photos)
 card.dataset.photoIndex=0
@@ -370,29 +365,38 @@ card.querySelector(".rating").innerText=
 
 }
 
-/* swipe */
+/* SWIPE ENGINE */
 
 function enableSwipe(card){
 
 let startX=0
 let currentX=0
+let dragging=false
 
-card.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
+card.addEventListener("pointerdown",e=>{
+dragging=true
+startX=e.clientX
 })
 
-card.addEventListener("touchmove",e=>{
+card.addEventListener("pointermove",e=>{
 
-currentX=e.touches[0].clientX
+if(!dragging)return
+
+currentX=e.clientX
 const diff=currentX-startX
 
-card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
+card.style.transition="none"
+card.style.transform=`translateX(${diff}px) rotate(${diff/12}deg)`
 
 })
 
-card.addEventListener("touchend",()=>{
+card.addEventListener("pointerup",()=>{
+
+dragging=false
 
 const diff=currentX-startX
+
+card.style.transition="transform .35s ease"
 
 if(diff>120){
 card.style.transform="translateX(120vw)"
@@ -412,18 +416,18 @@ card.style.transform="translateX(0)"
 
 }
 
-/* photo navigation */
+/* PHOTO NAV */
 
 function enablePhotoNav(card){
 
 card.addEventListener("click",e=>{
 
-if(e.target.closest(".buttons")) return
+if(e.target.closest(".buttons"))return
 
 const rect=card.getBoundingClientRect()
 const x=e.clientX-rect.left
 
-let photos=JSON.parse(card.dataset.photos)
+const photos=JSON.parse(card.dataset.photos)
 let i=parseInt(card.dataset.photoIndex)
 
 if(x<rect.width/2){
@@ -440,7 +444,7 @@ card.querySelector("img").src=photos[i]
 
 }
 
-/* like dislike */
+/* BUTTON ACTIONS */
 
 function btnLike(e){
 e.stopPropagation()
@@ -453,6 +457,8 @@ e.stopPropagation()
 document.querySelector(".card").style.transform="translateX(-120vw)"
 setTimeout(dislike,200)
 }
+
+/* LIKE / DISLIKE */
 
 function like(){
 
@@ -477,11 +483,11 @@ index++
 buildDeck()
 }
 
-/* undo */
+/* UNDO */
 
 function undo(){
 
-if(history.length===0) return
+if(history.length===0)return
 
 index=history.pop()
 
@@ -489,21 +495,21 @@ buildDeck()
 
 }
 
-/* navigation */
+/* NAVIGATION */
 
 function navigate(name,e){
 e.stopPropagation()
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
 
-/* booking */
+/* BOOKING */
 
 function book(name,e){
 e.stopPropagation()
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
-/* load place */
+/* LOAD PLACE */
 
 function loadPlace(name){
 
@@ -564,7 +570,7 @@ resolve(result)
 
 }
 
-/* fallback */
+/* FALLBACK */
 
 function fallback(name){
 return{
@@ -578,7 +584,7 @@ photos:[
 }
 }
 
-/* favorites */
+/* FAVORITES */
 
 function toggleFav(type){
 document.getElementById("fav-"+type).classList.toggle("hidden")
@@ -599,9 +605,37 @@ el.innerText=name
 
 el.onclick=()=>openFavorite(type,name)
 
+enableFavSwipe(el,type,name)
+
 box.appendChild(el)
 
 })
+
+})
+
+}
+
+function enableFavSwipe(el,type,name){
+
+let startX
+
+el.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+})
+
+el.addEventListener("touchend",e=>{
+
+let diff=e.changedTouches[0].clientX-startX
+
+if(diff<-100){
+
+favorites[type]=favorites[type].filter(x=>x!==name)
+
+localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
+
+renderFavorites()
+
+}
 
 })
 
@@ -620,8 +654,6 @@ deck.style.display="flex"
 buildDeck()
 
 }
-
-/* go home */
 
 function goHome(){
 
