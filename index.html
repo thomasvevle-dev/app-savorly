@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>Savorly</title>
 
@@ -94,7 +95,26 @@ height:100%;
 object-fit:cover;
 }
 
-/* GRADIENT */
+/* GRADIENT BACK TEXT */
+
+.card::before{
+content:"";
+position:absolute;
+left:0;
+right:0;
+bottom:140px;
+height:160px;
+
+background:linear-gradient(
+to bottom,
+rgba(0,0,0,0),
+rgba(0,0,0,0.45)
+);
+
+pointer-events:none;
+}
+
+/* GRADIENT BOTTOM */
 
 .card::after{
 content:"";
@@ -103,13 +123,15 @@ left:0;
 right:0;
 bottom:0;
 top:65%;
+
 background:linear-gradient(
 to bottom,
-rgba(0,0,0,0) 0%,
-rgba(0,0,0,0.4) 40%,
-rgba(0,0,0,0.7) 70%,
-rgba(0,0,0,0.95) 100%
+rgba(0,0,0,0),
+rgba(0,0,0,0.4),
+rgba(0,0,0,0.7),
+rgba(0,0,0,0.95)
 );
+
 pointer-events:none;
 }
 
@@ -160,11 +182,13 @@ left:24px;
 .name{
 font-family:'Playfair Display', serif;
 font-size:34px;
+text-shadow:0 2px 8px rgba(0,0,0,0.8);
 }
 
 .rating{
 font-size:18px;
 color:#E6C27A;
+text-shadow:0 2px 6px rgba(0,0,0,0.8);
 }
 
 /* ACTION BAR */
@@ -227,7 +251,6 @@ let list=[]
 let index=0
 let history=[]
 let currentType=""
-
 let placesService
 let imageCache={}
 
@@ -274,7 +297,19 @@ buildDeck()
 
 }
 
-/* CARD STACK */
+function openFavorite(type,name){
+
+currentType=type
+list=[...data[type]]
+
+index=list.indexOf(name)
+
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
+
+buildDeck()
+
+}
 
 function buildDeck(){
 
@@ -335,8 +370,6 @@ card.querySelector(".topRight").onclick=undo
 
 enableSwipe(card)
 
-/* LOAD PLACE */
-
 loadPlace(name).then(place=>{
 
 let photos=place.photos
@@ -370,79 +403,58 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 }
 
-/* PRELOAD NEXT */
+/* FAVORITES */
 
-function preloadNext(){
+function renderFavorites(){
 
-for(let i=1;i<=5;i++){
+["restaurants","winebars","cocktailbars"].forEach(type=>{
 
-const next=list[index+i]
+const box=document.getElementById("fav-"+type)
+box.innerHTML=""
 
-if(next && !imageCache[next]){
-loadPlace(next)
-}
+favorites[type].forEach(name=>{
 
-}
+const el=document.createElement("div")
+el.className="favoriteItem"
+el.innerText=name
 
-}
+el.onclick=()=>openFavorite(type,name)
 
-/* GOOGLE PLACE */
+enableFavSwipe(el,type,name)
 
-function loadPlace(name){
-
-return new Promise(resolve=>{
-
-if(imageCache[name]){
-resolve(imageCache[name])
-return
-}
-
-if(!placesService){
-resolve(fallback(name))
-return
-}
-
-placesService.findPlaceFromQuery({
-query:name+" Oslo",
-fields:["place_id"]
-},(results,status)=>{
-
-if(status!==google.maps.places.PlacesServiceStatus.OK){
-resolve(fallback(name))
-return
-}
-
-placesService.getDetails({
-placeId:results[0].place_id,
-fields:["name","rating","photos"]
-},(place,status)=>{
-
-let photos=[]
-
-if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
-
-for(let i=0;i<Math.min(3,place.photos.length);i++){
-photos.push(place.photos[i].getUrl({maxWidth:1200}))
-}
-
-}
-
-while(photos.length<3){
-photos.push("https://source.unsplash.com/featured/?restaurant")
-}
-
-let result={
-name:place.name||name,
-rating:place.rating||"",
-photos:photos
-}
-
-imageCache[name]=result
-resolve(result)
+box.appendChild(el)
 
 })
 
 })
+
+}
+
+function toggleFav(type){
+document.getElementById("fav-"+type).classList.toggle("hidden")
+}
+
+function enableFavSwipe(el,type,name){
+
+let startX
+
+el.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+})
+
+el.addEventListener("touchend",e=>{
+
+let diff=e.changedTouches[0].clientX-startX
+
+if(Math.abs(diff)>100){
+
+favorites[type]=favorites[type].filter(x=>x!==name)
+
+localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
+
+renderFavorites()
+
+}
 
 })
 
@@ -470,7 +482,7 @@ setTimeout(()=>dislike(),300)
 
 }
 
-/* TOUCH SWIPE */
+/* SWIPE */
 
 function enableSwipe(card){
 
@@ -535,7 +547,7 @@ buildDeck()
 
 function undo(){
 
-if(history.length===0) return
+if(history.length===0)return
 
 index=history.pop()
 buildDeck()
@@ -547,67 +559,81 @@ deck.style.display="none"
 document.getElementById("home").style.display="flex"
 }
 
-/* FAVORITES */
-
-function toggleFav(type){
-document.getElementById("fav-"+type).classList.toggle("hidden")
-}
-
-function renderFavorites(){
-
-["restaurants","winebars","cocktailbars"].forEach(type=>{
-
-const box=document.getElementById("fav-"+type)
-box.innerHTML=""
-
-favorites[type].forEach(name=>{
-
-const el=document.createElement("div")
-el.className="favoriteItem"
-el.innerText=name
-
-enableFavSwipe(el,type,name)
-
-box.appendChild(el)
-
-})
-
-})
-
-}
-
-function enableFavSwipe(el,type,name){
-
-let startX
-
-el.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
-
-el.addEventListener("touchend",e=>{
-
-let diff=e.changedTouches[0].clientX-startX
-
-if(Math.abs(diff)>100){
-
-favorites[type]=favorites[type].filter(x=>x!==name)
-
-localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
-
-renderFavorites()
-
-}
-
-})
-
-}
-
 function navigate(name){
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
 
 function book(name){
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
+}
+
+function preloadNext(){
+for(let i=1;i<=5;i++){
+const next=list[index+i]
+if(next && !imageCache[next]){
+loadPlace(next)
+}
+}
+}
+
+function loadPlace(name){
+
+return new Promise(resolve=>{
+
+if(imageCache[name]){
+resolve(imageCache[name])
+return
+}
+
+if(!placesService){
+resolve(fallback(name))
+return
+}
+
+placesService.findPlaceFromQuery({
+query:name+" Oslo",
+fields:["place_id"]
+},(results,status)=>{
+
+if(status!==google.maps.places.PlacesServiceStatus.OK){
+resolve(fallback(name))
+return
+}
+
+placesService.getDetails({
+placeId:results[0].place_id,
+fields:["name","rating","photos"]
+},(place,status)=>{
+
+let photos=[]
+
+if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
+
+for(let i=0;i<Math.min(3,place.photos.length);i++){
+photos.push(place.photos[i].getUrl({maxWidth:1200}))
+}
+
+}
+
+while(photos.length<3){
+photos.push("https://source.unsplash.com/featured/?restaurant")
+}
+
+let result={
+name:place.name||name,
+rating:place.rating||"",
+photos:photos
+}
+
+imageCache[name]=result
+resolve(result)
+
+})
+
+})
+
+})
+
 }
 
 function fallback(name){
