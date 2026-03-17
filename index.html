@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>Savorly</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 
 body{
 margin:0;
-font-family:-apple-system,BlinkMacSystemFont;
 background:#000;
 color:white;
-overflow:hidden;
+font-family:-apple-system,BlinkMacSystemFont;
 }
 
 /* HOME */
@@ -26,31 +27,31 @@ left:0;
 right:0;
 bottom:0;
 overflow-y:auto;
-padding-top:100px;
 display:flex;
 flex-direction:column;
 align-items:center;
+padding-top:70px;
 }
 
 .logo{
-width:220px;
+width:170px;
 margin-bottom:30px;
 }
 
 .cat{
-width:80%;
+width:85%;
 max-width:420px;
-padding:18px;
-margin:10px;
-border-radius:20px;
+padding:16px;
+margin:8px;
+border-radius:18px;
 background:#111;
-border:1px solid #333;
+border:1px solid rgba(255,255,255,0.18);
 text-align:center;
-font-size:22px;
+font-size:20px;
 }
 
 .favoriteItem{
-padding:14px;
+padding:12px;
 margin:6px 0;
 border-radius:14px;
 background:#111;
@@ -79,13 +80,13 @@ height:92%;
 border-radius:26px;
 overflow:hidden;
 background:black;
-touch-action:none;
 transition:transform .35s ease;
 }
 
 .card.next{
 transform:scale(.96) translateY(10px);
-opacity:.55;
+opacity:.6;
+z-index:-1;
 }
 
 .card img{
@@ -94,7 +95,26 @@ height:100%;
 object-fit:cover;
 }
 
-/* bottom gradient */
+/* GRADIENT BACK TEXT */
+
+.card::before{
+content:"";
+position:absolute;
+left:0;
+right:0;
+bottom:140px;
+height:160px;
+
+background:linear-gradient(
+to bottom,
+rgba(0,0,0,0),
+rgba(0,0,0,0.45)
+);
+
+pointer-events:none;
+}
+
+/* GRADIENT BOTTOM */
 
 .card::after{
 content:"";
@@ -103,22 +123,19 @@ left:0;
 right:0;
 bottom:0;
 top:65%;
-background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,0.45),rgba(0,0,0,0.9));
+
+background:linear-gradient(
+to bottom,
+rgba(0,0,0,0),
+rgba(0,0,0,0.4),
+rgba(0,0,0,0.7),
+rgba(0,0,0,0.95)
+);
+
 pointer-events:none;
 }
 
-/* gradient for name */
-
-.nameGradient{
-position:absolute;
-left:0;
-right:0;
-bottom:140px;
-height:200px;
-background:linear-gradient(to top,rgba(0,0,0,0.85),rgba(0,0,0,0.4),rgba(0,0,0,0));
-}
-
-/* dots */
+/* DOTS */
 
 .photoDots{
 position:absolute;
@@ -137,26 +154,24 @@ border-radius:10px;
 background:rgba(255,255,255,.4);
 }
 
-.dot.active{
-background:white;
-}
+.dot.active{background:white}
 
-/* top buttons */
+/* TOP BUTTONS */
 
 .topLeft,.topRight{
 position:absolute;
 top:24px;
 font-size:24px;
 color:black;
-background:rgba(255,255,255,0.9);
+background:rgba(255,255,255,.9);
 border-radius:14px;
 padding:10px 12px;
 }
 
-.topLeft{ left:20px; }
-.topRight{ right:20px; }
+.topLeft{left:20px}
+.topRight{right:20px}
 
-/* info */
+/* INFO */
 
 .info{
 position:absolute;
@@ -166,34 +181,32 @@ left:24px;
 
 .name{
 font-family:'Playfair Display', serif;
-font-size:36px;
+font-size:34px;
+text-shadow:0 2px 8px rgba(0,0,0,0.8);
 }
 
 .rating{
 font-size:18px;
 color:#E6C27A;
+text-shadow:0 2px 6px rgba(0,0,0,0.8);
 }
 
-/* buttons */
+/* ACTION BAR */
 
 .buttons{
 position:absolute;
 bottom:30px;
 left:20px;
 right:20px;
-
 display:flex;
 justify-content:space-around;
-
-background:rgba(255,255,255,0.15);
-backdrop-filter:blur(20px);
-
+background:rgba(0,0,0,.55);
 border-radius:26px;
 padding:18px 10px;
 }
 
 .buttons div{
-background:rgba(255,255,255,0.9);
+background:rgba(255,255,255,.9);
 border-radius:16px;
 padding:14px 18px;
 font-size:28px;
@@ -213,7 +226,7 @@ color:black;
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
 
-<div style="margin-top:40px;width:80%;max-width:420px">
+<div style="margin-top:20px;width:85%;max-width:420px">
 
 <div class="cat" onclick="toggleFav('restaurants')">Favoritt restaurant</div>
 <div id="fav-restaurants" class="hidden"></div>
@@ -265,19 +278,14 @@ zoom:13
 placesService=new google.maps.places.PlacesService(map)
 }
 
-/* shuffle */
-
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
-
-/* open category */
 
 function openCategory(type){
 
 currentType=type
 list=[...data[type]]
-
 shuffle(list)
 
 index=0
@@ -289,7 +297,19 @@ buildDeck()
 
 }
 
-/* build deck */
+function openFavorite(type,name){
+
+currentType=type
+list=[...data[type]]
+
+index=list.indexOf(name)
+
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
+
+buildDeck()
+
+}
 
 function buildDeck(){
 
@@ -306,9 +326,9 @@ if(list[index+1]){
 createCard(list[index+1],true)
 }
 
-}
+preloadNext()
 
-/* create card */
+}
 
 function createCard(name,isNext){
 
@@ -319,7 +339,7 @@ if(isNext) card.classList.add("next")
 
 card.innerHTML=`
 
-<img>
+<img id="photo" src="https://source.unsplash.com/featured/?restaurant">
 
 <div class="photoDots">
 <span class="dot active"></span>
@@ -330,20 +350,17 @@ card.innerHTML=`
 <div class="topLeft">←</div>
 <div class="topRight">↺</div>
 
-<div class="nameGradient"></div>
-
 <div class="info">
 <div class="name">${name}</div>
-<div class="rating">⭐</div>
+<div class="rating"></div>
 </div>
 
 <div class="buttons">
-<div onclick="btnDislike(event)">✕</div>
-<div onclick="navigate('${name}',event)">📍</div>
-<div onclick="book('${name}',event)">📅</div>
-<div onclick="btnLike(event)">♥</div>
+<div onclick="dislikeFromButton()">✕</div>
+<div onclick="navigate('${name}')">📍</div>
+<div onclick="book('${name}')">📅</div>
+<div onclick="likeFromButton()">♥</div>
 </div>
-
 `
 
 deck.appendChild(card)
@@ -352,113 +369,163 @@ card.querySelector(".topLeft").onclick=goHome
 card.querySelector(".topRight").onclick=undo
 
 enableSwipe(card)
-enablePhotoNav(card)
 
 loadPlace(name).then(place=>{
 
-const img=card.querySelector("img")
+let photos=place.photos
+let photoIndex=0
 
-img.src=place.photos[0]
+const img=card.querySelector("#photo")
 
-card.dataset.photos=JSON.stringify(place.photos)
-card.dataset.photoIndex=0
+img.src=photos[0]
 
-card.querySelector(".rating").innerText=
-"⭐ "+(place.rating||"")+" · Google"
+card.querySelector(".name").innerText=place.name
+card.querySelector(".rating").innerText="⭐ "+place.rating+" Google"
+
+card.addEventListener("click",e=>{
+
+if(e.target.closest(".buttons")) return
+
+if(e.clientX>window.innerWidth/2){
+photoIndex=(photoIndex+1)%photos.length
+}else{
+photoIndex=(photoIndex-1+photos.length)%photos.length
+}
+
+img.src=photos[photoIndex]
+
+const dots=card.querySelectorAll(".dot")
+dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
+
+})
 
 })
 
 }
 
-/* swipe */
+/* FAVORITES */
+
+function renderFavorites(){
+
+["restaurants","winebars","cocktailbars"].forEach(type=>{
+
+const box=document.getElementById("fav-"+type)
+box.innerHTML=""
+
+favorites[type].forEach(name=>{
+
+const el=document.createElement("div")
+el.className="favoriteItem"
+el.innerText=name
+
+el.onclick=()=>openFavorite(type,name)
+
+enableFavSwipe(el,type,name)
+
+box.appendChild(el)
+
+})
+
+})
+
+}
+
+function toggleFav(type){
+document.getElementById("fav-"+type).classList.toggle("hidden")
+}
+
+function enableFavSwipe(el,type,name){
+
+let startX
+
+el.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+})
+
+el.addEventListener("touchend",e=>{
+
+let diff=e.changedTouches[0].clientX-startX
+
+if(Math.abs(diff)>100){
+
+favorites[type]=favorites[type].filter(x=>x!==name)
+
+localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
+
+renderFavorites()
+
+}
+
+})
+
+}
+
+/* BUTTON SWIPE */
+
+function likeFromButton(){
+
+const card=document.querySelector(".card")
+
+card.style.transform="translateX(120vw) rotate(25deg)"
+
+setTimeout(()=>like(),300)
+
+}
+
+function dislikeFromButton(){
+
+const card=document.querySelector(".card")
+
+card.style.transform="translateX(-120vw) rotate(-25deg)"
+
+setTimeout(()=>dislike(),300)
+
+}
+
+/* SWIPE */
 
 function enableSwipe(card){
 
-let startX=0
-let currentX=0
+let startX
+let currentX
 
 card.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
 })
 
 card.addEventListener("touchmove",e=>{
-
 currentX=e.touches[0].clientX
 const diff=currentX-startX
-
-card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
-
+card.style.transition="none"
+card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
 card.addEventListener("touchend",()=>{
 
 const diff=currentX-startX
+card.style.transition="transform .35s ease"
 
 if(diff>120){
-card.style.transform="translateX(120vw)"
-setTimeout(like,200)
-return
+card.style.transform="translateX(120vw) rotate(25deg)"
+setTimeout(like,250)
 }
-
-if(diff<-120){
-card.style.transform="translateX(-120vw)"
-setTimeout(dislike,200)
-return
+else if(diff<-120){
+card.style.transform="translateX(-120vw) rotate(-25deg)"
+setTimeout(dislike,250)
 }
-
+else{
 card.style.transform="translateX(0)"
+}
 
 })
 
 }
 
-/* photo navigation */
-
-function enablePhotoNav(card){
-
-card.addEventListener("click",e=>{
-
-if(e.target.closest(".buttons")) return
-
-const rect=card.getBoundingClientRect()
-const x=e.clientX-rect.left
-
-let photos=JSON.parse(card.dataset.photos)
-let i=parseInt(card.dataset.photoIndex)
-
-if(x<rect.width/2){
-i=(i-1+photos.length)%photos.length
-}else{
-i=(i+1)%photos.length
-}
-
-card.dataset.photoIndex=i
-
-card.querySelector("img").src=photos[i]
-
-})
-
-}
-
-/* like dislike */
-
-function btnLike(e){
-e.stopPropagation()
-document.querySelector(".card").style.transform="translateX(120vw)"
-setTimeout(like,200)
-}
-
-function btnDislike(e){
-e.stopPropagation()
-document.querySelector(".card").style.transform="translateX(-120vw)"
-setTimeout(dislike,200)
-}
+/* LOGIC */
 
 function like(){
 
 let name=list[index]
-
-history.push(index)
 
 if(!favorites[currentType].includes(name)){
 favorites[currentType].push(name)
@@ -466,44 +533,48 @@ localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
 renderFavorites()
 }
 
-index++
-buildDeck()
+next()
 
 }
 
-function dislike(){
+function dislike(){next()}
+
+function next(){
 history.push(index)
 index++
 buildDeck()
 }
 
-/* undo */
-
 function undo(){
 
-if(history.length===0) return
+if(history.length===0)return
 
 index=history.pop()
-
 buildDeck()
 
 }
 
-/* navigation */
+function goHome(){
+deck.style.display="none"
+document.getElementById("home").style.display="flex"
+}
 
-function navigate(name,e){
-e.stopPropagation()
+function navigate(name){
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
 
-/* booking */
-
-function book(name,e){
-e.stopPropagation()
+function book(name){
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
-/* load place */
+function preloadNext(){
+for(let i=1;i<=5;i++){
+const next=list[index+i]
+if(next && !imageCache[next]){
+loadPlace(next)
+}
+}
+}
 
 function loadPlace(name){
 
@@ -536,10 +607,12 @@ fields:["name","rating","photos"]
 
 let photos=[]
 
-if(place.photos){
+if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
+
 for(let i=0;i<Math.min(3,place.photos.length);i++){
 photos.push(place.photos[i].getUrl({maxWidth:1200}))
 }
+
 }
 
 while(photos.length<3){
@@ -547,13 +620,12 @@ photos.push("https://source.unsplash.com/featured/?restaurant")
 }
 
 let result={
-name:place?.name||name,
-rating:place?.rating||"",
+name:place.name||name,
+rating:place.rating||"",
 photos:photos
 }
 
 imageCache[name]=result
-
 resolve(result)
 
 })
@@ -563,8 +635,6 @@ resolve(result)
 })
 
 }
-
-/* fallback */
 
 function fallback(name){
 return{
@@ -576,58 +646,6 @@ photos:[
 "https://source.unsplash.com/featured/?wine"
 ]
 }
-}
-
-/* favorites */
-
-function toggleFav(type){
-document.getElementById("fav-"+type).classList.toggle("hidden")
-}
-
-function renderFavorites(){
-
-["restaurants","winebars","cocktailbars"].forEach(type=>{
-
-const box=document.getElementById("fav-"+type)
-box.innerHTML=""
-
-favorites[type].forEach(name=>{
-
-const el=document.createElement("div")
-el.className="favoriteItem"
-el.innerText=name
-
-el.onclick=()=>openFavorite(type,name)
-
-box.appendChild(el)
-
-})
-
-})
-
-}
-
-function openFavorite(type,name){
-
-currentType=type
-list=[...data[type]]
-
-index=list.indexOf(name)
-
-document.getElementById("home").style.display="none"
-deck.style.display="flex"
-
-buildDeck()
-
-}
-
-/* go home */
-
-function goHome(){
-
-deck.style.display="none"
-document.getElementById("home").style.display="flex"
-
 }
 
 </script>
