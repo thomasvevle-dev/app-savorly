@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
 <title>Savorly</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
@@ -13,9 +11,10 @@
 
 body{
 margin:0;
-background:#000;
 font-family:-apple-system,BlinkMacSystemFont;
+background:#000;
 color:white;
+overflow:hidden;
 }
 
 /* HOME */
@@ -27,15 +26,15 @@ left:0;
 right:0;
 bottom:0;
 overflow-y:auto;
+padding-top:100px;
 display:flex;
 flex-direction:column;
 align-items:center;
-padding-top:100px;
 }
 
 .logo{
-width:200px;
-margin-bottom:40px;
+width:220px;
+margin-bottom:30px;
 }
 
 .cat{
@@ -43,7 +42,7 @@ width:80%;
 max-width:420px;
 padding:18px;
 margin:10px;
-border-radius:18px;
+border-radius:20px;
 background:#111;
 border:1px solid #333;
 text-align:center;
@@ -60,7 +59,7 @@ border:1px solid #333;
 
 .hidden{display:none}
 
-/* DECK */
+/* CARD STACK */
 
 #deck{
 position:absolute;
@@ -75,9 +74,9 @@ align-items:center;
 
 .card{
 position:absolute;
-width:94%;
+width:95%;
 height:92%;
-border-radius:28px;
+border-radius:26px;
 overflow:hidden;
 background:black;
 touch-action:none;
@@ -85,8 +84,8 @@ transition:transform .35s ease;
 }
 
 .card.next{
-transform:scale(.96) translateY(12px);
-opacity:.6;
+transform:scale(.96) translateY(10px);
+opacity:.55;
 }
 
 .card img{
@@ -95,67 +94,113 @@ height:100%;
 object-fit:cover;
 }
 
-.gradient{
+/* bottom gradient */
+
+.card::after{
+content:"";
 position:absolute;
 left:0;
 right:0;
 bottom:0;
-height:35%;
-background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.3),rgba(0,0,0,0));
+top:65%;
+background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,0.45),rgba(0,0,0,0.9));
+pointer-events:none;
 }
+
+/* gradient for name */
+
+.nameGradient{
+position:absolute;
+left:0;
+right:0;
+bottom:140px;
+height:200px;
+background:linear-gradient(to top,rgba(0,0,0,0.85),rgba(0,0,0,0.4),rgba(0,0,0,0));
+}
+
+/* dots */
+
+.photoDots{
+position:absolute;
+top:16px;
+left:0;
+right:0;
+text-align:center;
+}
+
+.dot{
+display:inline-block;
+width:26px;
+height:4px;
+margin:3px;
+border-radius:10px;
+background:rgba(255,255,255,.4);
+}
+
+.dot.active{
+background:white;
+}
+
+/* top buttons */
+
+.topLeft,.topRight{
+position:absolute;
+top:24px;
+font-size:24px;
+color:black;
+background:rgba(255,255,255,0.9);
+border-radius:14px;
+padding:10px 12px;
+}
+
+.topLeft{ left:20px; }
+.topRight{ right:20px; }
+
+/* info */
 
 .info{
 position:absolute;
-bottom:150px;
+bottom:180px;
 left:24px;
 }
 
 .name{
-font-family:'Playfair Display';
-font-size:34px;
+font-family:'Playfair Display', serif;
+font-size:36px;
 }
 
 .rating{
+font-size:18px;
 color:#E6C27A;
 }
 
-/* BUTTONS */
+/* buttons */
 
 .buttons{
 position:absolute;
 bottom:30px;
 left:20px;
 right:20px;
+
 display:flex;
 justify-content:space-around;
-background:rgba(255,255,255,.15);
-border-radius:24px;
-padding:16px 10px;
+
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(20px);
+
+border-radius:26px;
+padding:18px 10px;
 }
 
 .buttons div{
-background:white;
-border-radius:14px;
-padding:12px 16px;
-font-size:26px;
+background:rgba(255,255,255,0.9);
+border-radius:16px;
+padding:14px 18px;
+font-size:28px;
 color:black;
 }
-
-.topLeft,.topRight{
-position:absolute;
-top:20px;
-font-size:24px;
-background:white;
-color:black;
-padding:10px 12px;
-border-radius:12px;
-}
-
-.topLeft{ left:20px }
-.topRight{ right:20px }
 
 </style>
-
 </head>
 
 <body>
@@ -184,81 +229,76 @@ border-radius:12px;
 </div>
 
 <div id="deck"></div>
+<div id="map" style="display:none"></div>
 
 <script>
 
-/* SAMPLE DATA */
-
-const data={
-restaurants:[
-{
-name:"Stallen",
-rating:"4.6",
-photos:[
-"https://source.unsplash.com/featured/?restaurant",
-"https://source.unsplash.com/featured/?fine-dining",
-"https://source.unsplash.com/featured/?food"
-]
-}
-],
-winebars:[
-{
-name:"Territoriet",
-rating:"4.6",
-photos:[
-"https://source.unsplash.com/featured/?winebar",
-"https://source.unsplash.com/featured/?wine",
-"https://source.unsplash.com/featured/?bar"
-]
-}
-],
-cocktailbars:[
-{
-name:"Himkok",
-rating:"4.7",
-photos:[
-"https://source.unsplash.com/featured/?cocktail",
-"https://source.unsplash.com/featured/?cocktail-bar",
-"https://source.unsplash.com/featured/?mixology"
-]
-}
-]
-}
-
+let data
 let list=[]
 let index=0
 let history=[]
 let currentType=""
+let placesService
+let imageCache={}
 
 let favorites={
-restaurants:[],
-winebars:[],
-cocktailbars:[]
+restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
+winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
+cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 }
 
 const deck=document.getElementById("deck")
 
-/* CATEGORY */
+async function loadData(){
+const res=await fetch("data/places.json")
+data=await res.json()
+renderFavorites()
+}
+
+loadData()
+
+function initMap(){
+const map=new google.maps.Map(document.getElementById("map"),{
+center:{lat:59.91,lng:10.75},
+zoom:13
+})
+placesService=new google.maps.places.PlacesService(map)
+}
+
+/* shuffle */
+
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5)
+}
+
+/* open category */
 
 function openCategory(type){
 
 currentType=type
 list=[...data[type]]
 
+shuffle(list)
+
 index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
 
-renderDeck()
+buildDeck()
 
 }
 
-/* DECK */
+/* build deck */
 
-function renderDeck(){
+function buildDeck(){
 
 deck.innerHTML=""
+
+if(index>=list.length){
+shuffle(list)
+index=0
+}
 
 createCard(list[index],false)
 
@@ -268,9 +308,9 @@ createCard(list[index+1],true)
 
 }
 
-/* CARD */
+/* create card */
 
-function createCard(place,isNext){
+function createCard(name,isNext){
 
 const card=document.createElement("div")
 card.className="card"
@@ -279,114 +319,90 @@ if(isNext) card.classList.add("next")
 
 card.innerHTML=`
 
-<img src="${place.photos[0]}">
+<img>
 
-<div class="gradient"></div>
+<div class="photoDots">
+<span class="dot active"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
 
 <div class="topLeft">←</div>
 <div class="topRight">↺</div>
 
+<div class="nameGradient"></div>
+
 <div class="info">
-<div class="name">${place.name}</div>
-<div class="rating">⭐ ${place.rating}</div>
+<div class="name">${name}</div>
+<div class="rating">⭐</div>
 </div>
 
 <div class="buttons">
-<div onclick="dislike(event)">✕</div>
-<div onclick="navigate('${place.name}',event)">📍</div>
-<div onclick="book('${place.name}',event)">📅</div>
-<div onclick="like(event)">♥</div>
+<div onclick="btnDislike(event)">✕</div>
+<div onclick="navigate('${name}',event)">📍</div>
+<div onclick="book('${name}',event)">📅</div>
+<div onclick="btnLike(event)">♥</div>
 </div>
 
 `
 
 deck.appendChild(card)
 
-card.dataset.photos=JSON.stringify(place.photos)
-card.dataset.index=0
+card.querySelector(".topLeft").onclick=goHome
+card.querySelector(".topRight").onclick=undo
 
 enableSwipe(card)
 enablePhotoNav(card)
 
-card.querySelector(".topLeft").onclick=goHome
-card.querySelector(".topRight").onclick=undo
+loadPlace(name).then(place=>{
 
-}
+const img=card.querySelector("img")
 
-/* PHOTO NAV */
+img.src=place.photos[0]
 
-function enablePhotoNav(card){
+card.dataset.photos=JSON.stringify(place.photos)
+card.dataset.photoIndex=0
 
-card.addEventListener("click",e=>{
-
-if(e.target.closest(".buttons")) return
-
-const rect=card.getBoundingClientRect()
-
-const x=e.clientX-rect.left
-
-const photos=JSON.parse(card.dataset.photos)
-
-let i=parseInt(card.dataset.index)
-
-if(x<rect.width/2){
-i=(i-1+photos.length)%photos.length
-}else{
-i=(i+1)%photos.length
-}
-
-card.dataset.index=i
-card.querySelector("img").src=photos[i]
+card.querySelector(".rating").innerText=
+"⭐ "+(place.rating||"")+" · Google"
 
 })
 
 }
 
-/* SWIPE */
+/* swipe */
 
 function enableSwipe(card){
 
 let startX=0
 let currentX=0
-let dragging=false
 
-card.addEventListener("pointerdown",e=>{
-if(e.target.closest(".buttons")) return
-dragging=true
-startX=e.clientX
+card.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
 })
 
-card.addEventListener("pointermove",e=>{
+card.addEventListener("touchmove",e=>{
 
-if(!dragging) return
-
-currentX=e.clientX
-
+currentX=e.touches[0].clientX
 const diff=currentX-startX
 
-card.style.transition="none"
-card.style.transform=`translateX(${diff}px) rotate(${diff/12}deg)`
+card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
 
 })
 
-card.addEventListener("pointerup",()=>{
-
-if(!dragging) return
-dragging=false
+card.addEventListener("touchend",()=>{
 
 const diff=currentX-startX
-
-card.style.transition="transform .35s ease"
 
 if(diff>120){
 card.style.transform="translateX(120vw)"
-setTimeout(nextLike,200)
+setTimeout(like,200)
 return
 }
 
 if(diff<-120){
 card.style.transform="translateX(-120vw)"
-setTimeout(nextDislike,200)
+setTimeout(dislike,200)
 return
 }
 
@@ -396,44 +412,72 @@ card.style.transform="translateX(0)"
 
 }
 
-/* ACTIONS */
+/* photo navigation */
 
-function like(e){
-if(e) e.stopPropagation()
+function enablePhotoNav(card){
 
-let place=list[index]
+card.addEventListener("click",e=>{
 
-if(!favorites[currentType].includes(place)){
-favorites[currentType].push(place)
+if(e.target.closest(".buttons")) return
+
+const rect=card.getBoundingClientRect()
+const x=e.clientX-rect.left
+
+let photos=JSON.parse(card.dataset.photos)
+let i=parseInt(card.dataset.photoIndex)
+
+if(x<rect.width/2){
+i=(i-1+photos.length)%photos.length
+}else{
+i=(i+1)%photos.length
+}
+
+card.dataset.photoIndex=i
+
+card.querySelector("img").src=photos[i]
+
+})
+
+}
+
+/* like dislike */
+
+function btnLike(e){
+e.stopPropagation()
+document.querySelector(".card").style.transform="translateX(120vw)"
+setTimeout(like,200)
+}
+
+function btnDislike(e){
+e.stopPropagation()
+document.querySelector(".card").style.transform="translateX(-120vw)"
+setTimeout(dislike,200)
+}
+
+function like(){
+
+let name=list[index]
+
+history.push(index)
+
+if(!favorites[currentType].includes(name)){
+favorites[currentType].push(name)
+localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
 renderFavorites()
 }
 
-document.querySelector(".card").style.transform="translateX(120vw)"
-
-setTimeout(nextLike,200)
-
-}
-
-function dislike(e){
-if(e) e.stopPropagation()
-
-document.querySelector(".card").style.transform="translateX(-120vw)"
-
-setTimeout(nextDislike,200)
+index++
+buildDeck()
 
 }
 
-function nextLike(){
+function dislike(){
 history.push(index)
 index++
-renderDeck()
+buildDeck()
 }
 
-function nextDislike(){
-history.push(index)
-index++
-renderDeck()
-}
+/* undo */
 
 function undo(){
 
@@ -441,30 +485,100 @@ if(history.length===0) return
 
 index=history.pop()
 
-renderDeck()
+buildDeck()
 
 }
 
-/* NAV */
+/* navigation */
 
 function navigate(name,e){
 e.stopPropagation()
-window.open("https://maps.google.com/?q="+encodeURIComponent(name))
+window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
+
+/* booking */
 
 function book(name,e){
 e.stopPropagation()
-window.open("https://google.com/search?q="+encodeURIComponent(name+" booking"))
+window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
-/* HOME */
+/* load place */
 
-function goHome(){
-deck.style.display="none"
-document.getElementById("home").style.display="flex"
+function loadPlace(name){
+
+return new Promise(resolve=>{
+
+if(imageCache[name]){
+resolve(imageCache[name])
+return
 }
 
-/* FAVORITES */
+if(!placesService){
+resolve(fallback(name))
+return
+}
+
+placesService.findPlaceFromQuery({
+query:name+" Oslo",
+fields:["place_id"]
+},(results,status)=>{
+
+if(status!==google.maps.places.PlacesServiceStatus.OK){
+resolve(fallback(name))
+return
+}
+
+placesService.getDetails({
+placeId:results[0].place_id,
+fields:["name","rating","photos"]
+},(place,status)=>{
+
+let photos=[]
+
+if(place.photos){
+for(let i=0;i<Math.min(3,place.photos.length);i++){
+photos.push(place.photos[i].getUrl({maxWidth:1200}))
+}
+}
+
+while(photos.length<3){
+photos.push("https://source.unsplash.com/featured/?restaurant")
+}
+
+let result={
+name:place?.name||name,
+rating:place?.rating||"",
+photos:photos
+}
+
+imageCache[name]=result
+
+resolve(result)
+
+})
+
+})
+
+})
+
+}
+
+/* fallback */
+
+function fallback(name){
+return{
+name:name,
+rating:"",
+photos:[
+"https://source.unsplash.com/featured/?restaurant",
+"https://source.unsplash.com/featured/?food",
+"https://source.unsplash.com/featured/?wine"
+]
+}
+}
+
+/* favorites */
 
 function toggleFav(type){
 document.getElementById("fav-"+type).classList.toggle("hidden")
@@ -477,13 +591,13 @@ function renderFavorites(){
 const box=document.getElementById("fav-"+type)
 box.innerHTML=""
 
-favorites[type].forEach(place=>{
+favorites[type].forEach(name=>{
 
 const el=document.createElement("div")
 el.className="favoriteItem"
-el.innerText=place.name
+el.innerText=name
 
-enableFavSwipe(el,type,place)
+el.onclick=()=>openFavorite(type,name)
 
 box.appendChild(el)
 
@@ -493,30 +607,33 @@ box.appendChild(el)
 
 }
 
-function enableFavSwipe(el,type,place){
+function openFavorite(type,name){
 
-let startX
+currentType=type
+list=[...data[type]]
 
-el.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
+index=list.indexOf(name)
 
-el.addEventListener("touchend",e=>{
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
 
-let diff=e.changedTouches[0].clientX-startX
-
-if(diff<-100){
-
-favorites[type]=favorites[type].filter(x=>x!==place)
-
-renderFavorites()
+buildDeck()
 
 }
 
-})
+/* go home */
+
+function goHome(){
+
+deck.style.display="none"
+document.getElementById("home").style.display="flex"
 
 }
 
+</script>
+
+<script async
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap">
 </script>
 
 </body>
