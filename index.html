@@ -14,6 +14,7 @@ margin:0;
 font-family:-apple-system,BlinkMacSystemFont;
 background:#000;
 color:white;
+overflow:hidden;
 }
 
 /* HOME */
@@ -78,14 +79,13 @@ height:92%;
 border-radius:26px;
 overflow:hidden;
 background:black;
+touch-action:none;
 transition:transform .35s ease;
-z-index:2;
 }
 
 .card.next{
 transform:scale(.96) translateY(10px);
 opacity:.55;
-z-index:1;
 }
 
 .card img{
@@ -94,7 +94,7 @@ height:100%;
 object-fit:cover;
 }
 
-/* GRADIENT FOR BUTTONS */
+/* bottom gradient */
 
 .card::after{
 content:"";
@@ -103,38 +103,22 @@ left:0;
 right:0;
 bottom:0;
 top:65%;
-
-background:linear-gradient(
-to bottom,
-rgba(0,0,0,0),
-rgba(0,0,0,0.35),
-rgba(0,0,0,0.7),
-rgba(0,0,0,0.95)
-);
-
+background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,0.45),rgba(0,0,0,0.9));
 pointer-events:none;
 }
 
-/* GRADIENT FOR NAME + RATING */
+/* gradient for name */
 
 .nameGradient{
 position:absolute;
 left:0;
 right:0;
 bottom:140px;
-height:180px;
-
-background:linear-gradient(
-to top,
-rgba(0,0,0,0.85),
-rgba(0,0,0,0.6),
-rgba(0,0,0,0)
-);
-
-pointer-events:none;
+height:200px;
+background:linear-gradient(to top,rgba(0,0,0,0.85),rgba(0,0,0,0.4),rgba(0,0,0,0));
 }
 
-/* PHOTO DOTS */
+/* dots */
 
 .photoDots{
 position:absolute;
@@ -157,16 +141,14 @@ background:rgba(255,255,255,.4);
 background:white;
 }
 
-/* TOP BUTTONS */
+/* top buttons */
 
-.topLeft,
-.topRight{
+.topLeft,.topRight{
 position:absolute;
 top:24px;
 font-size:24px;
 color:black;
-background:rgba(255,255,255,0.85);
-backdrop-filter:blur(12px);
+background:rgba(255,255,255,0.9);
 border-radius:14px;
 padding:10px 12px;
 }
@@ -174,7 +156,7 @@ padding:10px 12px;
 .topLeft{ left:20px; }
 .topRight{ right:20px; }
 
-/* INFO */
+/* info */
 
 .info{
 position:absolute;
@@ -185,7 +167,6 @@ left:24px;
 .name{
 font-family:'Playfair Display', serif;
 font-size:36px;
-font-weight:500;
 }
 
 .rating{
@@ -193,7 +174,7 @@ font-size:18px;
 color:#E6C27A;
 }
 
-/* BUTTONS */
+/* buttons */
 
 .buttons{
 position:absolute;
@@ -209,12 +190,10 @@ backdrop-filter:blur(20px);
 
 border-radius:26px;
 padding:18px 10px;
-
-border:1px solid rgba(255,255,255,0.25);
 }
 
 .buttons div{
-background:rgba(255,255,255,0.85);
+background:rgba(255,255,255,0.9);
 border-radius:16px;
 padding:14px 18px;
 font-size:28px;
@@ -254,8 +233,6 @@ color:black;
 
 <script>
 
-/* STATE */
-
 let data
 let list=[]
 let index=0
@@ -263,8 +240,6 @@ let history=[]
 let currentType=""
 let placesService
 let imageCache={}
-
-/* FAVORITES */
 
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
@@ -274,8 +249,6 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 
 const deck=document.getElementById("deck")
 
-/* LOAD DATA */
-
 async function loadData(){
 const res=await fetch("data/places.json")
 data=await res.json()
@@ -284,26 +257,21 @@ renderFavorites()
 
 loadData()
 
-/* MAP */
-
 function initMap(){
-
 const map=new google.maps.Map(document.getElementById("map"),{
 center:{lat:59.91,lng:10.75},
 zoom:13
 })
-
 placesService=new google.maps.places.PlacesService(map)
-
 }
 
-/* SHUFFLE */
+/* shuffle */
 
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
-/* CATEGORY */
+/* open category */
 
 function openCategory(type){
 
@@ -317,13 +285,11 @@ index=0
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
 
-preloadNext()
-
 buildDeck()
 
 }
 
-/* BUILD DECK */
+/* build deck */
 
 function buildDeck(){
 
@@ -342,7 +308,7 @@ createCard(list[index+1],true)
 
 }
 
-/* CREATE CARD */
+/* create card */
 
 function createCard(name,isNext){
 
@@ -353,7 +319,7 @@ if(isNext) card.classList.add("next")
 
 card.innerHTML=`
 
-<img id="photo">
+<img>
 
 <div class="photoDots">
 <span class="dot active"></span>
@@ -372,10 +338,10 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="dislikeBtn(event)">✕</div>
+<div onclick="btnDislike(event)">✕</div>
 <div onclick="navigate('${name}',event)">📍</div>
 <div onclick="book('${name}',event)">📅</div>
-<div onclick="likeBtn(event)">♥</div>
+<div onclick="btnLike(event)">♥</div>
 </div>
 
 `
@@ -386,61 +352,29 @@ card.querySelector(".topLeft").onclick=goHome
 card.querySelector(".topRight").onclick=undo
 
 enableSwipe(card)
+enablePhotoNav(card)
 
 loadPlace(name).then(place=>{
 
-let photos=place.photos
-let photoIndex=0
+const img=card.querySelector("img")
 
-const img=card.querySelector("#photo")
+img.src=place.photos[0]
 
-img.src=photos[0]
+card.dataset.photos=JSON.stringify(place.photos)
+card.dataset.photoIndex=0
 
-card.querySelector(".name").innerText=place.name
-card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
-
-card.addEventListener("click",e=>{
-
-if(e.target.closest(".buttons")) return
-
-const rect=card.getBoundingClientRect()
-const x=e.clientX-rect.left
-
-if(x<rect.width/2){
-photoIndex=(photoIndex-1+photos.length)%photos.length
-}else{
-photoIndex=(photoIndex+1)%photos.length
-}
-
-img.src=photos[photoIndex]
-
-})
+card.querySelector(".rating").innerText=
+"⭐ "+(place.rating||"")+" · Google"
 
 })
 
 }
 
-/* PRELOAD */
-
-function preloadNext(){
-
-for(let i=1;i<=5;i++){
-
-const next=list[index+i]
-
-if(next && !imageCache[next]){
-loadPlace(next)
-}
-
-}
-
-}
-
-/* SWIPE */
+/* swipe */
 
 function enableSwipe(card){
 
-let startX
+let startX=0
 let currentX=0
 
 card.addEventListener("touchstart",e=>{
@@ -448,9 +382,12 @@ startX=e.touches[0].clientX
 })
 
 card.addEventListener("touchmove",e=>{
+
 currentX=e.touches[0].clientX
 const diff=currentX-startX
-card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
+
+card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
+
 })
 
 card.addEventListener("touchend",()=>{
@@ -475,23 +412,47 @@ card.style.transform="translateX(0)"
 
 }
 
-/* BUTTON SWIPE */
+/* photo navigation */
 
-function likeBtn(e){
+function enablePhotoNav(card){
+
+card.addEventListener("click",e=>{
+
+if(e.target.closest(".buttons")) return
+
+const rect=card.getBoundingClientRect()
+const x=e.clientX-rect.left
+
+let photos=JSON.parse(card.dataset.photos)
+let i=parseInt(card.dataset.photoIndex)
+
+if(x<rect.width/2){
+i=(i-1+photos.length)%photos.length
+}else{
+i=(i+1)%photos.length
+}
+
+card.dataset.photoIndex=i
+
+card.querySelector("img").src=photos[i]
+
+})
+
+}
+
+/* like dislike */
+
+function btnLike(e){
 e.stopPropagation()
-const card=document.querySelector(".card")
-card.style.transform="translateX(120vw)"
+document.querySelector(".card").style.transform="translateX(120vw)"
 setTimeout(like,200)
 }
 
-function dislikeBtn(e){
+function btnDislike(e){
 e.stopPropagation()
-const card=document.querySelector(".card")
-card.style.transform="translateX(-120vw)"
+document.querySelector(".card").style.transform="translateX(-120vw)"
 setTimeout(dislike,200)
 }
-
-/* LOGIC */
 
 function like(){
 
@@ -500,34 +461,27 @@ let name=list[index]
 history.push(index)
 
 if(!favorites[currentType].includes(name)){
-
 favorites[currentType].push(name)
-
 localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
-
 renderFavorites()
-
 }
 
 index++
-
 buildDeck()
 
 }
 
 function dislike(){
-
 history.push(index)
-
 index++
-
 buildDeck()
-
 }
+
+/* undo */
 
 function undo(){
 
-if(history.length===0)return
+if(history.length===0) return
 
 index=history.pop()
 
@@ -535,95 +489,21 @@ buildDeck()
 
 }
 
-/* FAVORITES */
-
-function toggleFav(type){
-document.getElementById("fav-"+type).classList.toggle("hidden")
-}
-
-function renderFavorites(){
-
-["restaurants","winebars","cocktailbars"].forEach(type=>{
-
-const box=document.getElementById("fav-"+type)
-
-box.innerHTML=""
-
-favorites[type].forEach(name=>{
-
-const el=document.createElement("div")
-
-el.className="favoriteItem"
-
-el.innerText=name
-
-el.onclick=()=>openFavorite(type,name)
-
-enableFavSwipe(el,type,name)
-
-box.appendChild(el)
-
-})
-
-})
-
-}
-
-function openFavorite(type,name){
-
-currentType=type
-list=[...data[type]]
-
-index=list.indexOf(name)
-
-document.getElementById("home").style.display="none"
-deck.style.display="flex"
-
-buildDeck()
-
-}
-
-/* FAVORITE SWIPE DELETE */
-
-function enableFavSwipe(el,type,name){
-
-let startX
-
-el.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-})
-
-el.addEventListener("touchend",e=>{
-
-let diff=e.changedTouches[0].clientX-startX
-
-if(Math.abs(diff)>100){
-
-favorites[type]=favorites[type].filter(x=>x!==name)
-
-localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
-
-renderFavorites()
-
-}
-
-})
-
-}
-
-/* NAVIGATION */
+/* navigation */
 
 function navigate(name,e){
 e.stopPropagation()
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
 
+/* booking */
+
 function book(name,e){
 e.stopPropagation()
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
-/* GOOGLE PLACE */
+/* load place */
 
 function loadPlace(name){
 
@@ -631,6 +511,11 @@ return new Promise(resolve=>{
 
 if(imageCache[name]){
 resolve(imageCache[name])
+return
+}
+
+if(!placesService){
+resolve(fallback(name))
 return
 }
 
@@ -652,11 +537,9 @@ fields:["name","rating","photos"]
 let photos=[]
 
 if(place.photos){
-
 for(let i=0;i<Math.min(3,place.photos.length);i++){
 photos.push(place.photos[i].getUrl({maxWidth:1200}))
 }
-
 }
 
 while(photos.length<3){
@@ -681,7 +564,7 @@ resolve(result)
 
 }
 
-/* FALLBACK */
+/* fallback */
 
 function fallback(name){
 return{
@@ -693,6 +576,58 @@ photos:[
 "https://source.unsplash.com/featured/?wine"
 ]
 }
+}
+
+/* favorites */
+
+function toggleFav(type){
+document.getElementById("fav-"+type).classList.toggle("hidden")
+}
+
+function renderFavorites(){
+
+["restaurants","winebars","cocktailbars"].forEach(type=>{
+
+const box=document.getElementById("fav-"+type)
+box.innerHTML=""
+
+favorites[type].forEach(name=>{
+
+const el=document.createElement("div")
+el.className="favoriteItem"
+el.innerText=name
+
+el.onclick=()=>openFavorite(type,name)
+
+box.appendChild(el)
+
+})
+
+})
+
+}
+
+function openFavorite(type,name){
+
+currentType=type
+list=[...data[type]]
+
+index=list.indexOf(name)
+
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
+
+buildDeck()
+
+}
+
+/* go home */
+
+function goHome(){
+
+deck.style.display="none"
+document.getElementById("home").style.display="flex"
+
 }
 
 </script>
