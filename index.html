@@ -7,7 +7,7 @@
 
 <title>Savorly</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 
@@ -107,10 +107,10 @@ bottom:0;
 top:65%;
 background:linear-gradient(
 to bottom,
-rgba(0,0,0,0) 0%,
-rgba(0,0,0,0.35) 40%,
-rgba(0,0,0,0.65) 70%,
-rgba(0,0,0,0.9) 100%
+rgba(0,0,0,0),
+rgba(0,0,0,0.35),
+rgba(0,0,0,0.7),
+rgba(0,0,0,0.95)
 );
 pointer-events:none;
 }
@@ -231,6 +231,8 @@ color:black;
 
 <script>
 
+/* STATE */
+
 let data
 let list=[]
 let index=0
@@ -247,6 +249,8 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 
 const deck=document.getElementById("deck")
 
+/* LOAD DATA */
+
 async function loadData(){
 const res=await fetch("data/places.json")
 data=await res.json()
@@ -254,6 +258,8 @@ renderFavorites()
 }
 
 loadData()
+
+/* INIT MAP */
 
 function initMap(){
 
@@ -266,18 +272,23 @@ placesService=new google.maps.places.PlacesService(map)
 
 }
 
+/* SHUFFLE */
+
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
+/* CATEGORY */
+
 function openCategory(type){
 
-if(!data) return
+if(!data)return
 
 currentType=type
 list=[...data[type]]
 
 shuffle(list)
+
 index=0
 
 document.getElementById("home").style.display="none"
@@ -287,6 +298,8 @@ preloadNext()
 buildDeck()
 
 }
+
+/* BUILD STACK */
 
 function buildDeck(){
 
@@ -305,6 +318,8 @@ createCard(list[index+1],true)
 
 }
 
+/* CARD */
+
 function createCard(name,isNext){
 
 const card=document.createElement("div")
@@ -314,7 +329,7 @@ if(isNext) card.classList.add("next")
 
 card.innerHTML=`
 
-<img id="photo" src="https://source.unsplash.com/featured/?restaurant">
+<img id="photo">
 
 <div class="photoDots">
 <span class="dot active"></span>
@@ -331,12 +346,11 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="dislike()">✕</div>
-<div onclick="navigate('${name}')">📍</div>
-<div onclick="book('${name}')">📅</div>
-<div onclick="like()">♥</div>
+<div onclick="dislikeBtn(event)">✕</div>
+<div onclick="navigate('${name}',event)">📍</div>
+<div onclick="book('${name}',event)">📅</div>
+<div onclick="likeBtn(event)">♥</div>
 </div>
-
 `
 
 deck.appendChild(card)
@@ -350,7 +364,6 @@ loadPlace(name).then(place=>{
 
 let photos=place.photos
 let photoIndex=0
-
 const img=card.querySelector("#photo")
 
 img.src=photos[0]
@@ -359,6 +372,8 @@ card.querySelector(".name").innerText=place.name
 card.querySelector(".rating").innerText="⭐ "+(place.rating||"")+" · Google"
 
 card.addEventListener("click",e=>{
+
+if(e.target.closest(".buttons"))return
 
 const rect=card.getBoundingClientRect()
 const x=e.clientX-rect.left
@@ -377,6 +392,8 @@ img.src=photos[photoIndex]
 
 }
 
+/* PRELOAD */
+
 function preloadNext(){
 
 for(let i=1;i<=5;i++){
@@ -391,6 +408,8 @@ loadPlace(next)
 
 }
 
+/* SWIPE */
+
 function enableSwipe(card){
 
 let startX
@@ -403,8 +422,6 @@ startX=e.touches[0].clientX
 card.addEventListener("touchmove",e=>{
 currentX=e.touches[0].clientX
 const diff=currentX-startX
-
-card.style.transition="none"
 card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
@@ -412,43 +429,50 @@ card.addEventListener("touchend",()=>{
 
 const diff=currentX-startX
 
-card.style.transition="transform .35s ease"
-
 if(diff>120){
-
-card.style.transform="translateX(120vw) rotate(25deg)"
-setTimeout(like,250)
-
+card.style.transform="translateX(120vw)"
+setTimeout(like,200)
+return
 }
 
-else if(diff<-120){
-
-card.style.transform="translateX(-120vw) rotate(-25deg)"
-setTimeout(dislike,250)
-
+if(diff<-120){
+card.style.transform="translateX(-120vw)"
+setTimeout(dislike,200)
+return
 }
 
-else{
-
-card.style.transform="translateX(0px) rotate(0deg)"
-
-}
+card.style.transform="translateX(0)"
 
 })
 
 }
+
+/* BUTTONS */
+
+function likeBtn(e){
+e.stopPropagation()
+const card=document.querySelector(".card")
+card.style.transform="translateX(120vw)"
+setTimeout(like,200)
+}
+
+function dislikeBtn(e){
+e.stopPropagation()
+const card=document.querySelector(".card")
+card.style.transform="translateX(-120vw)"
+setTimeout(dislike,200)
+}
+
+/* LOGIC */
 
 function like(){
 
 let name=list[index]
 
 if(!favorites[currentType].includes(name)){
-
 favorites[currentType].push(name)
 localStorage.setItem("fav-"+currentType,JSON.stringify(favorites[currentType]))
-
 renderFavorites()
-
 }
 
 next()
@@ -472,12 +496,14 @@ buildDeck()
 
 }
 
-function goHome(){
+/* HOME */
 
+function goHome(){
 deck.style.display="none"
 document.getElementById("home").style.display="flex"
-
 }
+
+/* FAVORITES */
 
 function toggleFav(type){
 document.getElementById("fav-"+type).classList.toggle("hidden")
@@ -512,7 +538,6 @@ function openFavorite(type,name){
 
 currentType=type
 list=[...data[type]]
-
 index=list.indexOf(name)
 
 document.getElementById("home").style.display="none"
@@ -521,6 +546,8 @@ deck.style.display="flex"
 buildDeck()
 
 }
+
+/* FAVORITE DELETE */
 
 function enableFavSwipe(el,type,name){
 
@@ -535,37 +562,28 @@ el.addEventListener("touchend",e=>{
 let diff=e.changedTouches[0].clientX-startX
 
 if(Math.abs(diff)>100){
-
 favorites[type]=favorites[type].filter(x=>x!==name)
 localStorage.setItem("fav-"+type,JSON.stringify(favorites[type]))
-
 renderFavorites()
-
 }
 
 })
 
 }
 
-function navigate(name){
+/* MAP */
 
-if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){
-
-window.location.href="maps://?q="+encodeURIComponent(name+" Oslo")
-
-}else{
-
+function navigate(name,e){
+e.stopPropagation()
 window.location.href="https://maps.google.com/?q="+encodeURIComponent(name+" Oslo")
-
 }
 
-}
-
-function book(name){
-
+function book(name,e){
+e.stopPropagation()
 window.location.href="https://www.google.com/search?q="+encodeURIComponent(name+" booking")
-
 }
+
+/* LOAD PLACE */
 
 function loadPlace(name){
 
@@ -599,11 +617,9 @@ fields:["name","rating","photos"]
 let photos=[]
 
 if(place.photos){
-
 for(let i=0;i<Math.min(3,place.photos.length);i++){
 photos.push(place.photos[i].getUrl({maxWidth:1200}))
 }
-
 }
 
 while(photos.length<3){
@@ -617,7 +633,6 @@ photos:photos
 }
 
 imageCache[name]=result
-
 resolve(result)
 
 })
@@ -627,6 +642,8 @@ resolve(result)
 })
 
 }
+
+/* FALLBACK */
 
 function fallback(name){
 return{
