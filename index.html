@@ -560,13 +560,12 @@ document.getElementById("home").style.display="flex"
 }
 
 function navigate(name){
-window.location.href =
-"https://maps.google.com/?q=" + encodeURIComponent(name + " Oslo")
+window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
 
 function book(name){
-window.location.href =
-"https://www.google.com/search?q=" + encodeURIComponent(name + " booking")
+window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
+}
 
 function preloadNext(){
 for(let i=1;i<=5;i++){
