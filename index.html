@@ -60,18 +60,6 @@ border:1px solid #333;
 
 .hidden{display:none}
 
-/* 🔥 UNDERKATEGORI FIX */
-#subcategories{
-display:flex;
-flex-direction:column;
-align-items:center;
-width:100%;
-}
-
-#subcategories .cat{
-margin-top:6px;
-}
-
 /* CARD STACK */
 
 #deck{
@@ -225,16 +213,6 @@ font-size:28px;
 color:black;
 }
 
-#subcategories{
-width:85%;
-max-width:420px;
-margin-top:0;
-}
-
-#subcategories .cat{
-margin:6px 0;
-}
-
 </style>
 </head>
 
@@ -245,24 +223,6 @@ margin:6px 0;
 <img src="logo.png" class="logo">
 
 <div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
-
-<!-- 🔥 UNDERKATEGORIER -->
-<div id="subcategories" class="hidden" style="width:85%;max-width:420px">
-
-<div class="cat" onclick="selectSub('fine dining')">Fine dining</div>
-<div class="cat" onclick="selectSub('italiensk')">Italiensk</div>
-<div class="cat" onclick="selectSub('fransk')">Fransk</div>
-<div class="cat" onclick="selectSub('indisk')">Indisk</div>
-<div class="cat" onclick="selectSub('asiatisk')">Asiatisk</div>
-<div class="cat" onclick="selectSub('japansk')">Japansk</div>
-<div class="cat" onclick="selectSub('spansk')">Spansk</div>
-<div class="cat" onclick="selectSub('mexicansk')">Mexicansk</div>
-
-<div class="cat" onclick="closeSub()">← Tilbake</div>
-
-</div>
-</div>
-
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
 
@@ -286,46 +246,6 @@ margin:6px 0;
 
 <script>
 
-let selectedSubCategory = null
-
-function selectSub(category){
-
-if(!data){
-alert("Data laster...")
-return
-}
-
-selectedSubCategory = category
-
-list = data.restaurants
-.filter(r => r.category === category)
-.map(r => r.name)
-
-shuffle(list)
-
-index = 0
-
-document.getElementById("subcategories").classList.add("hidden")
-document.getElementById("home").style.display = "none"
-deck.style.display = "flex"
-
-buildDeck()
-
-}
-
-function closeSub(){
-
-document.getElementById("subcategories").classList.add("hidden")
-
-currentType = ""
-list = []
-index = 0
-
-document.getElementById("home").style.display = "flex"
-deck.style.display = "none"
-
-}
-
 let data
 let list=[]
 let index=0
@@ -343,7 +263,7 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 const deck=document.getElementById("deck")
 
 async function loadData(){
-const res=await fetch("./data/places.json")
+const res=await fetch("data/places.json")
 data=await res.json()
 renderFavorites()
 }
@@ -362,27 +282,13 @@ function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
-/* 🔥 FIX */
 function openCategory(type){
 
-if(!data){
-alert("Data laster...")
-return
-}
-
-currentType = type
-
-if(type === "restaurants"){
-document.getElementById("subcategories").classList.remove("hidden")
-return
-} else {
-document.getElementById("subcategories").classList.add("hidden")
-}
-
-list = [...data[type]]
+currentType=type
+list=[...data[type]]
 shuffle(list)
 
-index = 0
+index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
