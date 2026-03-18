@@ -212,16 +212,6 @@ padding:14px 18px;
 font-size:28px;
 color:black;
 }
-#subcategories{
-display:flex;
-flex-direction:column;
-align-items:center;
-width:100%;
-}
-
-#subcategories .cat{
-margin-top:6px;
-}
 
 </style>
 </head>
@@ -233,25 +223,8 @@ margin-top:6px;
 <img src="logo.png" class="logo">
 
 <div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
-
-<div id="subcategories" class="hidden" style="width:85%;max-width:420px">
-
-<div class="cat" onclick="selectSub('fine dining')">Fine dining</div>
-<div class="cat" onclick="selectSub('italiensk')">Italiensk</div>
-<div class="cat" onclick="selectSub('fransk')">Fransk</div>
-<div class="cat" onclick="selectSub('indisk')">Indisk</div>
-<div class="cat" onclick="selectSub('asiatisk')">Asiatisk</div>
-<div class="cat" onclick="selectSub('japansk')">Japansk</div>
-<div class="cat" onclick="selectSub('spansk')">Spansk</div>
-<div class="cat" onclick="selectSub('mexicansk')">Mexicansk</div>
-
-<div class="cat" onclick="closeSub()">← Tilbake</div>
-
-</div>
-
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
-</div>
 
 <div style="margin-top:20px;width:85%;max-width:420px">
 
@@ -290,7 +263,7 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 const deck=document.getElementById("deck")
 
 async function loadData(){
-const res = await fetch("./data/places.json")
+const res=await fetch("data/places.json")
 data=await res.json()
 renderFavorites()
 }
@@ -311,35 +284,6 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
-if(!data){
-alert("Data laster... prøv igjen")
-return
-}
-
-currentType = type
-
-if(type === "restaurants"){
-
-// 🔥 VIS underkategorier
-document.getElementById("subcategories").classList.remove("hidden")
-
-// 🔥 IKKE gå videre
-return
-}
-
-// resten som før
-list = [...data[type]]
-shuffle(list)
-
-index = 0
-
-document.getElementById("home").style.display = "none"
-deck.style.display = "flex"
-
-buildDeck()
-
-}
-
 currentType=type
 list=[...data[type]]
 shuffle(list)
@@ -351,6 +295,7 @@ deck.style.display="flex"
 
 buildDeck()
 
+}
 
 function openFavorite(type,name){
 
@@ -358,7 +303,6 @@ currentType=type
 list=[...data[type]]
 
 index=list.indexOf(name)
-if(index<0) index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
@@ -543,7 +487,7 @@ setTimeout(()=>dislike(),300)
 function enableSwipe(card){
 
 let startX
-let currentX=0
+let currentX
 
 card.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
@@ -557,8 +501,6 @@ card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
 card.addEventListener("touchend",()=>{
-
-if(currentX===0) return
 
 const diff=currentX-startX
 card.style.transition="transform .35s ease"
@@ -574,8 +516,6 @@ setTimeout(dislike,250)
 else{
 card.style.transform="translateX(0)"
 }
-
-currentX=0
 
 })
 
@@ -698,9 +638,9 @@ resolve(result)
 
 function fallback(name){
 return{
-name: name,
-rating: "",
-photos: [
+name:name,
+rating:"",
+photos:[
 "https://source.unsplash.com/featured/?restaurant",
 "https://source.unsplash.com/featured/?food",
 "https://source.unsplash.com/featured/?wine"
@@ -708,60 +648,6 @@ photos: [
 }
 }
 
-let selectedSubCategory = null
-
-function selectSub(category){
-
-selectedSubCategory = category
-
-list = data.restaurants
-.filter(r => r.category === category)
-.map(r => r.name)
-
-shuffle(list)
-
-index = 0
-
-document.getElementById("home").style.display = "none"
-deck.style.display = "flex"
-
-buildDeck()
-
-}
-
-function closeSub(){
-document.getElementById("subcategories").classList.add("hidden")
-}
-let selectedSubCategory = null
-
-function selectSub(category){
-
-if(!data){
-alert("Data laster...")
-return
-}
-
-selectedSubCategory = category
-
-list = data.restaurants
-.filter(r => r.category === category)
-.map(r => r.name)
-
-shuffle(list)
-
-index = 0
-
-document.getElementById("subcategories").classList.add("hidden")
-document.getElementById("home").style.display = "none"
-deck.style.display = "flex"
-
-buildDeck()
-
-}
-
-function closeSub(){
-document.getElementById("subcategories").classList.add("hidden")
-}
 </script>
 
 <script async
