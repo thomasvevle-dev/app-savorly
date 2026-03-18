@@ -309,10 +309,15 @@ return
 currentType = type
 
 if(type === "restaurants"){
+
+// 🔥 VIS underkategorier
 document.getElementById("subcategories").classList.remove("hidden")
+
+// 🔥 IKKE gå videre
 return
 }
 
+// resten som før
 list = [...data[type]]
 shuffle(list)
 
@@ -324,7 +329,6 @@ deck.style.display = "flex"
 buildDeck()
 
 }
-
 
 currentType=type
 list=[...data[type]]
