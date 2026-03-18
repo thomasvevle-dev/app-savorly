@@ -303,6 +303,7 @@ currentType=type
 list=[...data[type]]
 
 index=list.indexOf(name)
+if(index<0) index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
@@ -487,7 +488,7 @@ setTimeout(()=>dislike(),300)
 function enableSwipe(card){
 
 let startX
-let currentX
+let currentX=0
 
 card.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
@@ -501,6 +502,8 @@ card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
 card.addEventListener("touchend",()=>{
+
+if(currentX===0) return
 
 const diff=currentX-startX
 card.style.transition="transform .35s ease"
@@ -516,6 +519,8 @@ setTimeout(dislike,250)
 else{
 card.style.transform="translateX(0)"
 }
+
+currentX=0
 
 })
 
