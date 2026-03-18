@@ -1,54 +1,70 @@
 {
   "restaurants": [
-    {"name":"Maaemo","category":"fine dining"},
-    {"name":"Kontrast","category":"fine dining"},
-    {"name":"Statholdergaarden","category":"fine dining"},
-    {"name":"Sabi Omakase Oslo","category":"japansk"},
-    {"name":"Hot Shop","category":"fine dining"},
-    {"name":"Plah","category":"asiatisk"},
-    {"name":"Arakataka","category":"fine dining"},
-    {"name":"Le Benjamin","category":"fransk"},
-    {"name":"Vaaghals","category":"fine dining"},
-    {"name":"Katla","category":"asiatisk"},
-    {"name":"Kolonialen","category":"fine dining"},
-    {"name":"Smalhans","category":"fine dining"},
-    {"name":"Fyr Bistronomi","category":"fransk"},
-    {"name":"Ylajali","category":"fine dining"},
-    {"name":"Dinner","category":"asiatisk"},
-    {"name":"Südøst","category":"asiatisk"},
-    {"name":"Louise Restaurant & Bar","category":"fine dining"},
-    {"name":"Galt","category":"fine dining"},
-    {"name":"Grand Café","category":"fransk"},
-    {"name":"Alex Sushi","category":"japansk"},
-    {"name":"Kverneriet","category":"mexicansk"},
-    {"name":"Hyde","category":"fine dining"},
-    {"name":"Sjømagasinet","category":"fine dining"},
-    {"name":"Lorry","category":"fransk"},
-    {"name":"Feinschmecker","category":"fine dining"},
-    {"name":"Stock","category":"fine dining"},
-    {"name":"Park 29","category":"fine dining"},
-    {"name":"Palace Grill","category":"fine dining"},
-    {"name":"Hos Thea","category":"fine dining"},
-    {"name":"Brasserie Blanche","category":"fransk"},
-    {"name":"Savage","category":"fine dining"},
-    {"name":"Hrimnir","category":"asiatisk"},
-    {"name":"Brasserie France","category":"fransk"},
-    {"name":"Ling Ling","category":"asiatisk"},
-    {"name":"Nodee","category":"asiatisk"},
-    {"name":"Fjord Restaurant","category":"fine dining"},
-    {"name":"Sanguine","category":"fine dining"},
-    {"name":"Palmen","category":"fine dining"},
-    {"name":"Brasserie Rivoli","category":"fransk"},
-    {"name":"Eik Annen Etage","category":"fine dining"},
-    {"name":"The Salmon","category":"fine dining"},
-    {"name":"Varemottaket","category":"fine dining"},
-    {"name":"Stallen","category":"fine dining"},
-    {"name":"Smia Galleri","category":"fine dining"},
-    {"name":"Statholderens Mat & Vinkjeller","category":"fine dining"},
-    {"name":"Bass Oslo","category":"mexicansk"},
-    {"name":"Der Peppern Gror","category":"indisk"},
-    {"name":"Sushi Sho","category":"japansk"},
-    {"name":"Aymara","category":"fine dining"}
+
+    { "name": "Maaemo", "category": "fine dining" },
+    { "name": "Kontrast", "category": "fine dining" },
+    { "name": "Statholdergaarden", "category": "fine dining" },
+    { "name": "Hot Shop", "category": "fine dining" },
+    { "name": "Ylajali", "category": "fine dining" },
+    { "name": "Feinschmecker", "category": "fine dining" },
+    { "name": "Park 29", "category": "fine dining" },
+    { "name": "Hos Thea", "category": "fine dining" },
+    { "name": "Savage", "category": "fine dining" },
+
+    { "name": "Sabi Omakase Oslo", "category": "japansk" },
+    { "name": "Alex Sushi", "category": "japansk" },
+    { "name": "Sushi Sho", "category": "japansk" },
+
+    { "name": "Dinner", "category": "asiatisk" },
+    { "name": "Südøst", "category": "asiatisk" },
+    { "name": "Ling Ling", "category": "asiatisk" },
+    { "name": "Nodee", "category": "asiatisk" },
+
+    { "name": "Der Peppern Gror", "category": "indisk" },
+
+    { "name": "Brasserie France", "category": "fransk" },
+    { "name": "Brasserie Blanche", "category": "fransk" },
+    { "name": "Brasserie Rivoli", "category": "fransk" },
+    { "name": "Le Benjamin", "category": "fransk" },
+
+    { "name": "Aymara", "category": "mexicansk" },
+
+    { "name": "Palace Grill", "category": "fine dining" },
+    { "name": "Stock", "category": "fine dining" },
+    { "name": "Galt", "category": "fine dining" },
+
+    { "name": "Arakataka", "category": "fine dining" },
+    { "name": "Kolonialen", "category": "fine dining" },
+    { "name": "Vaaghals", "category": "fine dining" },
+
+    { "name": "Fyr Bistronomi", "category": "fransk" },
+
+    { "name": "Grand Café", "category": "fransk" },
+
+    { "name": "Kverneriet", "category": "spansk" },
+
+    { "name": "Hyde", "category": "asiatisk" },
+
+    { "name": "Sjømagasinet", "category": "fine dining" },
+
+    { "name": "Lorry", "category": "fransk" },
+
+    { "name": "Palmen", "category": "fransk" },
+
+    { "name": "Eik Annen Etage", "category": "fine dining" },
+
+    { "name": "The Salmon", "category": "fine dining" },
+
+    { "name": "Varemottaket", "category": "fine dining" },
+
+    { "name": "Stallen", "category": "fine dining" },
+
+    { "name": "Smia Galleri", "category": "fine dining" },
+
+    { "name": "Statholderens Mat & Vinkjeller", "category": "fine dining" },
+
+    { "name": "Bass Oslo", "category": "asiatisk" }
+
   ],
 
   "winebars": [
@@ -66,6 +82,7 @@
     "Mathallen Vinbar",
     "Vinbaren på Bristol",
     "Vinbaren på Hotel Continental",
+    "Dråpen Vinbar",
     "Vini Divini",
     "Nord Vinbar",
     "Syd Vinbar"
@@ -77,6 +94,7 @@
     "Svanen",
     "Torggata Botaniske",
     "Fuglen",
+    "Aku Aku",
     "Pier 42",
     "Jaeger",
     "Internasjonalen",
@@ -84,6 +102,7 @@
     "Ostara",
     "Bar Boca",
     "The Thief Bar",
+    "Gimle Kino Bar",
     "Angst Bar"
   ]
 }
