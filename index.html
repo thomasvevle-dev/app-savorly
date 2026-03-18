@@ -585,13 +585,13 @@ resolve(imageCache[name])
 return
 }
 
-if(!placesService){
+if(place.types && !place.types.includes("restaurant")){
 resolve(fallback(name))
 return
 }
 
 placesService.findPlaceFromQuery({
-query:name+" Oslo",
+query: name+" restaurant Oslo Norway",
 fields:["place_id"]
 },(results,status)=>{
 
