@@ -226,6 +226,21 @@ color:black;
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
 
+<div id="subcategories" class="hidden" style="width:85%;max-width:420px">
+
+<div class="cat" onclick="selectSub('fine dining')">Fine dining</div>
+<div class="cat" onclick="selectSub('italiensk')">Italiensk</div>
+<div class="cat" onclick="selectSub('fransk')">Fransk</div>
+<div class="cat" onclick="selectSub('indisk')">Indisk</div>
+<div class="cat" onclick="selectSub('asiatisk')">Asiatisk</div>
+<div class="cat" onclick="selectSub('japansk')">Japansk</div>
+<div class="cat" onclick="selectSub('spansk')">Spansk</div>
+<div class="cat" onclick="selectSub('mexicansk')">Mexicansk</div>
+
+<div class="cat" onclick="closeSub()">← Tilbake</div>
+
+</div>
+
 <div style="margin-top:20px;width:85%;max-width:420px">
 
 <div class="cat" onclick="toggleFav('restaurants')">Favoritt restaurant</div>
@@ -283,6 +298,25 @@ return arr.sort(()=>Math.random()-0.5)
 }
 
 function openCategory(type){
+
+currentType = type
+
+if(type === "restaurants"){
+document.getElementById("subcategories").classList.remove("hidden")
+return
+}
+
+list = [...data[type]]
+shuffle(list)
+
+index = 0
+
+document.getElementById("home").style.display = "none"
+deck.style.display = "flex"
+
+buildDeck()
+
+}
 
 currentType=type
 list=[...data[type]]
@@ -642,6 +676,32 @@ resolve(result)
 }
 
 function fallback(name){
+    
+let selectedSubCategory = null
+
+function selectSub(category){
+
+selectedSubCategory = category
+
+list = data.restaurants
+.filter(r => r.category === category)
+.map(r => r.name)
+
+shuffle(list)
+
+index = 0
+
+document.getElementById("home").style.display = "none"
+deck.style.display = "flex"
+
+buildDeck()
+
+}
+
+function closeSub(){
+document.getElementById("subcategories").classList.add("hidden")
+}
+    
 return{
 name:name,
 rating:"",
