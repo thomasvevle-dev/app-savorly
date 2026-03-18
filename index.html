@@ -314,7 +314,16 @@ buildDeck()
 }
 
 function closeSub(){
+
 document.getElementById("subcategories").classList.add("hidden")
+
+currentType = ""
+list = []
+index = 0
+
+document.getElementById("home").style.display = "flex"
+deck.style.display = "none"
+
 }
 
 let data
@@ -366,6 +375,8 @@ currentType = type
 if(type === "restaurants"){
 document.getElementById("subcategories").classList.remove("hidden")
 return
+} else {
+document.getElementById("subcategories").classList.add("hidden")
 }
 
 list = [...data[type]]
