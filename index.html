@@ -299,6 +299,11 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
+if(!data){
+alert("Data laster... prøv igjen")
+return
+}
+
 currentType = type
 
 if(type === "restaurants"){
@@ -317,6 +322,8 @@ deck.style.display = "flex"
 buildDeck()
 
 }
+
+
 
 currentType=type
 list=[...data[type]]
