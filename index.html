@@ -223,10 +223,11 @@ color:black;
 <img src="logo.png" class="logo">
 
 <div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
+<div id="subcategories" class="hidden" style="width:85%;max-width:420px">
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
 
-<div id="subcategories" class="hidden" style="width:85%;max-width:420px">
+
 
 <div class="cat" onclick="selectSub('fine dining')">Fine dining</div>
 <div class="cat" onclick="selectSub('italiensk')">Italiensk</div>
@@ -716,7 +717,36 @@ buildDeck()
 function closeSub(){
 document.getElementById("subcategories").classList.add("hidden")
 }
+let selectedSubCategory = null
 
+function selectSub(category){
+
+if(!data){
+alert("Data laster...")
+return
+}
+
+selectedSubCategory = category
+
+list = data.restaurants
+.filter(r => r.category === category)
+.map(r => r.name)
+
+shuffle(list)
+
+index = 0
+
+document.getElementById("subcategories").classList.add("hidden")
+document.getElementById("home").style.display = "none"
+deck.style.display = "flex"
+
+buildDeck()
+
+}
+
+function closeSub(){
+document.getElementById("subcategories").classList.add("hidden")
+}
 </script>
 
 <script async
