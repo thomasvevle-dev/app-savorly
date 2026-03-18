@@ -60,6 +60,18 @@ border:1px solid #333;
 
 .hidden{display:none}
 
+/* 🔥 UNDERKATEGORI FIX */
+#subcategories{
+display:flex;
+flex-direction:column;
+align-items:center;
+width:100%;
+}
+
+#subcategories .cat{
+margin-top:6px;
+}
+
 /* CARD STACK */
 
 #deck{
@@ -223,6 +235,23 @@ color:black;
 <img src="logo.png" class="logo">
 
 <div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
+
+<!-- 🔥 UNDERKATEGORIER -->
+<div id="subcategories" class="hidden" style="width:85%;max-width:420px">
+
+<div class="cat" onclick="selectSub('fine dining')">Fine dining</div>
+<div class="cat" onclick="selectSub('italiensk')">Italiensk</div>
+<div class="cat" onclick="selectSub('fransk')">Fransk</div>
+<div class="cat" onclick="selectSub('indisk')">Indisk</div>
+<div class="cat" onclick="selectSub('asiatisk')">Asiatisk</div>
+<div class="cat" onclick="selectSub('japansk')">Japansk</div>
+<div class="cat" onclick="selectSub('spansk')">Spansk</div>
+<div class="cat" onclick="selectSub('mexicansk')">Mexicansk</div>
+
+<div class="cat" onclick="closeSub()">← Tilbake</div>
+
+</div>
+
 <div class="cat" onclick="openCategory('winebars')">Vinbar</div>
 <div class="cat" onclick="openCategory('cocktailbars')">Cocktailbar</div>
 
@@ -246,6 +275,37 @@ color:black;
 
 <script>
 
+let selectedSubCategory = null
+
+function selectSub(category){
+
+if(!data){
+alert("Data laster...")
+return
+}
+
+selectedSubCategory = category
+
+list = data.restaurants
+.filter(r => r.category === category)
+.map(r => r.name)
+
+shuffle(list)
+
+index = 0
+
+document.getElementById("subcategories").classList.add("hidden")
+document.getElementById("home").style.display = "none"
+deck.style.display = "flex"
+
+buildDeck()
+
+}
+
+function closeSub(){
+document.getElementById("subcategories").classList.add("hidden")
+}
+
 let data
 let list=[]
 let index=0
@@ -263,7 +323,7 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 const deck=document.getElementById("deck")
 
 async function loadData(){
-const res=await fetch("data/places.json")
+const res=await fetch("./data/places.json")
 data=await res.json()
 renderFavorites()
 }
@@ -282,13 +342,25 @@ function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
+/* 🔥 FIX */
 function openCategory(type){
 
-currentType=type
-list=[...data[type]]
+if(!data){
+alert("Data laster...")
+return
+}
+
+currentType = type
+
+if(type === "restaurants"){
+document.getElementById("subcategories").classList.remove("hidden")
+return
+}
+
+list = [...data[type]]
 shuffle(list)
 
-index=0
+index = 0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
