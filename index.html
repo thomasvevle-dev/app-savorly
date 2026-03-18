@@ -356,10 +356,10 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="dislikeFromButton()">✕</div>
-<div onclick="navigate('${name}')">📍</div>
-<div onclick="book('${name}')">📅</div>
-<div onclick="likeFromButton()">♥</div>
+<div onclick="dislikeFromButton(event)">✕</div>
+<div onclick="navigate('${name}',event)">📍</div>
+<div onclick="book('${name}',event)">📅</div>
+<div onclick="likeFromButton(event)">♥</div>
 </div>
 `
 
@@ -386,7 +386,9 @@ card.addEventListener("click",e=>{
 
 if(e.target.closest(".buttons")) return
 
-if(e.clientX > window.innerWidth/2){
+const x = e.clientX || (e.touches && e.touches[0].clientX)
+
+if(x > window.innerWidth/2){
 photoIndex=(photoIndex+1)%photos.length
 }else{
 photoIndex=(photoIndex-1+photos.length)%photos.length
@@ -462,26 +464,18 @@ renderFavorites()
 
 /* BUTTON SWIPE */
 
-function likeFromButton(){
-
+function likeFromButton(e){
+if(e) e.stopPropagation()
 const card=document.querySelector(".card")
-
-card.style.transition="transform .35s ease"
 card.style.transform="translateX(120vw) rotate(25deg)"
-
 setTimeout(()=>like(),300)
-
 }
 
-function dislikeFromButton(){
-
+function dislikeFromButton(e){
+if(e) e.stopPropagation()
 const card=document.querySelector(".card")
-
-card.style.transition="transform .35s ease"
 card.style.transform="translateX(-120vw) rotate(-25deg)"
-
 setTimeout(()=>dislike(),300)
-
 }
 
 /* SWIPE */
@@ -566,11 +560,13 @@ deck.style.display="none"
 document.getElementById("home").style.display="flex"
 }
 
-function navigate(name){
+function navigate(name,e){
+if(e) e.stopPropagation()
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
 
-function book(name){
+function book(name,e){
+if(e) e.stopPropagation()
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
