@@ -386,7 +386,7 @@ card.addEventListener("click",e=>{
 
 if(e.target.closest(".buttons")) return
 
-if(e.clientX>window.innerWidth/2){
+if(e.clientX > window.innerWidth/2){
 photoIndex=(photoIndex+1)%photos.length
 }else{
 photoIndex=(photoIndex-1+photos.length)%photos.length
@@ -466,6 +466,7 @@ function likeFromButton(){
 
 const card=document.querySelector(".card")
 
+card.style.transition="transform .35s ease"
 card.style.transform="translateX(120vw) rotate(25deg)"
 
 setTimeout(()=>like(),300)
@@ -476,6 +477,7 @@ function dislikeFromButton(){
 
 const card=document.querySelector(".card")
 
+card.style.transition="transform .35s ease"
 card.style.transform="translateX(-120vw) rotate(-25deg)"
 
 setTimeout(()=>dislike(),300)
@@ -517,6 +519,8 @@ else{
 card.style.transform="translateX(0)"
 }
 
+currentX=0
+
 })
 
 }
@@ -550,6 +554,9 @@ function undo(){
 if(history.length===0)return
 
 index=history.pop()
+
+if(index<0) index=0
+
 buildDeck()
 
 }
