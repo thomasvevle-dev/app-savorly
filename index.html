@@ -278,7 +278,7 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 const deck=document.getElementById("deck")
 
 async function loadData(){
-const res=await fetch("data/places.json")
+const res = await fetch("./data/places.json")
 data=await res.json()
 renderFavorites()
 }
@@ -324,7 +324,6 @@ buildDeck()
 }
 
 
-
 currentType=type
 list=[...data[type]]
 shuffle(list)
@@ -336,7 +335,6 @@ deck.style.display="flex"
 
 buildDeck()
 
-}
 
 function openFavorite(type,name){
 
@@ -683,7 +681,17 @@ resolve(result)
 }
 
 function fallback(name){
-    
+return{
+name: name,
+rating: "",
+photos: [
+"https://source.unsplash.com/featured/?restaurant",
+"https://source.unsplash.com/featured/?food",
+"https://source.unsplash.com/featured/?wine"
+]
+}
+}
+
 let selectedSubCategory = null
 
 function selectSub(category){
@@ -707,17 +715,6 @@ buildDeck()
 
 function closeSub(){
 document.getElementById("subcategories").classList.add("hidden")
-}
-    
-return{
-name:name,
-rating:"",
-photos:[
-"https://source.unsplash.com/featured/?restaurant",
-"https://source.unsplash.com/featured/?food",
-"https://source.unsplash.com/featured/?wine"
-]
-}
 }
 
 </script>
