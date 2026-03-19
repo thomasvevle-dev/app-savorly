@@ -385,6 +385,7 @@ card.querySelector(".rating").innerText="⭐ "+place.rating+" Google"
 card.addEventListener("click",e=>{
 
 if(e.target.closest(".buttons")) return
+if(e.type === "touchend") return
 
 const x = e.clientX || (e.touches && e.touches[0].clientX)
 
