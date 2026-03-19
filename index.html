@@ -482,30 +482,44 @@ setTimeout(()=>dislike(),300)
 
 function enableSwipe(card){
 
-let startX
+let startX=0
 let currentX=0
+let startTime=0
+let isSwiping=false
 
 card.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
+startTime=Date.now()
+isSwiping=true
+card.style.transition="none"
 })
 
 card.addEventListener("touchmove",e=>{
+if(!isSwiping) return
+
 currentX=e.touches[0].clientX
 const diff=currentX-startX
-card.style.transition="none"
-card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
+
+card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
 })
 
-card.addEventListener("touchend",()=>{
+card.addEventListener("touchend",e=>{
+
+if(!isSwiping) return
+isSwiping=false
 
 const diff=currentX-startX
+const time=Date.now()-startTime
+const velocity=diff/time
+
 card.style.transition="transform .35s ease"
 
-if(diff>120){
+// 🔥 ekte Tinder logikk
+if(diff>100 || velocity>0.5){
 card.style.transform="translateX(120vw) rotate(25deg)"
 setTimeout(like,250)
 }
-else if(diff<-120){
+else if(diff<-100 || velocity<-0.5){
 card.style.transform="translateX(-120vw) rotate(-25deg)"
 setTimeout(dislike,250)
 }
