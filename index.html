@@ -549,22 +549,21 @@ function undo(){
 
 if(history.length === 0) return
 
-// 🔥 hent forrige index
+// gå tilbake ett steg
 index = history.pop()
 
-// 🔥 sikkerhet
+// sikkerhet
 if(index < 0) index = 0
 
-// 🔥 reset deck helt riktig
-deck.innerHTML = ""
-deck.style.display = "flex"
-
-// bygg kort på nytt
-createCard(list[index], false)
-
-if(list[index+1]){
-createCard(list[index+1], true)
+// 🔥 reset transform på eksisterende kort (viktig!)
+const card = document.querySelector(".card")
+if(card){
+card.style.transition = "none"
+card.style.transform = "translateX(0) rotate(0)"
 }
+
+// 🔥 bygg deck riktig (beholder hele logikken din)
+buildDeck()
 
 }
 
