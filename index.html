@@ -284,19 +284,29 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
+console.log("TRYKK:", type)
+
 if(!data){
 alert("Laster data... prøv igjen")
 return
 }
 
-currentType=type
-list=[...data[type]]
+// 🔥 Sjekk at category finnes
+if(!data[type] || !Array.isArray(data[type])){
+alert("Fant ikke kategori: " + type)
+console.error("FEIL TYPE:", type, data)
+return
+}
+
+currentType = type
+
+list = [...data[type]]
 shuffle(list)
 
-index=0
+index = 0
 
-document.getElementById("home").style.display="none"
-deck.style.display="flex"
+document.getElementById("home").style.display = "none"
+deck.style.display = "flex"
 
 buildDeck()
 
