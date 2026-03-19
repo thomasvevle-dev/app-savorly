@@ -369,7 +369,15 @@ card.innerHTML=`
 deck.appendChild(card)
 
 card.querySelector(".topLeft").onclick=goHome
-card.querySelector(".topRight").onclick=undo
+card.querySelector(".topRight").addEventListener("click", e => {
+e.stopPropagation()
+undo()
+})
+
+card.querySelector(".topRight").addEventListener("touchend", e => {
+e.stopPropagation()
+undo()
+})
 
 const stop = e => { e.stopPropagation() }
 
@@ -399,23 +407,41 @@ img.src=photos[0]
 card.querySelector(".name").innerText=place.name
 card.querySelector(".rating").innerText="⭐ "+place.rating+" Google"
 
-card.addEventListener("click",e=>{
+let tapStartX = 0
+let tapStartTime = 0
 
-if(e.target.closest(".buttons")) return
-
-if(e.clientX>window.innerWidth/2){
-photoIndex=(photoIndex+1)%photos.length
-}else{
-photoIndex=(photoIndex-1+photos.length)%photos.length
-}
-
-img.src=photos[photoIndex]
-
-const dots=card.querySelectorAll(".dot")
-dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
-
+card.addEventListener("touchstart", e => {
+tapStartX = e.touches[0].clientX
+tapStartTime = Date.now()
 })
 
+card.addEventListener("touchend", e => {
+
+if(e.target.closest(".buttons") || e.target.closest(".topLeft") || e.target.closest(".topRight")) return
+
+let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
+let time = Date.now() - tapStartTime
+
+// Bare ekte tap (ikke swipe)
+if(diffX < 10 && time < 200){
+
+let x = e.changedTouches[0].clientX
+
+if(x > window.innerWidth/2){
+photoIndex = (photoIndex+1)%photos.length
+}else{
+photoIndex = (photoIndex-1+photos.length)%photos.length
+}
+
+img.src = photos[photoIndex]
+
+const dots = card.querySelectorAll(".dot")
+dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
+
+}
+
+})
+  
 })
 
 }
