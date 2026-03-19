@@ -377,6 +377,14 @@ card.innerHTML=`
 `
 deck.appendChild(card)
 
+card.querySelector(".buttons").addEventListener("touchstart", e => {
+  e.stopPropagation()
+})
+
+card.querySelector(".buttons").addEventListener("touchend", e => {
+  e.stopPropagation()
+})
+
 card.querySelector(".topLeft").onclick=goHome
 card.querySelector(".topRight").addEventListener("click", e => {
 e.stopPropagation()
@@ -426,7 +434,7 @@ tapStartTime = Date.now()
 
 card.addEventListener("touchend", e => {
 
-if(e.target.closest(".buttons") || e.target.closest(".topLeft") || e.target.closest(".topRight")) return
+if(e.target.closest(".buttons")) return
 
 let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
 let time = Date.now() - tapStartTime
