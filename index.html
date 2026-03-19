@@ -664,15 +664,8 @@ function loadPlace(name){
 
 return new Promise(resolve=>{
 
-if(imageCache[name]){
-resolve(imageCache[name])
-return
-}
-
 if(!placesService){
-setTimeout(()=>{
-loadPlace(name).then(resolve)
-},300)
+resolve(fallback(name))
 return
 }
 
@@ -694,32 +687,26 @@ fields:["name","rating","photos"]
 let photos=[]
 
 if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
-
 for(let i=0;i<Math.min(3,place.photos.length);i++){
 photos.push(place.photos[i].getUrl({maxWidth:1200}))
 }
-
 }
 
 while(photos.length<3){
 photos.push("https://source.unsplash.com/featured/?restaurant")
 }
 
-let result={
+resolve({
 name:place.name||name,
 rating:place.rating||"",
 photos:photos
-}
-
-imageCache[name]=result
-resolve(result)
-
 })
 
 })
 
 })
 
+})
 }
 
 function fallback(name){
