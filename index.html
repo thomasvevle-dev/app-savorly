@@ -564,7 +564,11 @@ card.style.transition="none"
 card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
-card.addEventListener("touchend",()=>{
+card.addEventListener("touchend",(e)=>{
+
+if(e.changedTouches && Math.abs(e.changedTouches[0].clientX - startX) < 10){
+  return
+}
 
 const diff=currentX-startX
 
