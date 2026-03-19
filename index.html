@@ -80,7 +80,6 @@ display:none;
 justify-content:center;
 align-items:center;
 z-index:10;
-pointer-events:none;  
 }
 
 .card{
@@ -302,7 +301,6 @@ index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
-deck.style.pointerEvents="auto"   // 👈 DENNE
 
 buildDeck()
 
@@ -338,10 +336,10 @@ shuffle(list)
 index=0
 }
 
-createCard(list[index],false)
+createCard(list[index], false)
 
-if(!list[index]) return
-createCard(list[index],false)
+if(list[index+1]){
+  createCard(list[index+1], true)
 }
 
 preloadNext()
