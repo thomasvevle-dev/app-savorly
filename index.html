@@ -396,19 +396,28 @@ e.stopPropagation()
 undo()
 })
 
-const stop = e => {
-e.stopPropagation()
-e.preventDefault()
-}
+card.querySelector(".buttons").addEventListener("click", e => {
 
-card.querySelector(".btn-dislike").addEventListener("click", e => { stop(e); dislikeFromButton() })
+  const btn = e.target.closest("div")
+  if(!btn) return
 
-card.querySelector(".btn-map").addEventListener("click", e => { stop(e); navigate(name) })
+  e.stopPropagation()
+  e.preventDefault()
 
-card.querySelector(".btn-book").addEventListener("click", e => { stop(e); book(name) })
+  if(btn.classList.contains("btn-like")){
+    likeFromButton()
+  }
+  else if(btn.classList.contains("btn-dislike")){
+    dislikeFromButton()
+  }
+  else if(btn.classList.contains("btn-map")){
+    navigate(name)
+  }
+  else if(btn.classList.contains("btn-book")){
+    book(name)
+  }
 
-card.querySelector(".btn-like").addEventListener("click", e => { stop(e); likeFromButton() })
-
+})
 
 enableSwipe(card)
 
