@@ -310,12 +310,14 @@ buildDeck()
 
 function openFavorite(type,name){
 
-if(!data) return   // 🔥 LEGG TIL
-
 currentType=type
 list=[...data[type]]
 
-index=list.indexOf(name)
+index = list.indexOf(name)
+
+if(index === -1){
+  index = 0
+}
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
