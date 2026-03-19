@@ -664,43 +664,60 @@ function loadPlace(name){
 
 return new Promise(resolve=>{
 
+// Hvis vi allerede har cache
+if(imageCache[name]){
+resolve(imageCache[name])
+return
+}
+
+// Hvis Google Places ikke er klar → fallback direkte
 if(!placesService){
 resolve(fallback(name))
 return
 }
 
+// Søk etter sted
 placesService.findPlaceFromQuery({
-query:name+" Oslo",
-fields:["place_id"]
-},(results,status)=>{
+query: name + " Oslo",
+fields: ["place_id"]
+}, (results, status) => {
 
-if(status!==google.maps.places.PlacesServiceStatus.OK){
+if(status !== google.maps.places.PlacesServiceStatus.OK || !results || !results[0]){
 resolve(fallback(name))
 return
 }
 
+// Hent detaljer
 placesService.getDetails({
-placeId:results[0].place_id,
-fields:["name","rating","photos"]
-},(place,status)=>{
+placeId: results[0].place_id,
+fields: ["name","rating","photos"]
+}, (place, status) => {
 
-let photos=[]
+let photos = []
 
-if(status===google.maps.places.PlacesServiceStatus.OK && place.photos){
-for(let i=0;i<Math.min(3,place.photos.length);i++){
+if(status === google.maps.places.PlacesServiceStatus.OK && place.photos){
+
+for(let i=0; i<Math.min(3, place.photos.length); i++){
 photos.push(place.photos[i].getUrl({maxWidth:1200}))
 }
+
 }
 
-while(photos.length<3){
+// Sørg for minst 3 bilder
+while(photos.length < 3){
 photos.push("https://source.unsplash.com/featured/?restaurant")
 }
 
-resolve({
-name:place.name||name,
-rating:place.rating||"",
-photos:photos
-})
+let result = {
+name: place.name || name,
+rating: place.rating || "",
+photos: photos
+}
+
+// Cache resultat
+imageCache[name] = result
+
+resolve(result)
 
 })
 
