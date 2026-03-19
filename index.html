@@ -295,7 +295,7 @@ return arr.sort(()=>Math.random()-0.5)
 function openCategory(type){
 
 currentType=type
-list=[...data[type]]
+list = data[type].filter(item => item && item.trim() !== "")
 shuffle(list)
 
 index=0
@@ -424,6 +424,8 @@ card.querySelector(".buttons").addEventListener("click", e => {
 })
 
 enableSwipe(card)
+
+if(!name) return
 
 loadPlace(name).then(place=>{
 
@@ -662,7 +664,10 @@ loadPlace(next)
 function loadPlace(name){
 
 return new Promise(resolve=>{
-
+if(!name){
+  resolve(fallback("restaurant"))
+  return
+}
 // Hvis vi allerede har cache
 if(imageCache[name]){
 resolve(imageCache[name])
