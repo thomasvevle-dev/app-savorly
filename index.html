@@ -670,9 +670,7 @@ return
 }
 
 if(!placesService){
-setTimeout(()=>{
-loadPlace(name).then(resolve)
-},300)
+resolve(fallback(name))
 return
 }
 
