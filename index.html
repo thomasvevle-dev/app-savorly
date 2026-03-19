@@ -83,7 +83,9 @@ height:92%;
 border-radius:26px;
 overflow:hidden;
 background:black;
-transition:transform .35s ease;
+transition: transform .25s ease-out;
+will-change: transform;
+transform: translateZ(0);
 }
 
 .card.next{
@@ -542,7 +544,7 @@ startX=e.touches[0].clientX
 card.addEventListener("touchmove",e=>{
 currentX=e.touches[0].clientX
 const diff=currentX-startX
-card.style.transition="none"
+card.style.transition="transform 0s"
 card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
