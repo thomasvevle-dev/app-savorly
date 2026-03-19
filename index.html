@@ -547,10 +547,24 @@ buildDeck()
 
 function undo(){
 
-if(history.length===0)return
+if(history.length === 0) return
 
-index=history.pop()
-buildDeck()
+// 🔥 hent forrige index
+index = history.pop()
+
+// 🔥 sikkerhet
+if(index < 0) index = 0
+
+// 🔥 reset deck helt riktig
+deck.innerHTML = ""
+deck.style.display = "flex"
+
+// bygg kort på nytt
+createCard(list[index], false)
+
+if(list[index+1]){
+createCard(list[index+1], true)
+}
 
 }
 
