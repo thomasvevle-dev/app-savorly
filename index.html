@@ -284,6 +284,8 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
+if(!data) return   // 🔥 LEGG TIL DENNE
+
 currentType=type
 list=[...data[type]]
 shuffle(list)
@@ -292,13 +294,14 @@ index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
-deck.style.visibility="visible"
 
 buildDeck()
 
 }
 
 function openFavorite(type,name){
+
+if(!data) return   // 🔥 LEGG TIL
 
 currentType=type
 list=[...data[type]]
@@ -307,7 +310,6 @@ index=list.indexOf(name)
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
-deck.style.visibility="visible"
 
 buildDeck()
 
