@@ -384,26 +384,25 @@ card.querySelector(".rating").innerText="⭐ "+place.rating+" Google"
 
 card.addEventListener("click",e=>{
 
-if(e.target.closest(".buttons")) return
-if(e.type === "touchend") return
+// 🚫 ignorer hvis swipe nettopp skjedde
+if(Math.abs(card.style.transform.replace(/[^0-9-]/g,'')) > 10) return
 
-const x = e.clientX || (e.touches && e.touches[0].clientX)
+if(e.target.closest(".buttons")) return
+
+const x = e.clientX
 
 if(x > window.innerWidth/2){
-photoIndex=(photoIndex+1)%photos.length
+photoIndex = (photoIndex + 1) % photos.length
 }else{
-photoIndex=(photoIndex-1+photos.length)%photos.length
+photoIndex = (photoIndex - 1 + photos.length) % photos.length
 }
 
-img.src=photos[photoIndex]
+img.src = photos[photoIndex]
 
-const dots=card.querySelectorAll(".dot")
+const dots = card.querySelectorAll(".dot")
 dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 })
-
-})
-
 }
 
 /* FAVORITES */
@@ -483,55 +482,53 @@ setTimeout(()=>dislike(),300)
 
 function enableSwipe(card){
 
-let startX=0
-let currentX=0
-let startTime=0
-let isSwiping=false
+let startX = 0
+let currentX = 0
+let startTime = 0
+let isDragging = false
 
 card.addEventListener("touchstart",e=>{
-startX=e.touches[0].clientX
-startTime=Date.now()
-isSwiping=true
-card.style.transition="none"
+startX = e.touches[0].clientX
+currentX = startX
+startTime = Date.now()
+isDragging = true
+card.style.transition = "none"
 })
 
 card.addEventListener("touchmove",e=>{
-if(!isSwiping) return
+if(!isDragging) return
 
-currentX=e.touches[0].clientX
-const diff=currentX-startX
+currentX = e.touches[0].clientX
+const diff = currentX - startX
 
-card.style.transform=`translateX(${diff}px) rotate(${diff/10}deg)`
+card.style.transform = `translateX(${diff}px) rotate(${diff/10}deg)`
 })
 
-card.addEventListener("touchend",e=>{
+card.addEventListener("touchend",()=>{
 
-if(!isSwiping) return
-isSwiping=false
+if(!isDragging) return
+isDragging = false
 
-const diff=currentX-startX
-const time=Date.now()-startTime
-const velocity=diff/time
+const diff = currentX - startX
+const time = Date.now() - startTime
+const velocity = diff / time
 
-card.style.transition="transform .35s ease"
+card.style.transition = "transform .35s ease"
 
-// 🔥 ekte Tinder logikk
-if(diff>100 || velocity>0.5){
-card.style.transform="translateX(120vw) rotate(25deg)"
+// 🔥 Tinder logic
+if(diff > 120 || velocity > 0.5){
+card.style.transform = "translateX(120vw) rotate(25deg)"
 setTimeout(like,250)
 }
-else if(diff<-100 || velocity<-0.5){
-card.style.transform="translateX(-120vw) rotate(-25deg)"
+else if(diff < -120 || velocity < -0.5){
+card.style.transform = "translateX(-120vw) rotate(-25deg)"
 setTimeout(dislike,250)
 }
 else{
-card.style.transform="translateX(0)"
+card.style.transform = "translateX(0)"
 }
 
-currentX=0
-
 })
-
 }
 
 /* LOGIC */
