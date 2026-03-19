@@ -104,13 +104,11 @@ left:0;
 right:0;
 bottom:140px;
 height:160px;
-
 background:linear-gradient(
 to bottom,
 rgba(0,0,0,0),
 rgba(0,0,0,0.45)
 );
-
 pointer-events:none;
 }
 
@@ -123,7 +121,6 @@ left:0;
 right:0;
 bottom:0;
 top:65%;
-
 background:linear-gradient(
 to bottom,
 rgba(0,0,0,0),
@@ -131,7 +128,6 @@ rgba(0,0,0,0.4),
 rgba(0,0,0,0.7),
 rgba(0,0,0,0.95)
 );
-
 pointer-events:none;
 }
 
@@ -211,6 +207,8 @@ border-radius:16px;
 padding:14px 18px;
 font-size:28px;
 color:black;
+z-index:10;
+position:relative;
 }
 
 </style>
@@ -356,17 +354,30 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="dislikeFromButton()">✕</div>
-<div onclick="navigate('${name}')">📍</div>
-<div onclick="book('${name}')">📅</div>
-<div onclick="likeFromButton()">♥</div>
+<div class="btn-dislike">✕</div>
+<div class="btn-map">📍</div>
+<div class="btn-book">📅</div>
+<div class="btn-like">♥</div>
 </div>
-`
 
 deck.appendChild(card)
 
 card.querySelector(".topLeft").onclick=goHome
 card.querySelector(".topRight").onclick=undo
+
+const stop = e => { e.stopPropagation() }
+
+card.querySelector(".btn-dislike").addEventListener("click", e => { stop(e); dislikeFromButton() })
+card.querySelector(".btn-dislike").addEventListener("touchend", e => { stop(e); dislikeFromButton() })
+
+card.querySelector(".btn-map").addEventListener("click", e => { stop(e); navigate(name) })
+card.querySelector(".btn-map").addEventListener("touchend", e => { stop(e); navigate(name) })
+
+card.querySelector(".btn-book").addEventListener("click", e => { stop(e); book(name) })
+card.querySelector(".btn-book").addEventListener("touchend", e => { stop(e); book(name) })
+
+card.querySelector(".btn-like").addEventListener("click", e => { stop(e); likeFromButton() })
+card.querySelector(".btn-like").addEventListener("touchend", e => { stop(e); likeFromButton() })
 
 enableSwipe(card)
 
@@ -503,6 +514,7 @@ card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 card.addEventListener("touchend",()=>{
 
 const diff=currentX-startX
+
 card.style.transition="transform .35s ease"
 
 if(diff>120){
