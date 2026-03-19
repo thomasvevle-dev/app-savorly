@@ -547,36 +547,10 @@ buildDeck()
 
 function undo(){
 
-if(history.length === 0) return
+if(history.length===0)return
 
-// 🔥 gå tilbake
-const prevIndex = history.pop()
-
-// 🔥 finn retning (optional feel)
-const wasLiked = true // vi antar høyre (kan utvides senere)
-
-index = prevIndex
-
-// 🔥 bygg kort først
+index=history.pop()
 buildDeck()
-
-// 🔥 hent toppkort
-const card = document.querySelector(".card")
-
-if(!card) return
-
-// 🔥 start posisjon (utenfor skjerm)
-card.style.transition = "none"
-card.style.transform = wasLiked
-? "translateX(120vw) rotate(25deg)"
-: "translateX(-120vw) rotate(-25deg)"
-
-// 🔥 trigger reflow
-card.offsetHeight
-
-// 🔥 animér tilbake
-card.style.transition = "transform .35s ease"
-card.style.transform = "translateX(0) rotate(0)"
 
 }
 
