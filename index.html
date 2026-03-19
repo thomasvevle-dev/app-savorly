@@ -73,6 +73,7 @@ display:none;
 justify-content:center;
 align-items:center;
 z-index:10;
+pointer-events:none;  
 }
 
 .card{
@@ -284,8 +285,6 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
-if(!data) return   // 🔥 LEGG TIL DENNE
-
 currentType=type
 list=[...data[type]]
 shuffle(list)
@@ -294,6 +293,7 @@ index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
+deck.style.pointerEvents="auto"   // 👈 DENNE
 
 buildDeck()
 
@@ -626,6 +626,7 @@ buildDeck()
 function goHome(){
 deck.innerHTML = ""
 deck.style.display = "none"
+deck.style.pointerEvents = "none"   // 👈 LEGG TIL
 document.getElementById("home").style.display = "flex"
 }
 
