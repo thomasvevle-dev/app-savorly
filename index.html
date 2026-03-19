@@ -284,29 +284,14 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
-console.log("TRYKK:", type)
-
-if(!data){
-alert("Laster data... prøv igjen")
-return
-}
-
-// 🔥 Sjekk at category finnes
-if(!data[type] || !Array.isArray(data[type])){
-alert("Fant ikke kategori: " + type)
-console.error("FEIL TYPE:", type, data)
-return
-}
-
-currentType = type
-
-list = [...data[type]]
+currentType=type
+list=[...data[type]]
 shuffle(list)
 
-index = 0
+index=0
 
-document.getElementById("home").style.display = "none"
-deck.style.display = "flex"
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
 
 buildDeck()
 
@@ -371,10 +356,10 @@ card.innerHTML=`
 </div>
 
 <div class="buttons">
-<div onclick="dislikeFromButton(event)">✕</div>
-<div onclick="navigate('${name}',event)">📍</div>
-<div onclick="book('${name}',event)">📅</div>
-<div onclick="likeFromButton(event)">♥</div>
+<div onclick="dislikeFromButton()">✕</div>
+<div onclick="navigate('${name}')">📍</div>
+<div onclick="book('${name}')">📅</div>
+<div onclick="likeFromButton()">♥</div>
 </div>
 `
 
@@ -399,25 +384,23 @@ card.querySelector(".rating").innerText="⭐ "+place.rating+" Google"
 
 card.addEventListener("click",e=>{
 
-// 🚫 ignorer hvis swipe nettopp skjedde
-if(Math.abs(card.style.transform.replace(/[^0-9-]/g,'')) > 10) return
-
 if(e.target.closest(".buttons")) return
 
-const x = e.clientX
-
-if(x > window.innerWidth/2){
-photoIndex = (photoIndex + 1) % photos.length
+if(e.clientX>window.innerWidth/2){
+photoIndex=(photoIndex+1)%photos.length
 }else{
-photoIndex = (photoIndex - 1 + photos.length) % photos.length
+photoIndex=(photoIndex-1+photos.length)%photos.length
 }
 
-img.src = photos[photoIndex]
+img.src=photos[photoIndex]
 
-const dots = card.querySelectorAll(".dot")
+const dots=card.querySelectorAll(".dot")
 dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 })
+
+})
+
 }
 
 /* FAVORITES */
@@ -479,71 +462,63 @@ renderFavorites()
 
 /* BUTTON SWIPE */
 
-function likeFromButton(e){
-if(e) e.stopPropagation()
+function likeFromButton(){
+
 const card=document.querySelector(".card")
+
 card.style.transform="translateX(120vw) rotate(25deg)"
+
 setTimeout(()=>like(),300)
+
 }
 
-function dislikeFromButton(e){
-if(e) e.stopPropagation()
+function dislikeFromButton(){
+
 const card=document.querySelector(".card")
+
 card.style.transform="translateX(-120vw) rotate(-25deg)"
+
 setTimeout(()=>dislike(),300)
+
 }
 
 /* SWIPE */
 
 function enableSwipe(card){
 
-let startX = 0
-let currentX = 0
-let startTime = 0
-let isDragging = false
+let startX
+let currentX=0
 
 card.addEventListener("touchstart",e=>{
-startX = e.touches[0].clientX
-currentX = startX
-startTime = Date.now()
-isDragging = true
-card.style.transition = "none"
+startX=e.touches[0].clientX
 })
 
 card.addEventListener("touchmove",e=>{
-if(!isDragging) return
-
-currentX = e.touches[0].clientX
-const diff = currentX - startX
-
-card.style.transform = `translateX(${diff}px) rotate(${diff/10}deg)`
+currentX=e.touches[0].clientX
+const diff=currentX-startX
+card.style.transition="none"
+card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
 card.addEventListener("touchend",()=>{
 
-if(!isDragging) return
-isDragging = false
+const diff=currentX-startX
+card.style.transition="transform .35s ease"
 
-const diff = currentX - startX
-const time = Date.now() - startTime
-const velocity = diff / time
-
-card.style.transition = "transform .35s ease"
-
-// 🔥 Tinder logic
-if(diff > 120 || velocity > 0.5){
-card.style.transform = "translateX(120vw) rotate(25deg)"
+if(diff>120){
+card.style.transform="translateX(120vw) rotate(25deg)"
 setTimeout(like,250)
 }
-else if(diff < -120 || velocity < -0.5){
-card.style.transform = "translateX(-120vw) rotate(-25deg)"
+else if(diff<-120){
+card.style.transform="translateX(-120vw) rotate(-25deg)"
 setTimeout(dislike,250)
 }
 else{
-card.style.transform = "translateX(0)"
+card.style.transform="translateX(0)"
 }
 
 })
+
 }
 
 /* LOGIC */
@@ -575,9 +550,6 @@ function undo(){
 if(history.length===0)return
 
 index=history.pop()
-
-if(index<0) index=0
-
 buildDeck()
 
 }
@@ -587,13 +559,11 @@ deck.style.display="none"
 document.getElementById("home").style.display="flex"
 }
 
-function navigate(name,e){
-if(e) e.stopPropagation()
+function navigate(name){
 window.open("https://maps.google.com/?q="+encodeURIComponent(name+" Oslo"))
 }
 
-function book(name,e){
-if(e) e.stopPropagation()
+function book(name){
 window.open("https://www.google.com/search?q="+encodeURIComponent(name+" booking"))
 }
 
