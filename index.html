@@ -25,12 +25,7 @@ background:#000;
 color:white;
 font-family:-apple-system,BlinkMacSystemFont;
 }
-<button id="installBtn"
-style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-padding:12px 20px;border-radius:12px;border:none;background:white;color:black;
-font-size:16px;display:none;z-index:999;">
-Installer app
-</button>
+
 /* HOME */
 
 #home{
@@ -750,23 +745,6 @@ if ("serviceWorker" in navigator) {
   })
 }
 
-let deferredPrompt
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault()
-  deferredPrompt = e
-
-  document.getElementById("installBtn").style.display = "block"
-})
-
-document.getElementById("installBtn").addEventListener("click", async () => {
-  if(!deferredPrompt) return
-
-  deferredPrompt.prompt()
-  await deferredPrompt.userChoice
-
-  deferredPrompt = null
-})  
 </script>
 
 <script async
