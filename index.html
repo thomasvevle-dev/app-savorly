@@ -310,22 +310,25 @@ buildDeck()
 
 function openFavorite(type,name){
 
-currentType=type
-list=[...data[type]]
+currentType = type
 
-index = list.indexOf(name)
+// Rens data (super viktig)
+list = data[type].map(item => item.trim())
 
+// Finn index robust
+index = list.findIndex(item => item.toLowerCase() === name.toLowerCase())
+
+// Fallback hvis ikke funnet
 if(index === -1){
   index = 0
 }
 
-document.getElementById("home").style.display="none"
-deck.style.display="flex"
+document.getElementById("home").style.display = "none"
+deck.style.display = "flex"
 
 buildDeck()
 
 }
-
 function buildDeck(){
 
 deck.innerHTML=""
@@ -337,8 +340,8 @@ index=0
 
 createCard(list[index],false)
 
-if(list[index+1]){
-createCard(list[index+1],true)
+if(!list[index]) return
+createCard(list[index],false)
 }
 
 preloadNext()
