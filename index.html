@@ -436,7 +436,10 @@ photoIndex = (photoIndex-1+photos.length)%photos.length
 
 let x = e.changedTouches[0].clientX
 
-if(x > window.innerWidth/2){
+const rect = card.getBoundingClientRect()
+const relativeX = x - rect.left
+
+if(relativeX > rect.width / 2){
 photoIndex = (photoIndex+1)%photos.length
 }else{
 photoIndex = (photoIndex-1+photos.length)%photos.length
