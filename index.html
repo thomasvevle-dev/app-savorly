@@ -443,29 +443,11 @@ dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
 
 }
 
-let x = e.changedTouches[0].clientX
+})   // touchend
 
-const rect = card.getBoundingClientRect()
-const relativeX = x - rect.left
+})   // loadPlace
 
-if(relativeX > rect.width / 2){
-photoIndex = (photoIndex+1)%photos.length
-}else{
-photoIndex = (photoIndex-1+photos.length)%photos.length
-}
-
-img.src = photos[photoIndex]
-
-const dots = card.querySelectorAll(".dot")
-dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
-
-}
-
-})
-  
-})
-
-}
+}    // createCard
 
 /* FAVORITES */
 
