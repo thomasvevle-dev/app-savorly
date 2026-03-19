@@ -284,6 +284,11 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
+if(!data){
+alert("Laster data... prøv igjen")
+return
+}
+
 currentType=type
 list=[...data[type]]
 shuffle(list)
