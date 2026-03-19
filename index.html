@@ -71,6 +71,7 @@ bottom:0;
 display:none;
 justify-content:center;
 align-items:center;
+pointer-events:none;
 }
 
 .card{
@@ -290,6 +291,7 @@ index=0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
+deck.style.pointerEvents="auto"
 
 buildDeck()
 
@@ -304,6 +306,7 @@ index=list.indexOf(name)
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
+deck.style.pointerEvents="auto"
 
 buildDeck()
 
@@ -568,6 +571,7 @@ buildDeck()
 
 function goHome(){
 deck.style.display="none"
+deck.style.pointerEvents="none"
 document.getElementById("home").style.display="flex"
 }
 
