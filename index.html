@@ -294,11 +294,16 @@ return arr.sort(()=>Math.random()-0.5)
 
 function openCategory(type){
 
-currentType=type
-list = data[type].filter(item => item && item.trim() !== "")
-shuffle(list)
+currentType = type
 
-index=0
+list = (data[type] || []).filter(item => item && item.trim() !== "")
+
+if(list.length === 0){
+  alert("Ingen data")
+  return
+}
+
+index = 0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
@@ -311,19 +316,22 @@ function openFavorite(type,name){
 
 currentType = type
 
-// Rens data (super viktig)
-list = data[type].map(item => item.trim())
+list = (data[type] || []).filter(item => item && item.trim() !== "")
 
-// Finn index robust
+// finn riktig index
 index = list.findIndex(item => item.toLowerCase() === name.toLowerCase())
 
-// Fallback hvis ikke funnet
 if(index === -1){
   index = 0
 }
 
-document.getElementById("home").style.display = "none"
-deck.style.display = "flex"
+if(!list[index]){
+  alert("Fant ikke sted")
+  return
+}
+
+document.getElementById("home").style.display="none"
+deck.style.display="flex"
 
 buildDeck()
 
@@ -332,9 +340,17 @@ function buildDeck(){
 
 deck.innerHTML=""
 
-if(index>=list.length){
-shuffle(list)
-index=0
+if(!list || list.length === 0){
+  return
+}
+
+if(index >= list.length){
+  index = 0
+}
+
+// SIKKERHET
+if(!list[index]){
+  index = 0
 }
 
 createCard(list[index], false)
