@@ -425,7 +425,7 @@ let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
 let time = Date.now() - tapStartTime
 
 // Bare ekte tap (ikke swipe)
-if(diffX < 10 && time < 200){
+if(diffX < 15 && time < 250){
 
 let x = e.changedTouches[0].clientX
 
