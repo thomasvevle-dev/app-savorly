@@ -549,21 +549,34 @@ function undo(){
 
 if(history.length === 0) return
 
-// gå tilbake ett steg
-index = history.pop()
+// 🔥 gå tilbake
+const prevIndex = history.pop()
 
-// sikkerhet
-if(index < 0) index = 0
+// 🔥 finn retning (optional feel)
+const wasLiked = true // vi antar høyre (kan utvides senere)
 
-// 🔥 reset transform på eksisterende kort (viktig!)
-const card = document.querySelector(".card")
-if(card){
-card.style.transition = "none"
-card.style.transform = "translateX(0) rotate(0)"
-}
+index = prevIndex
 
-// 🔥 bygg deck riktig (beholder hele logikken din)
+// 🔥 bygg kort først
 buildDeck()
+
+// 🔥 hent toppkort
+const card = document.querySelector(".card")
+
+if(!card) return
+
+// 🔥 start posisjon (utenfor skjerm)
+card.style.transition = "none"
+card.style.transform = wasLiked
+? "translateX(120vw) rotate(25deg)"
+: "translateX(-120vw) rotate(-25deg)"
+
+// 🔥 trigger reflow
+card.offsetHeight
+
+// 🔥 animér tilbake
+card.style.transition = "transform .35s ease"
+card.style.transform = "translateX(0) rotate(0)"
 
 }
 
