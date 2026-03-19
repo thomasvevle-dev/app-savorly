@@ -214,8 +214,8 @@ font-size:28px;
 color:black;
 z-index:10;
 position:relative;
+touch-action: manipulation;
 }
-
 </style>
 </head>
 
@@ -381,19 +381,19 @@ e.stopPropagation()
 undo()
 })
 
-const stop = e => { e.stopPropagation() }
+const stop = e => {
+e.stopPropagation()
+e.preventDefault()
+}
 
 card.querySelector(".btn-dislike").addEventListener("click", e => { stop(e); dislikeFromButton() })
-card.querySelector(".btn-dislike").addEventListener("touchend", e => { stop(e); dislikeFromButton() })
 
 card.querySelector(".btn-map").addEventListener("click", e => { stop(e); navigate(name) })
-card.querySelector(".btn-map").addEventListener("touchend", e => { stop(e); navigate(name) })
 
 card.querySelector(".btn-book").addEventListener("click", e => { stop(e); book(name) })
-card.querySelector(".btn-book").addEventListener("touchend", e => { stop(e); book(name) })
 
 card.querySelector(".btn-like").addEventListener("click", e => { stop(e); likeFromButton() })
-card.querySelector(".btn-like").addEventListener("touchend", e => { stop(e); likeFromButton() })
+
 
 enableSwipe(card)
 
