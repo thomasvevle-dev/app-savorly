@@ -660,6 +660,8 @@ card.style.transform="translateX(0)"
 
 /* LOGIC */
 
+/* LOGIC */
+
 function like(){
 
 let name = list[index]
@@ -695,9 +697,9 @@ buildDeck()
 
 function undo(){
 
-if(history.length===0)return
+if(history.length === 0) return
 
-index=history.pop()
+index = history.pop()
 buildDeck()
 
 }
@@ -705,8 +707,33 @@ buildDeck()
 function goHome(){
 deck.innerHTML = ""
 deck.style.display = "none"
-deck.style.pointerEvents = "none"   // 👈 LEGG TIL
 document.getElementById("home").style.display = "flex"
+}
+
+function buildDeck(){
+
+deck.innerHTML = ""
+
+if(!list || list.length === 0) return
+
+if(index >= list.length){
+  shuffle(list)
+  index = 0
+}
+
+const current = list[index]
+const nextItem = list[index + 1]
+
+if(current){
+  createCard(current, false)
+}
+
+if(nextItem){
+  createCard(nextItem, true)
+}
+
+preloadNext()
+
 }
 
 function navigate(name){
