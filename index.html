@@ -626,6 +626,11 @@ card.style.transform="translateX(0)"
 
 function like(){
 
+if(isBusy) return
+isBusy = true
+
+setTimeout(()=>{ isBusy = false }, 500)
+
 let name=list[index]
 
 if(!favorites[currentType].includes(name)){
@@ -638,12 +643,15 @@ next()
 
 }
 
-function dislike(){next()}
+function dislike(){
 
-function next(){
-history.push(index)
-index++
-buildDeck()
+if(isBusy) return
+isBusy = true
+
+setTimeout(()=>{ isBusy = false }, 500)
+
+next()
+
 }
 
 function undo(){
