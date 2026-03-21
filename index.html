@@ -679,9 +679,19 @@ for(let i = 1; i <= 2; i++){
 }
 
 }
-
 function navigate(name){
-  window.location.href = "https://maps.google.com/?q=" + encodeURIComponent(name + " Oslo")
+
+const query = encodeURIComponent(name + " Oslo")
+
+// iPhone (Apple Maps)
+if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){
+  window.location.href = "maps://?q=" + query
+  return
+}
+
+// Android / resten (Google Maps app)
+window.location.href = "geo:0,0?q=" + query
+
 }
 
 function book(name){
