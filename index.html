@@ -340,14 +340,30 @@ buildDeck()
 }
 function buildDeck(){
 
-deck.innerHTML=""
+deck.innerHTML = ""
 
-if(!list || list.length === 0){
-  return
-}
+if(!list || list.length === 0) return
 
 if(index >= list.length){
+  shuffle(list)
   index = 0
+}
+
+const current = list[index]
+const nextItem = list[index + 1]
+
+// alltid lag første kort
+if(current){
+  createCard(current, false)
+}
+
+// lag neste kort hvis finnes
+if(nextItem){
+  createCard(nextItem, true)
+}
+
+preloadNext()
+
 }
 
 // SIKKERHET
@@ -366,6 +382,7 @@ preloadNext()
 }
 
 function createCard(name,isNext){
+if(!name) return
 
 const card=document.createElement("div")
 card.className="card"
@@ -642,6 +659,21 @@ next()
 
 function dislike(){
 next()
+}
+
+function next(){
+
+history.push(index)
+
+index++
+
+if(index >= list.length){
+  shuffle(list)
+  index = 0
+}
+
+buildDeck()
+
 }
 
 function undo(){
