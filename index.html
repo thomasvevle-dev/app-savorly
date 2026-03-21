@@ -264,6 +264,8 @@ let currentType=""
 let placesService
 let imageCache={}
 
+let isBusy = false
+
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
 winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
