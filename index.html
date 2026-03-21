@@ -81,6 +81,7 @@ display:none;
 justify-content:center;
 align-items:center;
 z-index:10;
+pointer-events:none;
 }
 
 .card{
@@ -309,6 +310,7 @@ index = 0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
+deck.style.pointerEvents = "auto"  
 
 buildDeck()
 
@@ -399,7 +401,9 @@ preloadNext()
 }
 
 function createCard(name,isNext){
-if(!name) return
+if(!name){
+  name = "restaurant"
+}
 
 const card=document.createElement("div")
 card.className="card"
@@ -722,6 +726,10 @@ if(index >= list.length){
   index = 0
 }
 
+if(!list[index]){
+  index = 0
+}
+
 const current = list[index]
 const nextItem = list[index + 1]
 
@@ -733,7 +741,13 @@ if(nextItem){
   createCard(nextItem, true)
 }
 
-preloadNext()
+
+for(let i = 1; i <= 2; i++){
+  const next = list[index + i]
+  if(next && !imageCache[next]){
+    loadPlace(next)
+  }
+}
 
 }
 
@@ -784,8 +798,9 @@ if(imageCache[name]){
 }
 
 if(!placesService){
-  clearTimeout(timeout)
-  resolve(fallback(name))
+  setTimeout(()=>{
+    loadPlace(name).then(resolve)
+  },300)
   return
 }
 
