@@ -264,7 +264,7 @@ let currentType=""
 let placesService
 let imageCache={}
 
-let isBusy = false
+
 
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
@@ -628,12 +628,7 @@ card.style.transform="translateX(0)"
 
 function like(){
 
-if(isBusy) return
-isBusy = true
-
-setTimeout(()=>{ isBusy = false }, 500)
-
-let name=list[index]
+let name = list[index]
 
 if(!favorites[currentType].includes(name)){
 favorites[currentType].push(name)
@@ -646,14 +641,7 @@ next()
 }
 
 function dislike(){
-
-if(isBusy) return
-isBusy = true
-
-setTimeout(()=>{ isBusy = false }, 500)
-
 next()
-
 }
 
 function undo(){
