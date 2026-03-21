@@ -691,51 +691,10 @@ return
 }
 
 // Hvis Google Places ikke er klar → fallback direkte
-if(!placesService){
-resolve(fallback(name))
-return
-}
-
-// Søk etter sted
-let finished = false
-
-function safeResolve(data){
-  if(!finished){
-    finished = true
-    resolve(data)
-  }
-}
-
-// failsafe hvis Google ikke svarer
-setTimeout(()=>{
-  safeResolve(fallback(name))
-},1500)
-
 placesService.getDetails({
 placeId: results[0].place_id,
 fields: ["name","rating","photos"]
 }, (place, status) => {
-
-let photos = []
-
-if(status === google.maps.places.PlacesServiceStatus.OK && place.photos){
-  for(let i=0;i<Math.min(3,place.photos.length);i++){
-    photos.push(place.photos[i].getUrl({maxWidth:1200}))
-  }
-}
-
-while(photos.length < 3){
-  photos.push("https://source.unsplash.com/featured/?wine")
-}
-
-safeResolve({
-  name: place?.name || name,
-  rating: place?.rating || "",
-  photos: photos
-})
-
-})
-
 if(status !== google.maps.places.PlacesServiceStatus.OK || !results || !results[0]){
 resolve(fallback(name))
 return
