@@ -444,6 +444,8 @@ enableSwipe(card)
 if(!name) return
 
 loadPlace(name).then(place=>{
+if(!card.isConnected) return
+if(!place || !place.photos) return
 
 let photos=place.photos
 let photoIndex=0
