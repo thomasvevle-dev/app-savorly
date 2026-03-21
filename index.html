@@ -352,6 +352,23 @@ if(index >= list.length){
 const current = list[index]
 const nextItem = list[index + 1]
 
+// alltid vis første kort
+if(current){
+  createCard(current, false)
+}
+
+// vis neste kort hvis finnes
+if(nextItem){
+  createCard(nextItem, true)
+}
+
+preloadNext()
+
+}
+
+const current = list[index]
+const nextItem = list[index + 1]
+
 // alltid lag første kort
 if(current){
   createCard(current, false)
