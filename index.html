@@ -695,6 +695,7 @@ placesService.getDetails({
 placeId: results[0].place_id,
 fields: ["name","rating","photos"]
 }, (place, status) => {
+
 if(status !== google.maps.places.PlacesServiceStatus.OK || !results || !results[0]){
 resolve(fallback(name))
 return
