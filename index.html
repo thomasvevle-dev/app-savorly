@@ -687,8 +687,17 @@ if(!name){
 }
 
 // failsafe timeout (hindrer freeze)
+let resolved = false
+
+function safeResolve(data){
+  if(!resolved){
+    resolved = true
+    resolve(data)
+  }
+}
+
 let timeout = setTimeout(()=>{
-  resolve(fallback(name))
+  safeResolve(fallback(name))
 },1500)
 
 if(imageCache[name]){
@@ -742,7 +751,7 @@ photos: photos
 
 imageCache[name] = result
 
-resolve(result)
+safeResolve(result)
 
 })
 
