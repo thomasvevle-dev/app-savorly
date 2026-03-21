@@ -680,46 +680,46 @@ loadPlace(next)
 function loadPlace(name){
 
 return new Promise(resolve=>{
+
 if(!name){
   resolve(fallback("restaurant"))
   return
 }
-// Hvis vi allerede har cache
+
+// failsafe timeout (hindrer freeze)
+let timeout = setTimeout(()=>{
+  resolve(fallback(name))
+},1500)
+
 if(imageCache[name]){
-resolve(imageCache[name])
-return
+  clearTimeout(timeout)
+  resolve(imageCache[name])
+  return
 }
 
-// Hvis Google Places ikke er klar → fallback direkte
-placesService.getDetails({
-placeId: results[0].place_id,
-fields: ["name","rating","photos"]
-}, (place, status) => {
+if(!placesService){
+  clearTimeout(timeout)
+  resolve(fallback(name))
+  return
+}
+
+placesService.findPlaceFromQuery({
+query: name + " Oslo",
+fields: ["place_id"]
+}, (results, status) => {
 
 if(status !== google.maps.places.PlacesServiceStatus.OK || !results || !results[0]){
-resolve(fallback(name))
-return
+  clearTimeout(timeout)
+  resolve(fallback(name))
+  return
 }
 
-// Hent detaljer
 placesService.getDetails({
 placeId: results[0].place_id,
 fields: ["name","rating","photos"]
 }, (place, status) => {
 
-let done = false
-
-function safeResolve(data){
-  if(!done){
-    done = true
-    resolve(data)
-  }
-}
-
-// fallback hvis Google ikke svarer
-setTimeout(()=>{
-  safeResolve(fallback(name))
-},1500)
+clearTimeout(timeout)
 
 let photos = []
 
@@ -729,8 +729,9 @@ if(status === google.maps.places.PlacesServiceStatus.OK && place && place.photos
   }
 }
 
+// fallback bilder hvis Google feiler
 while(photos.length < 3){
-  photos.push("https://source.unsplash.com/featured/?wine")
+  photos.push("https://source.unsplash.com/featured/?restaurant")
 }
 
 let result = {
@@ -741,9 +742,12 @@ photos: photos
 
 imageCache[name] = result
 
-safeResolve(result)
+resolve(result)
+
 })
+
 })
+
 })
 }
 
