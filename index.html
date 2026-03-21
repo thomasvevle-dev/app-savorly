@@ -265,8 +265,6 @@ let currentType=""
 let placesService
 let imageCache={}
 
-
-
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
 winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
@@ -280,7 +278,6 @@ const res=await fetch("data/places.json")
 data=await res.json()
 renderFavorites()
 }
-
 loadData()
 
 function initMap(){
@@ -298,48 +295,37 @@ return arr.sort(()=>Math.random()-0.5)
 function openCategory(type){
 
 currentType = type
-
 list = (data[type] || []).filter(item => item && item.trim() !== "")
 
 if(list.length === 0){
-  alert("Ingen data")
-  return
+ alert("Ingen data")
+ return
 }
 
 index = 0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
-deck.style.pointerEvents = "auto"  
+deck.style.pointerEvents="auto"
 
 buildDeck()
-
 }
 
 function openFavorite(type,name){
 
 currentType = type
-
 list = (data[type] || []).filter(item => item && item.trim() !== "")
 
-// finn riktig index
 index = list.findIndex(item => item.toLowerCase() === name.toLowerCase())
-
-if(index === -1){
-  index = 0
-}
-
-if(!list[index]){
-  alert("Fant ikke sted")
-  return
-}
+if(index === -1) index = 0
 
 document.getElementById("home").style.display="none"
 deck.style.display="flex"
+deck.style.pointerEvents="auto"
 
 buildDeck()
-
 }
+
 function buildDeck(){
 
 deck.innerHTML = ""
@@ -347,87 +333,58 @@ deck.innerHTML = ""
 if(!list || list.length === 0) return
 
 if(index >= list.length){
-  shuffle(list)
-  index = 0
+ shuffle(list)
+ index = 0
 }
 
-const current = list[index]
-const nextItem = list[index + 1]
-
-// alltid vis første kort
-if(current){
-  createCard(current, false)
-}
-
-// vis neste kort hvis finnes
-if(nextItem){
-  createCard(nextItem, true)
-}
-
-preloadNext()
-
-}
-
-const current = list[index]
-const nextItem = list[index + 1]
-
-// alltid lag første kort
-if(current){
-  createCard(current, false)
-}
-
-// lag neste kort hvis finnes
-if(nextItem){
-  createCard(nextItem, true)
-}
-
-preloadNext()
-
-}
-
-// SIKKERHET
 if(!list[index]){
-  index = 0
+ index = 0
 }
 
-createCard(list[index], false)
+const current = list[index]
+const nextItem = list[index + 1]
 
-if(list[index+1]){
-  createCard(list[index+1], true)
+if(current){
+ createCard(current, false)
 }
 
-preloadNext()
+if(nextItem){
+ createCard(nextItem, true)
+}
+
+// stabil preload
+for(let i = 1; i <= 2; i++){
+ const next = list[index + i]
+ if(next && !imageCache[next]){
+ loadPlace(next)
+ }
+}
 
 }
 
 function createCard(name,isNext){
+
 if(!name){
-  name = "restaurant"
+ name = "restaurant"
 }
 
 const card=document.createElement("div")
 card.className="card"
-
 if(isNext) card.classList.add("next")
 
 card.innerHTML=`
-
 <img id="photo" src="https://source.unsplash.com/featured/?restaurant">
-
 <div class="photoDots">
 <span class="dot active"></span>
 <span class="dot"></span>
 <span class="dot"></span>
 </div>
-
 <div class="topLeft">←</div>
 <div class="topRight">↺</div>
-
 <div class="info">
 <div class="name">${name}</div>
 <div class="rating"></div>
 </div>
-
 <div class="buttons">
 <div class="btn-dislike">✕</div>
 <div class="btn-map">📍</div>
@@ -435,109 +392,80 @@ card.innerHTML=`
 <div class="btn-like">♥</div>
 </div>
 `
+
 deck.appendChild(card)
 
-card.querySelector(".buttons").addEventListener("touchstart", e => {
-  e.stopPropagation()
-})
-
-card.querySelector(".buttons").addEventListener("touchend", e => {
-  e.stopPropagation()
-})
-
 card.querySelector(".topLeft").onclick=goHome
-card.querySelector(".topRight").addEventListener("click", e => {
+
+card.querySelector(".topRight").onclick=(e)=>{
 e.stopPropagation()
 undo()
-})
+}
 
-card.querySelector(".topRight").addEventListener("touchend", e => {
+card.querySelector(".buttons").addEventListener("click", e=>{
+const btn=e.target.closest("div")
+if(!btn) return
+
 e.stopPropagation()
-undo()
-})
 
-card.querySelector(".buttons").addEventListener("click", e => {
-
-  const btn = e.target.closest("div")
-  if(!btn) return
-
-  e.stopPropagation()
-  e.preventDefault()
-
-  if(btn.classList.contains("btn-like")){
-    likeFromButton()
-  }
-  else if(btn.classList.contains("btn-dislike")){
-    dislikeFromButton()
-  }
-  else if(btn.classList.contains("btn-map")){
-    navigate(name)
-  }
-  else if(btn.classList.contains("btn-book")){
-    book(name)
-  }
-
+if(btn.classList.contains("btn-like")) likeFromButton()
+if(btn.classList.contains("btn-dislike")) dislikeFromButton()
+if(btn.classList.contains("btn-map")) navigate(name)
+if(btn.classList.contains("btn-book")) book(name)
 })
 
 enableSwipe(card)
 
-if(!name) return
-
 loadPlace(name).then(place=>{
+
 if(!card.isConnected) return
-if(!place || !place.photos) return
 
 let photos=place.photos
 let photoIndex=0
 
 const img=card.querySelector("#photo")
-
 img.src=photos[0]
 
 card.querySelector(".name").innerText=place.name
-card.querySelector(".rating").innerText="⭐ "+place.rating+" Google"
+card.querySelector(".rating").innerText="⭐ "+place.rating
 
-let tapStartX = 0
-let tapStartTime = 0
+let tapStartX=0
+let tapStartTime=0
 
-card.addEventListener("touchstart", e => {
-tapStartX = e.touches[0].clientX
-tapStartTime = Date.now()
+card.addEventListener("touchstart", e=>{
+tapStartX=e.touches[0].clientX
+tapStartTime=Date.now()
 })
 
-card.addEventListener("touchend", e => {
+card.addEventListener("touchend", e=>{
 
 if(e.target.closest(".buttons")) return
 
-let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
-let time = Date.now() - tapStartTime
+let diffX=Math.abs(e.changedTouches[0].clientX-tapStartX)
+let time=Date.now()-tapStartTime
 
-// Bare ekte tap (ikke swipe)
-if(diffX < 15 && time < 250){
+if(diffX<15 && time<250){
 
-let x = e.changedTouches[0].clientX
+const rect=card.getBoundingClientRect()
+const x=e.changedTouches[0].clientX-rect.left
 
-const rect = card.getBoundingClientRect()
-const relativeX = x - rect.left
-
-if(relativeX > rect.width / 2){
-photoIndex = (photoIndex+1)%photos.length
+if(x>rect.width/2){
+photoIndex=(photoIndex+1)%photos.length
 }else{
-photoIndex = (photoIndex-1+photos.length)%photos.length
+photoIndex=(photoIndex-1+photos.length)%photos.length
 }
 
-img.src = photos[photoIndex]
+img.src=photos[photoIndex]
 
-const dots = card.querySelectorAll(".dot")
+const dots=card.querySelectorAll(".dot")
 dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
-
 }
 
-})   // touchend
+})
 
-})   // loadPlace
+})
 
-}    // createCard
+}
 
 /* FAVORITES */
 
@@ -708,11 +636,12 @@ buildDeck()
 
 }
 
+
 function goHome(){
-deck.innerHTML = ""
-deck.style.display = "none"
-deck.style.pointerEvents = "none"
-document.getElementById("home").style.display = "flex"
+deck.innerHTML=""
+deck.style.display="none"
+deck.style.pointerEvents="none"
+document.getElementById("home").style.display="flex"
 }
 
 function buildDeck(){
