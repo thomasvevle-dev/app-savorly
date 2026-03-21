@@ -707,36 +707,43 @@ placeId: results[0].place_id,
 fields: ["name","rating","photos"]
 }, (place, status) => {
 
+let done = false
+
+function safeResolve(data){
+  if(!done){
+    done = true
+    resolve(data)
+  }
+}
+
+// fallback hvis Google ikke svarer
+setTimeout(()=>{
+  safeResolve(fallback(name))
+},1500)
+
 let photos = []
 
-if(status === google.maps.places.PlacesServiceStatus.OK && place.photos){
-
-for(let i=0; i<Math.min(3, place.photos.length); i++){
-photos.push(place.photos[i].getUrl({maxWidth:1200}))
+if(status === google.maps.places.PlacesServiceStatus.OK && place && place.photos){
+  for(let i=0;i<Math.min(3,place.photos.length);i++){
+    photos.push(place.photos[i].getUrl({maxWidth:1200}))
+  }
 }
 
-}
-
-// Sørg for minst 3 bilder
 while(photos.length < 3){
-photos.push("https://source.unsplash.com/featured/?restaurant")
+  photos.push("https://source.unsplash.com/featured/?wine")
 }
 
 let result = {
-name: place.name || name,
-rating: place.rating || "",
+name: (place && place.name) || name,
+rating: (place && place.rating) || "",
 photos: photos
 }
 
-// Cache resultat
 imageCache[name] = result
 
-resolve(result)
-
+safeResolve(result)
 })
-
 })
-
 })
 }
 
