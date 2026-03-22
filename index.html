@@ -413,8 +413,8 @@ function createCard(item,isNext){
 
     <div class="info">
       <div class="name">${name}</div>
-     <div class="rating"></div>
-     <div class="vibe"></div>
+      <div class="rating"></div>
+      <div class="vibe"></div>
     </div>
 
     <div class="buttons">
@@ -439,20 +439,7 @@ function createCard(item,isNext){
   card.querySelector(".buttons").addEventListener("click", e=>{
     const btn = e.target.closest("div")
     if(!btn) return
-vibeEl.innerHTML = ""
 
-if(item.vibe){
-  item.vibe.forEach(v => {
-    const chip = document.createElement("span")
-    chip.className = "chip"
-    chip.innerText = v
-
-    // 🔥 LEGG DEN HER
-    chip.onclick = () => setVibe(v)
-
-    vibeEl.appendChild(chip)
-  })
-}
     e.stopPropagation()
 
     if(btn.classList.contains("btn-like")) likeFromButton()
@@ -461,10 +448,8 @@ if(item.vibe){
     if(btn.classList.contains("btn-book")) book(name)
   })
 
-  // SWIPE
   enableSwipe(card)
 
-  // LOAD DATA
   loadPlace(name).then(place=>{
 
     if(!card.isConnected) return
@@ -477,16 +462,26 @@ if(item.vibe){
 
     card.querySelector(".name").innerText = place.name
     card.querySelector(".rating").innerText = "⭐ " + place.rating
-   
 
-if(item.vibe){
-  item.vibe.forEach(v => {
-    const chip = document.createElement("span")
-    chip.className = "chip"
-    chip.innerText = v
-    vibeEl.appendChild(chip)
-  })
-}
+    // 🔥 HER SKAL CHIPS LAGES
+    const vibeEl = card.querySelector(".vibe")
+    vibeEl.innerHTML = ""
+
+    if(item.vibe){
+      item.vibe.forEach(v => {
+        const chip = document.createElement("span")
+        chip.className = "chip"
+        chip.innerText = v
+
+        chip.onclick = () => {
+          setVibe(v)
+          openCategory(currentType)
+        }
+
+        vibeEl.appendChild(chip)
+      })
+    }
+
     let tapStartX = 0
     let tapStartTime = 0
 
@@ -502,7 +497,6 @@ if(item.vibe){
       let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
       let time = Date.now() - tapStartTime
 
-      // TAP (ikke swipe)
       if(diffX < 15 && time < 250){
 
         const rect = card.getBoundingClientRect()
@@ -520,11 +514,11 @@ if(item.vibe){
         dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
       }
 
-    }) // touchend
+    })
 
-  }) // loadPlace.then
+  })
 
-} // createCard
+}
 /* FAVORITES */
 
 function renderFavorites(){
