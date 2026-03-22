@@ -457,10 +457,138 @@ img.src=photos[photoIndex]
 
 const dots=card.querySelectorAll(".dot")
 dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
+
+}   // if
+})  // touchend
+function createCard(item,isNext){
+
+if(!item || !item.name) return
+let name = item.name
+
+const card=document.createElement("div")
+card.className="card"
+if(isNext) card.classList.add("next")
+
+card.innerHTML=`
+<img id="photo" src="https://source.unsplash.com/featured/?restaurant">
+<div class="photoDots">
+<span class="dot active"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+<div class="topLeft">←</div>
+<div class="topRight">↺</div>
+<div class="info">
+<div class="name">${name}</div>
+<div class="rating"></div>
+</div>
+<div class="buttons">
+<div class="btn-dislike">✕</div>
+<div class="btn-map">📍</div>
+<div class="btn-book">📅</div>
+<div class="btn-like">♥</div>
+</div>
+`
+
+deck.appendChild(card)
+
+card.querySelector(".topLeft").onclick=goHome
+
+card.querySelector(".topRight").onclick=(e)=>{
+e.stopPropagation()
+undo()
 }
+
+card.querySelector(".buttons").addEventListener("click", e=>{
+const btn=e.target.closest("div")
+if(!btn) return
+
+e.stopPropagation()
+
+if(btn.classList.contains("btn-like")) likeFromButton()
+if(btn.classList.contains("btn-dislike")) dislikeFromButton()
+if(btn.classList.contains("btn-map")) navigate(name)
+if(btn.classList.contains("btn-book")) book(name)
 })
+
+enableSwipe(card)
+
+loadPlace(name).then(place=>{
+
+if(!card.isConnected) return
+
+let photos=place.photos
+let photoIndex=0
+
+const img=card.querySelector("#photo")
+img.src=photos[0]
+
+card.querySelector(".name").innerText=place.name
+card.querySelector(".rating").innerText="⭐ "+place.rating
+
+let tapStartX=0
+let tapStartTime=0
+
+card.addEventListener("touchstart", e=>{
+tapStartX=e.touches[0].clientX
+tapStartTime=Date.now()
+})
+
+card.addEventListener("touchend", e=>{
+
+if(e.target.closest(".buttons")) return
+
+let diffX=Math.abs(e.changedTouches[0].clientX-tapStartX)
+let time=Date.now()-tapStartTime
+
+if(diffX<15 && time<250){
+
+const rect=card.getBoundingClientRect()
+const x=e.changedTouches[0].clientX-rect.left
+
+if(x>rect.width/2){
+photoIndex=(photoIndex+1)%photos.length
+}else{
+photoIndex=(photoIndex-1+photos.length)%photos.length
 }
+
+img.src=photos[photoIndex]
+
+const dots=card.querySelectorAll(".dot")
+dots.forEach((d,i)=>d.classList.toggle("active",i===photoIndex))
+
+}   // if
+})  // touchend
+});  // loadPlace.then
+}    // createCard
+
+/* FAVORITES */
+
+function renderFavorites(){
+
+["restaurants","winebars","cocktailbars"].forEach(type=>{
+
+const box=document.getElementById("fav-"+type)
+box.innerHTML=""
+
+favorites[type].forEach(name=>{
+
+const el=document.createElement("div")
+el.className="favoriteItem"
+el.innerText=name
+
+el.onclick=()=>openFavorite(type,name)
+
+enableFavSwipe(el,type,name)
+
+box.appendChild(el)
+
+})
+
+})
+
 }
+
 
 /* FAVORITES */
 
