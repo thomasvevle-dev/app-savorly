@@ -333,20 +333,32 @@ placesService=new google.maps.places.PlacesService(map)
 function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
+
 function openCategory(type){
 
-  currentType = type
-  activeVibe = null   // 🔥 LEGG TIL
+ 
+  if(!data){
+    alert("Data laster... prøv igjen")
+    return
+  }
 
-  list = (data[type] || [])
+  currentType = type
+  activeVibe = null
+
+  list = data[type]
+
+  if(!list || list.length === 0){
+    alert("Ingen steder funnet")
+    return
+  }
 
   index = 0
 
   document.getElementById("home").style.display="none"
   deck.style.display="flex"
+  deck.style.pointerEvents = "auto"   // 🔥 viktig
 
   buildDeck()
-}
 }
 
 function openFavorite(type,name){
