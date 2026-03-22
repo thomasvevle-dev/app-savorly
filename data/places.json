@@ -73,5 +73,7 @@
     { "name": "Bar Boca", "vibe": ["romantisk"] },
     { "name": "The Thief Bar", "vibe": ["romantisk", "date"] },
     { "name": "Angst Bar", "vibe": ["aktiv", "sosial"] }
+    { "name": "Posthallen Drinkhub", "vibe": ["aktiv", "sosial"] },
+    { "name": "Chair", "vibe": ["chill"] },
   ]
 }
