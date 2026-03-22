@@ -194,12 +194,16 @@ font-size:34px;
 text-shadow:0 2px 8px rgba(0,0,0,0.8);
 }
 
-.rating{
-font-size:18px;
-color:#E6C27A;
+.vibe{
+font-size:13px;
+color:#ddd;
+opacity:.9;
+margin-top:6px;
+letter-spacing:.5px;
+text-transform:capitalize;
 text-shadow:0 2px 6px rgba(0,0,0,0.8);
 }
-
+  
 /* ACTION BAR */
 
 .buttons{
@@ -384,7 +388,8 @@ function createCard(item,isNext){
 
     <div class="info">
       <div class="name">${name}</div>
-      <div class="rating"></div>
+     <div class="rating"></div>
+     <div class="vibe"></div>
     </div>
 
     <div class="buttons">
@@ -434,7 +439,8 @@ function createCard(item,isNext){
 
     card.querySelector(".name").innerText = place.name
     card.querySelector(".rating").innerText = "⭐ " + place.rating
-
+    const vibeEl = card.querySelector(".vibe")
+    vibeEl.innerText = item.vibe ? item.vibe.join(" • ") : ""
     let tapStartX = 0
     let tapStartTime = 0
 
