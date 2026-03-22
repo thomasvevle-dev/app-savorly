@@ -135,7 +135,7 @@ pointer-events:none;
   left:0;
   right:0;
   bottom:0;
-  height:35%; 
+  height:35%;
   background:linear-gradient(
     to bottom,
     rgba(0,0,0,0),
@@ -144,6 +144,7 @@ pointer-events:none;
     rgba(0,0,0,0.95)
   );
   pointer-events:none;
+  z-index:1;
 }
 
 /* DOTS */
@@ -225,7 +226,6 @@ text-shadow:0 2px 8px rgba(0,0,0,0.8);
   border:1px solid rgba(255,255,255,0.3);
   font-weight:500;
 }
-}
   
 /* ACTION BAR */
 
@@ -239,8 +239,7 @@ text-shadow:0 2px 8px rgba(0,0,0,0.8);
   background:rgba(0,0,0,.55);
   border-radius:26px;
   padding:18px 10px;
-  z-index:50;             
-  pointer-events:auto;    
+  z-index:999;  
 }
 
 .buttons div{
