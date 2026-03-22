@@ -295,7 +295,7 @@ return arr.sort(()=>Math.random()-0.5)
 function openCategory(type){
 
 currentType = type
-list = (data[type] || []).filter(item => item && item.trim() !== "")
+list = (data[type] || []).filter(item => item && item.name)
 
 if(list.length === 0){
  alert("Ingen data")
@@ -316,7 +316,7 @@ function openFavorite(type,name){
 currentType = type
 list = (data[type] || []).filter(item => item && item.trim() !== "")
 
-index = list.findIndex(item => item.toLowerCase() === name.toLowerCase())
+index = list.findIndex(item => item.name === name)
 if(index === -1) index = 0
 
 document.getElementById("home").style.display="none"
@@ -362,9 +362,9 @@ for(let i = 1; i <= 2; i++){
 
 }
 
-function createCard(name,isNext){
+function createCard(item,isNext){
 
-if(!name){
+let name = item.name
  name = "restaurant"
 }
 
