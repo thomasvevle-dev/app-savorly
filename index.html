@@ -200,6 +200,7 @@ text-shadow:0 2px 8px rgba(0,0,0,0.8);
 }
 
 .vibe{
+  margin-top:8px;
   display:block;
   position:relative;
   z-index:5;
@@ -210,6 +211,20 @@ text-shadow:0 2px 8px rgba(0,0,0,0.8);
   letter-spacing:.5px;
   text-transform:capitalize;
   text-shadow:0 2px 6px rgba(0,0,0,0.8);
+}
+
+.chip{
+  display:inline-block;
+  padding:6px 12px;
+  margin:4px 6px 0 0;
+  font-size:12px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.2);
+  color:white;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  font-weight:500;
+}
 }
   
 /* ACTION BAR */
@@ -424,7 +439,20 @@ function createCard(item,isNext){
   card.querySelector(".buttons").addEventListener("click", e=>{
     const btn = e.target.closest("div")
     if(!btn) return
+vibeEl.innerHTML = ""
 
+if(item.vibe){
+  item.vibe.forEach(v => {
+    const chip = document.createElement("span")
+    chip.className = "chip"
+    chip.innerText = v
+
+    // 🔥 LEGG DEN HER
+    chip.onclick = () => setVibe(v)
+
+    vibeEl.appendChild(chip)
+  })
+}
     e.stopPropagation()
 
     if(btn.classList.contains("btn-like")) likeFromButton()
@@ -449,8 +477,16 @@ function createCard(item,isNext){
 
     card.querySelector(".name").innerText = place.name
     card.querySelector(".rating").innerText = "⭐ " + place.rating
-    const vibeEl = card.querySelector(".vibe")
-    vibeEl.innerText = item.vibe ? item.vibe.join(" • ") : ""
+   
+
+if(item.vibe){
+  item.vibe.forEach(v => {
+    const chip = document.createElement("span")
+    chip.className = "chip"
+    chip.innerText = v
+    vibeEl.appendChild(chip)
+  })
+}
     let tapStartX = 0
     let tapStartTime = 0
 
