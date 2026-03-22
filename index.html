@@ -189,7 +189,6 @@ padding:10px 12px;
   bottom:200px;
   left:24px;
   right:24px;
-  pointer-events:none;   
   z-index:10;
 }
 
@@ -200,6 +199,7 @@ text-shadow:0 2px 8px rgba(0,0,0,0.8);
 }
 
 .vibe{
+  pointer-events:auto;
   margin-top:8px;
   display:block;
   position:relative;
@@ -490,14 +490,14 @@ function createCard(item,isNext){
       tapStartTime = Date.now()
     })
 
-    card.addEventListener("touchend", e=>{
+  card.addEventListener("touchend", e=>{
 
-      if(e.target.closest(".buttons")) return
+  if(e.target.closest(".buttons") || e.target.closest(".chip")) return
 
-      let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
-      let time = Date.now() - tapStartTime
+  let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
+  let time = Date.now() - tapStartTime
 
-      if(diffX < 15 && time < 250){
+  if(diffX < 15 && time < 250){
 
         const rect = card.getBoundingClientRect()
         const x = e.changedTouches[0].clientX - rect.left
