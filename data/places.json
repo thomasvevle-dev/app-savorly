@@ -32,6 +32,12 @@
     { "name": "Grand Café", "vibe": ["chill", "romantisk"] },
     { "name": "Kverneriet", "vibe": ["aktiv", "sosial"] },
     { "name": "Hyde", "vibe": ["sosial"] },
+    { "name": "Ansjosen", "vibe": ["chill", "sosial"] },
+    { "name": "Kasteller", "vibe": ["romantisk", "date"] },
+    { "name": "Apostrophe", "vibe": ["date", "sosial"] },
+    { "name": "The Little Pickle", "vibe": ["chill"] },
+    { "name": "Seven", "vibe": ["sosial"] },
+    { "name": "About Contrast", "vibe": ["romantisk", "date"] },
     { "name": "Sjømagasinet", "vibe": ["romantisk", "date"] },
     { "name": "Lorry", "vibe": ["sosial"] },
     { "name": "Palmen", "vibe": ["romantisk"] },
@@ -58,7 +64,11 @@
     { "name": "Vinoteket", "vibe": ["sosial"] },
     { "name": "Vini Divini", "vibe": ["romantisk"] },
     { "name": "Nord Vinbar", "vibe": ["chill"] },
-    { "name": "Syd Vinbar", "vibe": ["sosial"] }
+    { "name": "Syd Vinbar", "vibe": ["sosial"] },
+    { "name": "Libertine Frogner", "vibe": ["sosial", "chill"] },
+    { "name": "Eff Eff", "vibe": ["date", "sosial"] },
+    { "name": "Libertine Vannkunsten", "vibe": ["romantisk", "chill"] },
+    { "name": "Esaias Mat&Vinbar", "vibe": ["romantisk", "date"] }
   ],
 
   "cocktailbars": [
@@ -72,8 +82,9 @@
     { "name": "Ostara", "vibe": ["chill"] },
     { "name": "Bar Boca", "vibe": ["romantisk"] },
     { "name": "The Thief Bar", "vibe": ["romantisk", "date"] },
-    { "name": "Angst Bar", "vibe": ["aktiv", "sosial"] }
+    { "name": "Angst Bar", "vibe": ["aktiv", "sosial"] },
     { "name": "Posthallen Drinkhub", "vibe": ["aktiv", "sosial"] },
     { "name": "Chair", "vibe": ["chill"] },
+    { "name": "F6", "vibe": ["sosial", "aktiv"] }
   ]
 }
