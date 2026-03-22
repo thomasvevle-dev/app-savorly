@@ -314,7 +314,7 @@ buildDeck()
 function openFavorite(type,name){
 
 currentType = type
-list = (data[type] || []).filter(item => item && item.trim() !== "")
+list = (data[type] || []).filter(item => item && item.name)
 
 index = list.findIndex(item => item.name === name)
 if(index === -1) index = 0
@@ -328,45 +328,43 @@ buildDeck()
 
 function buildDeck(){
 
-deck.innerHTML = ""
+  deck.innerHTML = ""
 
-if(!list || list.length === 0) return
+  if(!list || list.length === 0) return
 
-if(index >= list.length){
- shuffle(list)
- index = 0
+  if(index >= list.length){
+    shuffle(list)
+    index = 0
+  }
+
+  if(!list[index]){
+    index = 0
+  }
+
+  const current = list[index]
+  const nextItem = list[index + 1]
+
+  if(current){
+    createCard(current, false)
+  }
+
+  if(nextItem){
+    createCard(nextItem, true)
+  }
+
+  for(let i = 1; i <= 2; i++){
+    const next = list[index + i]
+   if(next && !imageCache[next.name]){
+loadPlace(next.name)
 }
-
-if(!list[index]){
- index = 0
-}
-
-const current = list[index]
-const nextItem = list[index + 1]
-
-if(current){
- createCard(current, false)
-}
-
-if(nextItem){
- createCard(nextItem, true)
-}
-
-// stabil preload
-for(let i = 1; i <= 2; i++){
- const next = list[index + i]
- if(next && !imageCache[next]){
- loadPlace(next)
- }
-}
+  }
 
 }
 
 function createCard(item,isNext){
 
+if(!item || !item.name) return
 let name = item.name
- name = "restaurant"
-}
 
 const card=document.createElement("div")
 card.className="card"
@@ -596,7 +594,7 @@ card.style.transform="translateX(0)"
 
 function like(){
 
-let name = list[index]
+let name = list[index].name
 
 if(!favorites[currentType].includes(name)){
 favorites[currentType].push(name)
@@ -644,41 +642,6 @@ deck.style.pointerEvents="none"
 document.getElementById("home").style.display="flex"
 }
 
-function buildDeck(){
-
-deck.innerHTML = ""
-
-if(!list || list.length === 0) return
-
-if(index >= list.length){
-  shuffle(list)
-  index = 0
-}
-
-if(!list[index]){
-  index = 0
-}
-
-const current = list[index]
-const nextItem = list[index + 1]
-
-if(current){
-  createCard(current, false)
-}
-
-if(nextItem){
-  createCard(nextItem, true)
-}
-
-
-for(let i = 1; i <= 2; i++){
-  const next = list[index + i]
-  if(next && !imageCache[next]){
-    loadPlace(next)
-  }
-}
-
-}
 function navigate(name){
 
 const query = encodeURIComponent(name + " Oslo")
