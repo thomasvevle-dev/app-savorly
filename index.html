@@ -354,7 +354,7 @@ function buildDeck(){
 
   for(let i = 1; i <= 2; i++){
     const next = list[index + i]
-   if(next && !imageCache[next.name]){
+  if(next && next.name && !imageCache[next.name]){
 loadPlace(next.name)
 }
   }
@@ -672,15 +672,6 @@ document.body.appendChild(a)
 a.click()
 document.body.removeChild(a)
 
-}
-
-function preloadNext(){
-for(let i=1;i<=5;i++){
-const next=list[index+i]
-if(next && !imageCache[next]){
-loadPlace(next)
-}
-}
 }
 
 function loadPlace(name){
