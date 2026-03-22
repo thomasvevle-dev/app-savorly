@@ -226,6 +226,12 @@ text-shadow:0 2px 8px rgba(0,0,0,0.8);
   border:1px solid rgba(255,255,255,0.3);
   font-weight:500;
 }
+
+.chip.active{
+  background:white;
+  color:black;
+  border:1px solid white;
+}
   
 /* ACTION BAR */
 
@@ -483,22 +489,34 @@ function createCard(item,isNext){
     card.querySelector(".rating").innerText = "⭐ " + place.rating
 
     // 🔥 HER SKAL CHIPS LAGES
-    const vibeEl = card.querySelector(".vibe")
-    vibeEl.innerHTML = ""
+   const vibeEl = card.querySelector(".vibe")
+vibeEl.innerHTML = ""
 
-    if(item.vibe){
-      item.vibe.forEach(v => {
-        const chip = document.createElement("span")
-        chip.className = "chip"
-        chip.innerText = v
+if(item.vibe){
+  item.vibe.forEach(v => {
+    const chip = document.createElement("span")
+    chip.className = "chip"
+    chip.innerText = v
 
-        chip.onclick = () => {
-          setVibe(v)
-        }
-
-        vibeEl.appendChild(chip)
-      })
+    // 🔥 highlight hvis aktiv
+    if(activeVibe === v){
+      chip.classList.add("active")
     }
+
+ chip.onclick = () => {
+  if(activeVibe === v){
+    activeVibe = null
+    list = data[currentType]
+    index = 0
+    buildDeck()
+  } else {
+    setVibe(v)
+  }
+}
+
+    vibeEl.appendChild(chip)
+  })
+}
 
     let tapStartX = 0
     let tapStartTime = 0
