@@ -85,6 +85,7 @@ pointer-events:none;
 }
 
 .card{
+overflow:visible;
 position:absolute;
 width:95%;
 height:92%;
@@ -183,9 +184,11 @@ padding:10px 12px;
 /* INFO */
 
 .info{
+  z-index:5;
   position:absolute;
   bottom:220px; /* ← viktig */
   left:24px;
+  right:24px;
 }
 
 .name{
@@ -195,7 +198,10 @@ text-shadow:0 2px 8px rgba(0,0,0,0.8);
 }
 
 .vibe{
-display:block;  
+  display:block !important;
+  position:relative;
+  z-index:5;
+}
 font-size:13px;
 color:#ddd;
 opacity:.9;
