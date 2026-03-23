@@ -81,7 +81,7 @@ border:1px solid #333;
   justify-content:center;
   align-items:center;
   z-index:10;
-  pointer-events:auto;  
+  pointer-events:none;  
 }
 
 .card{
@@ -394,8 +394,6 @@ function getFriendsWhoLike(placeName){
   
 function openCategory(type){
 
- 
-
   currentType = type
   activeVibe = null
 
@@ -404,16 +402,9 @@ function openCategory(type){
   index = 0
 
   document.getElementById("home").style.display="none"
+
   deck.style.display="flex"
-
-  buildDeck()
-}
-
-  index = 0
-
-  document.getElementById("home").style.display="none"
-  deck.style.display="flex"
-  deck.style.pointerEvents = "auto"   // 🔥 viktig
+  deck.style.pointerEvents="auto"
 
   buildDeck()
 }
@@ -813,10 +804,11 @@ buildDeck()
 
 function goHome(){
 
-  
-
   deck.innerHTML = ""
   deck.style.display = "none"
+
+  deck.style.pointerEvents = "none"
+
   document.getElementById("home").style.display = "flex"
 }
 
