@@ -503,21 +503,20 @@ function getFriendsWhoLike(placeName){
   
 function openCategory(type){
 
- 
-  if(!data){
-    alert("Data laster... prøv igjen")
-    return
-  }
+  document.querySelectorAll(".friend-overlay").forEach(el => el.remove())
 
   currentType = type
   activeVibe = null
 
-  list = data[type]
+  list = (data[type] || [])
 
-  if(!list || list.length === 0){
-    alert("Ingen steder funnet")
-    return
-  }
+  index = 0
+
+  document.getElementById("home").style.display="none"
+  deck.style.display="flex"
+
+  buildDeck()
+}
 
   index = 0
 
@@ -942,11 +941,12 @@ buildDeck()
 
 
 function goHome(){
-deck.innerHTML=""
-deck.style.display="none"
-deck.style.pointerEvents="none"
-document.getElementById("home").style.display="flex"
-document.querySelectorAll(".friend-overlay").forEach(el => el.remove())  
+
+  document.querySelectorAll(".friend-overlay").forEach(el => el.remove())
+
+  deck.innerHTML = ""
+  deck.style.display = "none"
+  document.getElementById("home").style.display = "flex"
 }
 
 function navigate(name){
