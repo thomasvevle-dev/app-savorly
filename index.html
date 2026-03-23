@@ -310,134 +310,23 @@ let imageCache={}
 let friends = [
   {
     name: "Jonas Berg",
-    likes: [
-      { name: "Himkok", rating: 4.8 },
-      { name: "Dinner", rating: 4.5 },
-      { name: "Kverneriet", rating: 4.7 },
-      { name: "Südøst", rating: 4.3 }
-    ]
+    likes: ["Himkok","Dinner","Kverneriet","Südøst"]
   },
   {
     name: "Emma Larsen",
-    likes: [
-      { name: "Savage", rating: 4.6 },
-      { name: "Bettola", rating: 4.4 },
-      { name: "Svanen", rating: 4.7 },
-      { name: "Le Benjamin", rating: 4.8 }
-    ]
+    likes: ["Savage","Bettola","Svanen","Le Benjamin"]
   },
   {
     name: "Lucas Nilsen",
-    likes: [
-      { name: "Himkok", rating: 4.9 },
-      { name: "Alex Sushi", rating: 4.6 },
-      { name: "Fuglen", rating: 4.3 },
-      { name: "Chair", rating: 4.2 }
-    ]
+    likes: ["Himkok","Alex Sushi","Fuglen","Chair"]
   },
   {
     name: "Sofie Hansen",
-    likes: [
-      { name: "Maaemo", rating: 5.0 },
-      { name: "Kontrast", rating: 4.8 },
-      { name: "Statholdergaarden", rating: 4.7 }
-    ]
+    likes: ["Maaemo","Kontrast","Statholdergaarden"]
   },
   {
     name: "Oliver Johansen",
-    likes: [
-      { name: "Kverneriet", rating: 4.6 },
-      { name: "Tilt Bar", rating: 4.3 },
-      { name: "Angst Bar", rating: 4.2 },
-      { name: "Posthallen Drinkhub", rating: 4.4 }
-    ]
-  },
-  {
-    name: "Noah Andersen",
-    likes: [
-      { name: "Dinner", rating: 4.5 },
-      { name: "Nodee", rating: 4.4 },
-      { name: "Ling Ling", rating: 4.3 },
-      { name: "Südøst", rating: 4.2 }
-    ]
-  },
-  {
-    name: "Ella Kristiansen",
-    likes: [
-      { name: "Ylajali", rating: 4.7 },
-      { name: "Hos Thea", rating: 4.8 },
-      { name: "Smia Galleri", rating: 4.6 },
-      { name: "Stallen", rating: 4.5 }
-    ]
-  },
-  {
-    name: "William Eriksen",
-    likes: [
-      { name: "Arakataka", rating: 4.7 },
-      { name: "Galt", rating: 4.6 },
-      { name: "Fyr Bistronomi", rating: 4.5 },
-      { name: "Savage", rating: 4.4 }
-    ]
-  },
-  {
-    name: "Amalie Solberg",
-    likes: [
-      { name: "Libertine Frogner", rating: 4.5 },
-      { name: "Eff Eff", rating: 4.6 },
-      { name: "Radegast", rating: 4.4 },
-      { name: "Vin Vin", rating: 4.3 }
-    ]
-  },
-  {
-    name: "Herman Dahl",
-    likes: [
-      { name: "Territoriet", rating: 4.6 },
-      { name: "Nektar Vinbar", rating: 4.7 },
-      { name: "Vintage Kitchen", rating: 4.5 }
-    ]
-  },
-  {
-    name: "Ingrid Moen",
-    likes: [
-      { name: "Svanen", rating: 4.8 },
-      { name: "Bettola", rating: 4.4 },
-      { name: "F6", rating: 4.3 },
-      { name: "Chair", rating: 4.2 }
-    ]
-  },
-  {
-    name: "Magnus Lie",
-    likes: [
-      { name: "Himkok", rating: 4.9 },
-      { name: "Angst Bar", rating: 4.3 },
-      { name: "Tilt Bar", rating: 4.2 },
-      { name: "Pier 42", rating: 4.1 }
-    ]
-  },
-  {
-    name: "Julie Bergersen",
-    likes: [
-      { name: "Le Benjamin", rating: 4.8 },
-      { name: "Kolonihagen", rating: 4.5 },
-      { name: "Grand Café", rating: 4.4 }
-    ]
-  },
-  {
-    name: "Filip Strand",
-    likes: [
-      { name: "Dinner", rating: 4.6 },
-      { name: "Kverneriet", rating: 4.7 },
-      { name: "Südøst", rating: 4.3 },
-      { name: "Seven", rating: 4.2 }
-    ]
-  },
-  {
-    name: "Thea Lund",
-    likes: [
-      { name: "Fuglen", rating: 4.4 },
-      { name: "Torggata Botaniske", rating: 4.3 },
-      { name: "Ostara", rating: 4.2 }
-    ]
+    likes: ["Kverneriet","Tilt Bar","Angst Bar"]
   }
 ]
 
@@ -482,6 +371,8 @@ return arr.sort(()=>Math.random()-0.5)
 }
 
 function getFriendsWhoLike(placeName){
+  return friends.filter(f => f.likes.includes(placeName))
+}
 
   let result = []
 
@@ -503,7 +394,7 @@ function getFriendsWhoLike(placeName){
   
 function openCategory(type){
 
-  document.querySelectorAll(".friend-overlay").forEach(el => el.remove())
+ 
 
   currentType = type
   activeVibe = null
@@ -598,11 +489,11 @@ function createCard(item,isNext){
     <div class="topRight">↺</div>
 
     <div class="info">
-  <div class="name">${name}</div>
-  <div class="rating"></div>
-  <div class="vibe"></div>
-  <div class="friends"></div>
-  </div>
+      <div class="name">${name}</div>
+      <div class="rating"></div>
+      <div class="vibe"></div>
+      <div class="friends"></div>
+    </div>
 
     <div class="buttons">
       <div class="btn-dislike">✕</div>
@@ -632,7 +523,7 @@ function createCard(item,isNext){
     if(btn.classList.contains("btn-like")) likeFromButton()
     if(btn.classList.contains("btn-dislike")) dislikeFromButton()
     if(btn.classList.contains("btn-map")) navigate(name)
-    if(btn.classList.contains("btn-book")) book(item)
+    if(btn.classList.contains("btn-book")) book(name)
   })
 
   enableSwipe(card)
@@ -649,60 +540,40 @@ function createCard(item,isNext){
 
     card.querySelector(".name").innerText = place.name
     card.querySelector(".rating").innerText = "⭐ " + place.rating
+
+    // FRIENDS (REN)
     const friendsEl = card.querySelector(".friends")
+    const matchedFriends = getFriendsWhoLike(place.name || name)
 
-const matchedFriends = getFriendsWhoLike(place.name || name)
-
-if(matchedFriends.length > 0){
-friendsEl.innerHTML = "🔥 "
-
-matchedFriends.forEach((f, i) => {
-
-  const span = document.createElement("span")
-  span.innerText = "⭐ " + f.rating + " " + f.name
-  span.style.marginRight = "8px"
-  span.style.cursor = "pointer"
-
-  // 🔥 KLIKK
-  span.onclick = (e)=>{
-    e.stopPropagation()
-    openFriendProfile(f.name)
-  }
-
-  friendsEl.appendChild(span)
-
-})
-
-    // 🔥 HER SKAL CHIPS LAGES
-   const vibeEl = card.querySelector(".vibe")
-vibeEl.innerHTML = ""
-
-if(item.vibe){
-  item.vibe.forEach(v => {
-    const chip = document.createElement("span")
-    chip.className = "chip"
-    chip.innerText = v
-
-    // 🔥 highlight hvis aktiv
-    if(activeVibe === v){
-      chip.classList.add("active")
+    if(matchedFriends.length > 0){
+      friendsEl.innerText =
+        "🔥 " + matchedFriends.map(f => f.name).join(", ")
     }
 
- chip.onclick = () => {
-  if(activeVibe === v){
-    activeVibe = null
-    list = data[currentType]
-    index = 0
-    buildDeck()
-  } else {
-    setVibe(v)
-  }
-}
+    // VIBE (CHIPS)
+    const vibeEl = card.querySelector(".vibe")
+    vibeEl.innerHTML = ""
 
-    vibeEl.appendChild(chip)
-  })
-}
+    if(item.vibe){
+      item.vibe.forEach(v => {
+        const chip = document.createElement("span")
+        chip.className = "chip"
+        chip.innerText = v
 
+        if(activeVibe === v){
+          chip.classList.add("active")
+        }
+
+        chip.onclick = (e)=>{
+          e.stopPropagation()
+          setVibe(v)
+        }
+
+        vibeEl.appendChild(chip)
+      })
+    }
+
+    // TAP
     let tapStartX = 0
     let tapStartTime = 0
 
@@ -711,14 +582,14 @@ if(item.vibe){
       tapStartTime = Date.now()
     })
 
-  card.addEventListener("touchend", e=>{
+    card.addEventListener("touchend", e=>{
 
-  if(e.target.closest(".buttons") || e.target.closest(".chip")) return
+      if(e.target.closest(".buttons") || e.target.closest(".chip")) return
 
-  let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
-  let time = Date.now() - tapStartTime
+      let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
+      let time = Date.now() - tapStartTime
 
-  if(diffX < 15 && time < 250){
+      if(diffX < 15 && time < 250){
 
         const rect = card.getBoundingClientRect()
         const x = e.changedTouches[0].clientX - rect.left
@@ -942,7 +813,7 @@ buildDeck()
 
 function goHome(){
 
-  document.querySelectorAll(".friend-overlay").forEach(el => el.remove())
+  
 
   deck.innerHTML = ""
   deck.style.display = "none"
@@ -990,55 +861,6 @@ function book(item){
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
-}
-
-function openFriendProfile(friendName){
-
-  // 🔥 Fjerner evt gamle overlays
-  document.querySelectorAll(".friend-overlay").forEach(el => el.remove())
-
-  const friend = friends.find(f => f.name === friendName)
-  if(!friend) return
-
-  // overlay
-  const overlay = document.createElement("div")
-  overlay.className = "friend-overlay"
-
-  overlay.style.position = "fixed"
-  overlay.style.top = 0
-  overlay.style.left = 0
-  overlay.style.right = 0
-  overlay.style.bottom = 0
-  overlay.style.background = "rgba(0,0,0,0.95)"
-  overlay.style.zIndex = 9999
-  overlay.style.padding = "30px"
-  overlay.style.overflowY = "auto"
-
-  // content box (viktig!)
-  const content = document.createElement("div")
-
-  content.innerHTML = `
-    <h2 style="margin-bottom:20px">${friend.name}</h2>
-    ${friend.likes.map(l => `
-      <div style="margin-bottom:12px;font-size:18px">
-        ${l.name} ⭐ ${l.rating}
-      </div>
-    `).join("")}
-    <div style="margin-top:30px;font-size:14px;opacity:.6">
-      Trykk utenfor for å lukke
-    </div>
-  `
-
-  overlay.appendChild(content)
-
-  // 🔥 RIKTIG LUKKING (fikser bug)
-  overlay.addEventListener("click", (e)=>{
-    if(e.target === overlay){
-      overlay.remove()
-    }
-  })
-
-  document.body.appendChild(overlay)
 }
 
 function loadPlace(name){
