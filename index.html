@@ -470,7 +470,7 @@ function createCard(item,isNext){
     if(btn.classList.contains("btn-like")) likeFromButton()
     if(btn.classList.contains("btn-dislike")) dislikeFromButton()
     if(btn.classList.contains("btn-map")) navigate(name)
-    if(btn.classList.contains("btn-book")) book(name)
+    if(btn.classList.contains("btn-book")) book(item)
   })
 
   enableSwipe(card)
@@ -776,20 +776,29 @@ document.body.removeChild(a)
 
 }
 
-function book(name){
+function book(item){
 
-const query = encodeURIComponent(name + " booking")
-const url = "https://www.google.com/search?q=" + query
+  let url
 
-const a = document.createElement("a")
-a.href = url
-a.target = "_blank"
-a.rel = "noopener noreferrer"
+  // 1. Har egen booking-link
+  if(item.booking){
+    url = item.booking
+  } 
+  // 2. Fallback → Google
+  else {
+    const query = encodeURIComponent(item.name + " Oslo booking")
+    url = "https://www.google.com/search?q=" + query
+  }
 
-document.body.appendChild(a)
-a.click()
-document.body.removeChild(a)
+  // 🔥 beholder din mobile-safe open
+  const a = document.createElement("a")
+  a.href = url
+  a.target = "_blank"
+  a.rel = "noopener noreferrer"
 
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
 
 function loadPlace(name){
