@@ -673,7 +673,7 @@ function createCard(item,isNext){
   friendsEl.innerText =
     "🔥 " +
     matchedFriends
-      .map(f => "⭐ " + f.rating + " " + f.name)
+      .map(f => f.name + " (" + f.rating + ")")
       .join(" • ")
 
 }
