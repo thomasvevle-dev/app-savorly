@@ -311,81 +311,50 @@ let friends = [
 
   {
     name: "Jonas Berg",
-    likes: ["Himkok","Dinner","Kverneriet","Südøst","Savage","Fuglen"]
+    likes: [
+      { name: "Himkok", rating: 4.8 },
+      { name: "Dinner", rating: 4.5 },
+      { name: "Kverneriet", rating: 4.7 },
+      { name: "Südøst", rating: 4.4 }
+    ]
   },
 
   {
     name: "Emma Larsen",
-    likes: ["Savage","Bettola","Svanen","Le Benjamin","Vintage Kitchen"]
+    likes: [
+      { name: "Savage", rating: 4.6 },
+      { name: "Bettola", rating: 4.3 },
+      { name: "Svanen", rating: 4.7 }
+    ]
   },
 
   {
     name: "Lucas Nilsen",
-    likes: ["Himkok","Alex Sushi","Fuglen","Chair","F6"]
+    likes: [
+      { name: "Himkok", rating: 4.9 },
+      { name: "Alex Sushi", rating: 4.6 },
+      { name: "F6", rating: 4.4 }
+    ]
   },
 
   {
     name: "Sofie Hansen",
-    likes: ["Maaemo","Kontrast","Statholdergaarden","Ylajali"]
+    likes: [
+      { name: "Maaemo", rating: 5.0 },
+      { name: "Kontrast", rating: 4.8 }
+    ]
   },
 
   {
     name: "Oliver Johansen",
-    likes: ["Kverneriet","Tilt Bar","Angst Bar","Bass Oslo"]
-  },
-
-  {
-    name: "Mathilde Olsen",
-    likes: ["Dinner","Nodee","Südøst","Andre til Høyre","Libertine Frogner"]
-  },
-
-  {
-    name: "Henrik Kristiansen",
-    likes: ["Hot Shop","Vaaghals","Arakataka","Eff Eff"]
-  },
-
-  {
-    name: "Ingrid Solberg",
-    likes: ["Le Benjamin","Kolonihagen","Fuglen Vinbar","Territoriet"]
-  },
-
-  {
-    name: "Markus Eriksen",
-    likes: ["Kverneriet","Tilt Bar","Posthallen Drinkhub","F6"]
-  },
-
-  {
-    name: "Amalie Nygård",
-    likes: ["Maaemo","Smia Galleri","Stallen","Palmen"]
-  },
-
-  {
-    name: "Sebastian Halvorsen",
-    likes: ["Dinner","Südøst","Nodee","Pier 42"]
-  },
-
-  {
-    name: "Julie Andreassen",
-    likes: ["Vintage Kitchen","Vin Vin","Nektar Vinbar","Esaias Mat&Vinbar"]
-  },
-
-  {
-    name: "Thomas Gundersen",
-    likes: ["Himkok","Bettola","Svanen","Torggata Botaniske"]
-  },
-
-  {
-    name: "Kristine Dahl",
-    likes: ["Kontrast","Ylajali","Park 29","Hos Thea"]
-  },
-
-  {
-    name: "Eirik Lund",
-    likes: ["Der Peppern Gror","Kverneriet","Tilt Bar","Angst Bar"]
+    likes: [
+      { name: "Kverneriet", rating: 4.6 },
+      { name: "Tilt Bar", rating: 4.3 },
+      { name: "Angst Bar", rating: 4.2 }
+    ]
   }
 
 ]
-
 let activeVibe = null
 
 function setVibe(v){
