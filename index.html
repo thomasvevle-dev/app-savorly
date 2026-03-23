@@ -258,6 +258,14 @@ z-index:10;
 position:relative;
 touch-action: manipulation;
 }
+
+.friends{
+  font-size:14px;
+  margin-top:6px;
+  color:#7dd3fc;
+  text-shadow:0 2px 6px rgba(0,0,0,0.8);
+}
+
 </style>
 </head>
 
@@ -299,6 +307,12 @@ let currentType=""
 let placesService
 let imageCache={}
 
+let friends = [
+  { name: "Jonas", likes: ["Himkok","Dinner","Kverneriet"] },
+  { name: "Emma", likes: ["Südøst","Bettola","Savage"] },
+  { name: "Lucas", likes: ["Himkok","Alex Sushi","Fuglen"] }
+]
+
 let activeVibe = null
 
 function setVibe(v){
@@ -339,6 +353,10 @@ function shuffle(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
+function getFriendsWhoLike(placeName){
+  return friends.filter(f => f.likes.includes(placeName))
+}
+  
 function openCategory(type){
 
  
@@ -437,10 +455,11 @@ function createCard(item,isNext){
     <div class="topRight">↺</div>
 
     <div class="info">
-      <div class="name">${name}</div>
-      <div class="rating"></div>
-      <div class="vibe"></div>
-    </div>
+  <div class="name">${name}</div>
+  <div class="rating"></div>
+  <div class="vibe"></div>
+  <div class="friends"></div>
+  </div>
 
     <div class="buttons">
       <div class="btn-dislike">✕</div>
@@ -487,6 +506,15 @@ function createCard(item,isNext){
 
     card.querySelector(".name").innerText = place.name
     card.querySelector(".rating").innerText = "⭐ " + place.rating
+    const friendsEl = card.querySelector(".friends")
+
+const matchedFriends = getFriendsWhoLike(place.name || name)
+
+if(matchedFriends.length > 0){
+  friendsEl.innerText =
+    "🔥 " + matchedFriends.length + " venner liker dette: " +
+    matchedFriends.map(f => f.name).join(", ")
+}
 
     // 🔥 HER SKAL CHIPS LAGES
    const vibeEl = card.querySelector(".vibe")
@@ -713,6 +741,8 @@ card.style.transform="translateX(0)"
 function like(){
 
 let name = list[index].name
+
+console.log("LIKE:", list[index]?.name)  
 
 if(!favorites[currentType].includes(name)){
 favorites[currentType].push(name)
