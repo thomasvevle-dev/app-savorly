@@ -655,10 +655,24 @@ function createCard(item,isNext){
 const matchedFriends = getFriendsWhoLike(place.name || name)
 
 if(matchedFriends.length > 0){
-friendsEl.innerText =
-  "🔥 " +
-  matchedFriends.map(f => f.name + " (" + f.rating + ")").join(", ")
-}
+friendsEl.innerHTML = "🔥 "
+
+matchedFriends.forEach((f, i) => {
+
+  const span = document.createElement("span")
+  span.innerText = "⭐ " + f.rating + " " + f.name
+  span.style.marginRight = "8px"
+  span.style.cursor = "pointer"
+
+  // 🔥 KLIKK
+  span.onclick = (e)=>{
+    e.stopPropagation()
+    openFriendProfile(f.name)
+  }
+
+  friendsEl.appendChild(span)
+
+})
 
     // 🔥 HER SKAL CHIPS LAGES
    const vibeEl = card.querySelector(".vibe")
@@ -975,6 +989,45 @@ function book(item){
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
+}
+
+function openFriendProfile(friendName){
+
+  const friend = friends.find(f => f.name === friendName)
+  if(!friend) return
+
+  // container
+  const overlay = document.createElement("div")
+  overlay.style.position = "fixed"
+  overlay.style.top = 0
+  overlay.style.left = 0
+  overlay.style.right = 0
+  overlay.style.bottom = 0
+  overlay.style.background = "rgba(0,0,0,0.95)"
+  overlay.style.zIndex = 9999
+  overlay.style.padding = "30px"
+  overlay.style.overflowY = "auto"
+
+  // innhold
+  let html = `<h2 style="margin-bottom:20px">${friend.name}</h2>`
+
+  friend.likes.forEach(like=>{
+    html += `
+      <div style="margin-bottom:12px;font-size:18px">
+        ${like.name} ⭐ ${like.rating}
+      </div>
+    `
+  })
+
+  html += `<div style="margin-top:30px;font-size:14px;opacity:.6">Trykk hvor som helst for å lukke</div>`
+
+  overlay.innerHTML = html
+
+  overlay.onclick = ()=>{
+    overlay.remove()
+  }
+
+  document.body.appendChild(overlay)
 }
 
 function loadPlace(name){
