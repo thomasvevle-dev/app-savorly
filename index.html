@@ -789,7 +789,9 @@ function book(item){
     const query = encodeURIComponent(item.name + " Oslo booking")
     url = "https://www.google.com/search?q=" + query
   }
-
+  
+  console.log("BOOK:", item.name)
+  
   // 🔥 beholder din mobile-safe open
   const a = document.createElement("a")
   a.href = url
