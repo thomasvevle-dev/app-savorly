@@ -523,9 +523,8 @@ function createCard(item,isNext){
 const matchedFriends = getFriendsWhoLike(place.name || name)
 
 if(matchedFriends.length > 0){
-  friendsEl.innerText =
-    "🔥 " + matchedFriends.length + " venner liker dette: " +
-    matchedFriends.map(f => f.name).join(", ")
+ friendsEl.innerText =
+  "🔥 " + matchedFriends.length + " venner liker dette"
 }
 
     // 🔥 HER SKAL CHIPS LAGES
