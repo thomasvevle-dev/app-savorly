@@ -993,11 +993,16 @@ function book(item){
 
 function openFriendProfile(friendName){
 
+  // 🔥 Fjerner evt gamle overlays
+  document.querySelectorAll(".friend-overlay").forEach(el => el.remove())
+
   const friend = friends.find(f => f.name === friendName)
   if(!friend) return
 
-  // container
+  // overlay
   const overlay = document.createElement("div")
+  overlay.className = "friend-overlay"
+
   overlay.style.position = "fixed"
   overlay.style.top = 0
   overlay.style.left = 0
@@ -1008,24 +1013,29 @@ function openFriendProfile(friendName){
   overlay.style.padding = "30px"
   overlay.style.overflowY = "auto"
 
-  // innhold
-  let html = `<h2 style="margin-bottom:20px">${friend.name}</h2>`
+  // content box (viktig!)
+  const content = document.createElement("div")
 
-  friend.likes.forEach(like=>{
-    html += `
+  content.innerHTML = `
+    <h2 style="margin-bottom:20px">${friend.name}</h2>
+    ${friend.likes.map(l => `
       <div style="margin-bottom:12px;font-size:18px">
-        ${like.name} ⭐ ${like.rating}
+        ${l.name} ⭐ ${l.rating}
       </div>
-    `
+    `).join("")}
+    <div style="margin-top:30px;font-size:14px;opacity:.6">
+      Trykk utenfor for å lukke
+    </div>
+  `
+
+  overlay.appendChild(content)
+
+  // 🔥 RIKTIG LUKKING (fikser bug)
+  overlay.addEventListener("click", (e)=>{
+    if(e.target === overlay){
+      overlay.remove()
+    }
   })
-
-  html += `<div style="margin-top:30px;font-size:14px;opacity:.6">Trykk hvor som helst for å lukke</div>`
-
-  overlay.innerHTML = html
-
-  overlay.onclick = ()=>{
-    overlay.remove()
-  }
 
   document.body.appendChild(overlay)
 }
