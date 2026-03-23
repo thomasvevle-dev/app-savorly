@@ -37,7 +37,6 @@
     { "name": "Apostrophe", "vibe": ["date","sosial"] },
     { "name": "The Little Pickle", "vibe": ["chill"] },
     { "name": "Seven", "vibe": ["sosial"] },
-    { "name": "Sjømagasinet", "vibe": ["romantisk","date"], "booking": "https://www.sjomagasinet.no/bestill-bord?gad_source=1&gad_campaignid=22833536284&gclid=CjwKCAjwyYPOBhBxEiwAgpT8PxzkBciARkQFoEfp6U9Sp3DGFYngvGBChZ0a8qTBoyN7jJOwyr_I-xoCVhQQAvD_BwE" },
     { "name": "Lorry", "vibe": ["sosial"] },
     { "name": "Palmen", "vibe": ["romantisk"] },
     { "name": "Eik Annen Etage", "vibe": ["date"] },
