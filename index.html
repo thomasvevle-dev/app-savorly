@@ -308,21 +308,137 @@ let placesService
 let imageCache={}
 
 let friends = [
-  { name: "Jonas", likes: ["Himkok","Dinner","Kverneriet","Südøst","F6"] },
-  { name: "Emma", likes: ["Savage","Bettola","Svanen","Le Benjamin","Nektar Vinbar"] },
-  { name: "Lucas", likes: ["Himkok","Alex Sushi","Fuglen","Territoriet","Chair"] },
-  { name: "Sofie", likes: ["Maaemo","Kontrast","Statholdergaarden","Eik Annen Etage"] },
-  { name: "Oliver", likes: ["Kverneriet","Tilt Bar","Angst Bar","Posthallen Drinkhub"] },
-  { name: "Noah", likes: ["Dinner","Nodee","Ling Ling","Südøst"] },
-  { name: "Ella", likes: ["Ylajali","Hos Thea","Smia Galleri","Stallen"] },
-  { name: "William", likes: ["Arakataka","Galt","Fyr Bistronomi","Savage"] },
-  { name: "Amalie", likes: ["Libertine Frogner","Eff Eff","Radegast","Vin Vin"] },
-  { name: "Herman", likes: ["Territoriet","Nektar Vinbar","Vintage Kitchen"] },
-  { name: "Ingrid", likes: ["Svanen","Bettola","F6","Chair"] },
-  { name: "Magnus", likes: ["Himkok","Angst Bar","Tilt Bar","Pier 42"] },
-  { name: "Julie", likes: ["Le Benjamin","Kolonihagen","Grand Café"] },
-  { name: "Filip", likes: ["Dinner","Kverneriet","Südøst","Seven"] },
-  { name: "Thea", likes: ["Fuglen","Torggata Botaniske","Ostara"] }
+  {
+    name: "Jonas Berg",
+    likes: [
+      { name: "Himkok", rating: 4.8 },
+      { name: "Dinner", rating: 4.5 },
+      { name: "Kverneriet", rating: 4.7 },
+      { name: "Südøst", rating: 4.3 }
+    ]
+  },
+  {
+    name: "Emma Larsen",
+    likes: [
+      { name: "Savage", rating: 4.6 },
+      { name: "Bettola", rating: 4.4 },
+      { name: "Svanen", rating: 4.7 },
+      { name: "Le Benjamin", rating: 4.8 }
+    ]
+  },
+  {
+    name: "Lucas Nilsen",
+    likes: [
+      { name: "Himkok", rating: 4.9 },
+      { name: "Alex Sushi", rating: 4.6 },
+      { name: "Fuglen", rating: 4.3 },
+      { name: "Chair", rating: 4.2 }
+    ]
+  },
+  {
+    name: "Sofie Hansen",
+    likes: [
+      { name: "Maaemo", rating: 5.0 },
+      { name: "Kontrast", rating: 4.8 },
+      { name: "Statholdergaarden", rating: 4.7 }
+    ]
+  },
+  {
+    name: "Oliver Johansen",
+    likes: [
+      { name: "Kverneriet", rating: 4.6 },
+      { name: "Tilt Bar", rating: 4.3 },
+      { name: "Angst Bar", rating: 4.2 },
+      { name: "Posthallen Drinkhub", rating: 4.4 }
+    ]
+  },
+  {
+    name: "Noah Andersen",
+    likes: [
+      { name: "Dinner", rating: 4.5 },
+      { name: "Nodee", rating: 4.4 },
+      { name: "Ling Ling", rating: 4.3 },
+      { name: "Südøst", rating: 4.2 }
+    ]
+  },
+  {
+    name: "Ella Kristiansen",
+    likes: [
+      { name: "Ylajali", rating: 4.7 },
+      { name: "Hos Thea", rating: 4.8 },
+      { name: "Smia Galleri", rating: 4.6 },
+      { name: "Stallen", rating: 4.5 }
+    ]
+  },
+  {
+    name: "William Eriksen",
+    likes: [
+      { name: "Arakataka", rating: 4.7 },
+      { name: "Galt", rating: 4.6 },
+      { name: "Fyr Bistronomi", rating: 4.5 },
+      { name: "Savage", rating: 4.4 }
+    ]
+  },
+  {
+    name: "Amalie Solberg",
+    likes: [
+      { name: "Libertine Frogner", rating: 4.5 },
+      { name: "Eff Eff", rating: 4.6 },
+      { name: "Radegast", rating: 4.4 },
+      { name: "Vin Vin", rating: 4.3 }
+    ]
+  },
+  {
+    name: "Herman Dahl",
+    likes: [
+      { name: "Territoriet", rating: 4.6 },
+      { name: "Nektar Vinbar", rating: 4.7 },
+      { name: "Vintage Kitchen", rating: 4.5 }
+    ]
+  },
+  {
+    name: "Ingrid Moen",
+    likes: [
+      { name: "Svanen", rating: 4.8 },
+      { name: "Bettola", rating: 4.4 },
+      { name: "F6", rating: 4.3 },
+      { name: "Chair", rating: 4.2 }
+    ]
+  },
+  {
+    name: "Magnus Lie",
+    likes: [
+      { name: "Himkok", rating: 4.9 },
+      { name: "Angst Bar", rating: 4.3 },
+      { name: "Tilt Bar", rating: 4.2 },
+      { name: "Pier 42", rating: 4.1 }
+    ]
+  },
+  {
+    name: "Julie Bergersen",
+    likes: [
+      { name: "Le Benjamin", rating: 4.8 },
+      { name: "Kolonihagen", rating: 4.5 },
+      { name: "Grand Café", rating: 4.4 }
+    ]
+  },
+  {
+    name: "Filip Strand",
+    likes: [
+      { name: "Dinner", rating: 4.6 },
+      { name: "Kverneriet", rating: 4.7 },
+      { name: "Südøst", rating: 4.3 },
+      { name: "Seven", rating: 4.2 }
+    ]
+  },
+  {
+    name: "Thea Lund",
+    likes: [
+      { name: "Fuglen", rating: 4.4 },
+      { name: "Torggata Botaniske", rating: 4.3 },
+      { name: "Ostara", rating: 4.2 }
+    ]
+  }
 ]
 
 let activeVibe = null
@@ -366,7 +482,23 @@ return arr.sort(()=>Math.random()-0.5)
 }
 
 function getFriendsWhoLike(placeName){
-  return friends.filter(f => f.likes.includes(placeName))
+
+  let result = []
+
+  friends.forEach(friend => {
+
+    const match = friend.likes.find(l => l.name === placeName)
+
+    if(match){
+      result.push({
+        name: friend.name,
+        rating: match.rating
+      })
+    }
+
+  })
+
+  return result
 }
   
 function openCategory(type){
@@ -523,8 +655,9 @@ function createCard(item,isNext){
 const matchedFriends = getFriendsWhoLike(place.name || name)
 
 if(matchedFriends.length > 0){
- friendsEl.innerText =
-  "🔥 " + matchedFriends.length + " venner liker dette"
+friendsEl.innerText =
+  "🔥 " +
+  matchedFriends.map(f => f.name + " (" + f.rating + ")").join(", ")
 }
 
     // 🔥 HER SKAL CHIPS LAGES
