@@ -373,24 +373,6 @@ return arr.sort(()=>Math.random()-0.5)
 function getFriendsWhoLike(placeName){
   return friends.filter(f => f.likes.includes(placeName))
 }
-
-  let result = []
-
-  friends.forEach(friend => {
-
-    const match = friend.likes.find(l => l.name === placeName)
-
-    if(match){
-      result.push({
-        name: friend.name,
-        rating: match.rating
-      })
-    }
-
-  })
-
-  return result
-}
   
 function openCategory(type){
 
@@ -631,31 +613,6 @@ box.appendChild(el)
 
 
 /* FAVORITES */
-
-function renderFavorites(){
-
-["restaurants","winebars","cocktailbars"].forEach(type=>{
-
-const box=document.getElementById("fav-"+type)
-box.innerHTML=""
-
-favorites[type].forEach(name=>{
-
-const el=document.createElement("div")
-el.className="favoriteItem"
-el.innerText=name
-
-el.onclick=()=>openFavorite(type,name)
-
-enableFavSwipe(el,type,name)
-
-box.appendChild(el)
-
-})
-
-})
-
-}
 
 function toggleFav(type){
 document.getElementById("fav-"+type).classList.toggle("hidden")
