@@ -946,6 +946,7 @@ deck.innerHTML=""
 deck.style.display="none"
 deck.style.pointerEvents="none"
 document.getElementById("home").style.display="flex"
+document.querySelectorAll(".friend-overlay").forEach(el => el.remove())  
 }
 
 function navigate(name){
