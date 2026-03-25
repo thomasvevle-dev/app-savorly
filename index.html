@@ -481,11 +481,17 @@ let friends = [
 let activeVibe = null
 
 function setVibe(v){
-  activeVibe = v
 
-  list = data[currentType].filter(item =>
-    item.vibe && item.vibe.includes(v)
-  )
+  // 🔥 hvis samme vibe → reset
+  if(activeVibe === v){
+    activeVibe = null
+    list = data[currentType]
+  } else {
+    activeVibe = v
+    list = data[currentType].filter(item =>
+      item.vibe && item.vibe.includes(v)
+    )
+  }
 
   index = 0
   buildDeck()
