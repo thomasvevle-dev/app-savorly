@@ -960,16 +960,18 @@ document.body.removeChild(a)
 
 }
 
-function book(item){
+function book(name){
 
   let url
 
-  if(item && item.booking){
-    url = item.booking
-  } else {
-    const query = encodeURIComponent((item?.name || "") + " Oslo booking")
-    url = "https://www.google.com/search?q=" + query
+  if(typeof name === "object"){
+    name = name.name
   }
+
+  const query = encodeURIComponent(name + " Oslo booking")
+  url = "https://www.google.com/search?q=" + query
+
+  console.log("BOOK:", name)
 
   const a = document.createElement("a")
   a.href = url
@@ -979,15 +981,6 @@ function book(item){
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
-}
-
-function loadPlace(name){
-
-return new Promise(resolve=>{
-
-if(!name){
-  resolve(fallback("restaurant"))
-  return
 }
 
 // failsafe timeout (hindrer freeze)
