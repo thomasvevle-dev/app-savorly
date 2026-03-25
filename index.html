@@ -642,7 +642,7 @@ function loadPlace(name){
 
         let photos = []
 
-        if(status === google.maps.places.PlacesServiceStatus.OK && place && place.photos){
+        if(place && place.photos){
           for(let i=0;i<Math.min(3,place.photos.length);i++){
             photos.push(place.photos[i].getUrl({maxWidth:1200}))
           }
@@ -652,15 +652,11 @@ function loadPlace(name){
           photos.push("https://source.unsplash.com/featured/?restaurant")
         }
 
-        let result = {
-          name: (place && place.name) || name,
-          rating: (place && place.rating) || "",
-          photos: photos
-        }
-
-        imageCache[name] = result
-
-        resolve(result)
+        resolve({
+          name: place?.name || name,
+          rating: place?.rating || "",
+          photos
+        })
       })
     })
   })
