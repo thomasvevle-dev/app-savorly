@@ -610,6 +610,62 @@ loadPlace(next.name)
 
 }
 
+function loadPlace(name){
+  return new Promise(resolve => {
+
+    if(imageCache[name]){
+      resolve(imageCache[name])
+      return
+    }
+
+    if(!placesService){
+      setTimeout(()=>{
+        loadPlace(name).then(resolve)
+      },300)
+      return
+    }
+
+    placesService.findPlaceFromQuery({
+      query: name + " Oslo",
+      fields: ["place_id"]
+    }, (results, status) => {
+
+      if(status !== google.maps.places.PlacesServiceStatus.OK || !results || !results[0]){
+        resolve(fallback(name))
+        return
+      }
+
+      placesService.getDetails({
+        placeId: results[0].place_id,
+        fields: ["name","rating","photos"]
+      }, (place, status) => {
+
+        let photos = []
+
+        if(status === google.maps.places.PlacesServiceStatus.OK && place && place.photos){
+          for(let i=0;i<Math.min(3,place.photos.length);i++){
+            photos.push(place.photos[i].getUrl({maxWidth:1200}))
+          }
+        }
+
+        while(photos.length < 3){
+          photos.push("https://source.unsplash.com/featured/?restaurant")
+        }
+
+        let result = {
+          name: (place && place.name) || name,
+          rating: (place && place.rating) || "",
+          photos: photos
+        }
+
+        imageCache[name] = result
+
+        resolve(result)
+      })
+    })
+  })
+}
+  
 function createCard(item,isNext){
 
   if(!item || !item.name) return
@@ -981,26 +1037,7 @@ function book(item){
   document.body.removeChild(a)
 }
 
-// failsafe timeout (hindrer freeze)
-let resolved = false
-
-function safeResolve(data){
-  if(!resolved){
-    resolved = true
-    resolve(data)
-  }
-}
-
-let timeout = setTimeout(()=>{
-  safeResolve(fallback(name))
-},1500)
-
-if(imageCache[name]){
-  clearTimeout(timeout)
-  resolve(imageCache[name])
-  return
-}
-
+  
 if(!placesService){
   setTimeout(()=>{
     loadPlace(name).then(resolve)
