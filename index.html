@@ -602,7 +602,9 @@ return arr.sort(()=>Math.random()-0.5)
 }
 
 function getFriendsWhoLike(placeName){
-  return friends.filter(f => f.likes.includes(placeName))
+  return friends.filter(friend =>
+    friend.reviews && friend.reviews[placeName]
+  )
 }
   
 function openCategory(type){
@@ -718,11 +720,12 @@ function createCard(item,isNext){
     undo()
   }
  card.addEventListener("click", (e)=>{
-  if(
-    e.target.closest(".buttons") ||
-    e.target.closest(".chip") ||
-    e.target.closest(".friends")
-  ) return
+ if(
+  e.target.closest(".buttons") ||
+  e.target.closest(".chip") ||
+  e.target.closest(".friends") ||
+  e.target.closest(".reviewBox")
+) return
 
   const box = card.querySelector(".reviewBox")
   if(box){
