@@ -360,13 +360,13 @@ touch-action: manipulation;
 <div style="margin-top:20px;width:85%;max-width:420px">
 
 <div class="cat" onclick="toggleFav('restaurants')">Favoritt restaurant</div>
-<div id="fav-restaurants" class="hidden"></div>
+<div id="fav-restaurants" style="display:none"></div>
 
 <div class="cat" onclick="toggleFav('winebars')">Favoritt vinbar</div>
-<div id="fav-winebars" class="hidden"></div>
+<div id="fav-winebars" style="display:none"></div>
 
 <div class="cat" onclick="toggleFav('cocktailbars')">Favoritt cocktailbar</div>
-<div id="fav-cocktailbars" class="hidden"></div>
+<div id="fav-cocktailbars" style="display:none"></div>
 
 </div>
 
@@ -867,16 +867,16 @@ function toggleFav(type){
 
   const el = document.getElementById("fav-"+type)
 
-  const isHidden = el.classList.contains("hidden")
+  const isOpen = el.style.display === "block"
 
-  // lukk alle først
-  document.getElementById("fav-restaurants").classList.add("hidden")
-  document.getElementById("fav-winebars").classList.add("hidden")
-  document.getElementById("fav-cocktailbars").classList.add("hidden")
+  // lukk alle
+  document.getElementById("fav-restaurants").style.display = "none"
+  document.getElementById("fav-winebars").style.display = "none"
+  document.getElementById("fav-cocktailbars").style.display = "none"
 
-  // åpne valgt hvis den var lukket
-  if(isHidden){
-    el.classList.remove("hidden")
+  // åpne hvis den var lukket
+  if(!isOpen){
+    el.style.display = "block"
   }
 
 }
