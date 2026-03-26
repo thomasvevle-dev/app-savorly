@@ -572,20 +572,25 @@ function createCard(item,isNext){
 
     // FRIENDS (REN)
     const friendsEl = card.querySelector(".friends")
-    const matchedFriends = getFriendsWhoLike(place.name || name)
 
-   if(matchedFriends.length > 0){
+const matchedFriends = getFriendsWhoLike(place.name || name)
+
+if(matchedFriends.length > 0){
+
+  // 👇 riktig tekst
   friendsEl.innerText =
     "🔥 " + matchedFriends.length + " venner liker dette"
 
+  // 👇 klikk
   friendsEl.style.cursor = "pointer"
 
   friendsEl.onclick = (e)=>{
-  e.stopPropagation()
+    e.stopPropagation()
 
-  alert(
-    matchedFriends.map(f => f.name).join("\n")
-  )
+    alert(
+      matchedFriends.map(f => f.name).join("\n")
+    )
+  }
 }
 
     // VIBE (CHIPS)
