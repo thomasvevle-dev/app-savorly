@@ -762,7 +762,7 @@ card.addEventListener("touchstart", e=>{
     card.querySelector(".rating").innerText = "⭐ " + place.rating
 
     // FRIENDS (REN)
-  const friendsEl = card.querySelector(".friends")
+const friendsEl = card.querySelector(".friends")
 
 const matchedFriends = getFriendsWhoLike(place.name || name)
 
@@ -788,9 +788,9 @@ if(matchedFriends.length > 0){
 
 }
 
-    // VIBE (CHIPS)
-    const vibeEl = card.querySelector(".vibe")
-    vibeEl.innerHTML = ""
+// VIBE (CHIPS)
+const vibeEl = card.querySelector(".vibe")
+vibeEl.innerHTML = ""
 
     if(item.vibe){
       item.vibe.forEach(v => {
