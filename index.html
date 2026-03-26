@@ -512,10 +512,16 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 const deck=document.getElementById("deck")
 
 async function loadData(){
-const res=await fetch("data/places.json")
-data=await res.json()
-renderFavorites()
+  const res=await fetch("data/places.json")
+  data=await res.json()
+
+  renderFavorites()
+
+  document.getElementById("fav-restaurants").classList.add("hidden")
+  document.getElementById("fav-winebars").classList.add("hidden")
+  document.getElementById("fav-cocktailbars").classList.add("hidden")
 }
+  
 loadData()
 
 function initMap(){
@@ -857,9 +863,22 @@ box.appendChild(el)
 
 
 /* FAVORITES */
-
 function toggleFav(type){
-document.getElementById("fav-"+type).classList.toggle("hidden")
+
+  const el = document.getElementById("fav-"+type)
+
+  const isHidden = el.classList.contains("hidden")
+
+  // lukk alle først
+  document.getElementById("fav-restaurants").classList.add("hidden")
+  document.getElementById("fav-winebars").classList.add("hidden")
+  document.getElementById("fav-cocktailbars").classList.add("hidden")
+
+  // åpne valgt hvis den var lukket
+  if(isHidden){
+    el.classList.remove("hidden")
+  }
+
 }
 
 function enableFavSwipe(el,type,name){
