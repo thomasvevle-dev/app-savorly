@@ -296,6 +296,48 @@ touch-action: manipulation;
   display:none;
 }
 
+ .sheet{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  height:100%;
+  background:rgba(0,0,0,0.4);
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  z-index:100;
+}
+
+.sheetContent{
+  width:100%;
+  max-width:500px;
+  background:#111;
+  border-top-left-radius:24px;
+  border-top-right-radius:24px;
+  padding:20px;
+  animation:slideUp .25s ease;
+}
+
+@keyframes slideUp{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+
+.sheetItem{
+  padding:14px;
+  border-bottom:1px solid #222;
+  font-size:16px;
+}
+
+.sheetHandle{
+  width:40px;
+  height:4px;
+  background:#555;
+  border-radius:10px;
+  margin:0 auto 12px;
+} 
+
 
 </style>
 </head>
@@ -641,10 +683,7 @@ if(matchedFriends.length > 0){
 
   friendsEl.onclick = (e)=>{
     e.stopPropagation()
-
-    alert(
-      matchedFriends.map(f => f.name).join("\n")
-    )
+    openFriendsSheet(matchedFriends)
   }
 
 }
@@ -730,6 +769,38 @@ function openFriendsModal(friends){
     modal.classList.add("hidden")
   }
 }
+
+function openFriendsSheet(friends){
+
+  const sheet = document.getElementById("friendsSheet")
+  const content = document.getElementById("sheetContent")
+
+  content.innerHTML = ""
+
+  // handle (den lille streken)
+  const handle = document.createElement("div")
+  handle.className = "sheetHandle"
+  content.appendChild(handle)
+
+  friends.forEach(f => {
+    const div = document.createElement("div")
+    div.className = "sheetItem"
+    div.innerText = f.name
+    content.appendChild(div)
+  })
+
+  sheet.classList.remove("hidden")
+
+  // lukke ved trykk utenfor
+  sheet.onclick = () => {
+    sheet.classList.add("hidden")
+  }
+
+  // ikke lukke når du trykker inni
+  content.onclick = (e)=>{
+    e.stopPropagation()
+  }
+}  
   
 /* FAVORITES */
 
@@ -1069,8 +1140,8 @@ if ("serviceWorker" in navigator) {
 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap">
 </script>
 
-<div id="friendsModal" class="modal hidden">
-  <div class="modalContent" id="modalContent"></div>
+<div id="friendsSheet" class="sheet hidden">
+  <div class="sheetContent" id="sheetContent"></div>
 </div>
   
 </body>
