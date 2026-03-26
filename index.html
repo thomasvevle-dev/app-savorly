@@ -95,7 +95,7 @@ overflow:hidden;
 background:black;
 transition: transform .25s ease-out;
 will-change: transform;
-transform: translateZ(0);
+pointer-events:none;
 }
 
 .card.next{
@@ -296,18 +296,17 @@ touch-action: manipulation;
   display:none;
 }
 
- .sheet{
+.sheet{
   position:fixed;
-  top:0;             
+  top:0;
   left:0;
   right:0;
   bottom:0;
-  height:100%;
-  background:rgba(0,0,0,0.4);
+  background:rgba(0,0,0,0.5);
   display:flex;
   justify-content:center;
   align-items:flex-end;
-  z-index:9999;     
+  z-index:999999; /*
 }
 
 .sheetContent{
@@ -656,7 +655,9 @@ function createCard(item,isNext){
   })
 
   enableSwipe(card)
-
+card.addEventListener("touchstart", ()=>{
+  closeFriendsSheet()
+})
   loadPlace(name).then(place=>{
 
     if(!card.isConnected) return
@@ -801,6 +802,11 @@ function openFriendsSheet(friends){
   content.onclick = (e)=>{
     e.stopPropagation()
   }
+}
+
+function closeFriendsSheet(){
+  const sheet = document.getElementById("friendsSheet")
+  sheet.classList.add("hidden")
 }  
   
 /* FAVORITES */
@@ -934,6 +940,7 @@ card.style.transform="translateX(0)"
 /* LOGIC */
 
 function like(){
+closeFriendsSheet()  
 
 let name = list[index].name
 
@@ -950,11 +957,13 @@ next()
 }
 
 function dislike(){
+closeFriendsSheet()  
 next()
 }
 
 function next(){
-
+closeFriendsSheet()
+  
 history.push(index)
 
 index++
@@ -969,7 +978,7 @@ buildDeck()
 }
 
 function undo(){
-
+closeFriendsSheet()
 if(history.length === 0) return
 
 index = history.pop()
@@ -979,7 +988,7 @@ buildDeck()
 
 
 function goHome(){
-
+closeFriendsSheet()
   deck.innerHTML = ""
   deck.style.display = "none"
 
@@ -989,7 +998,7 @@ function goHome(){
 }
 
 function navigate(name){
-
+closeFriendsSheet()
 const query = encodeURIComponent(name + " Oslo")
 const url = "https://maps.google.com/?q=" + query
 
@@ -1005,7 +1014,7 @@ document.body.removeChild(a)
 }
 
 function book(item){
-
+closeFriendsSheet()
   let url
 
   // 1. Har egen booking-link
