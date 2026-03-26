@@ -67,7 +67,9 @@ background:#111;
 border:1px solid #333;
 }
 
-.hidden{display:none}
+.hidden{
+  display:none !important;
+}
 
 /* CARD STACK */
 
@@ -306,9 +308,14 @@ touch-action: manipulation;
   display:flex;
   justify-content:center;
   align-items:flex-end;
-  z-index:999999; /*
+  z-index:9999;
+  pointer-events:auto;
 }
-
+  
+.sheet.hidden{
+  display:none;
+}
+ 
 .sheetContent{
   width:100%;
   max-width:500px;
