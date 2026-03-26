@@ -264,7 +264,38 @@ touch-action: manipulation;
   margin-top:6px;
   color:#7dd3fc;
   text-shadow:0 2px 6px rgba(0,0,0,0.8);
+
+.modal{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:100;
 }
+
+.modalContent{
+  background:#111;
+  padding:20px;
+  border-radius:20px;
+  width:85%;
+  max-width:400px;
+}
+
+.modalItem{
+  padding:12px;
+  border-bottom:1px solid #333;
+  font-size:16px;
+}
+
+.hidden{
+  display:none;
+}
+
 
 </style>
 </head>
@@ -603,9 +634,17 @@ const matchedFriends = getFriendsWhoLike(place.name || name)
 
 if(matchedFriends.length > 0){
 
-  // 👇 riktig tekst
   friendsEl.innerText =
-    "🔥 " + matchedFriends.length + " venner liker dette"
+    "❤️ " + matchedFriends.length + " venner liker dette"
+
+  friendsEl.style.cursor = "pointer"
+
+  friendsEl.onclick = (e)=>{
+    e.stopPropagation()
+    openFriendsModal(matchedFriends)
+  }
+
+}
 
   // 👇 klikk
   friendsEl.style.cursor = "pointer"
@@ -680,6 +719,27 @@ if(matchedFriends.length > 0){
   })
 
 }
+
+function openFriendsModal(friends){
+  const modal = document.getElementById("friendsModal")
+  const content = document.getElementById("modalContent")
+
+  content.innerHTML = ""
+
+  friends.forEach(f => {
+    const div = document.createElement("div")
+    div.className = "modalItem"
+    div.innerText = f.name
+    content.appendChild(div)
+  })
+
+  modal.classList.remove("hidden")
+
+  modal.onclick = () => {
+    modal.classList.add("hidden")
+  }
+}
+  
 /* FAVORITES */
 
 function renderFavorites(){
@@ -1018,5 +1078,9 @@ if ("serviceWorker" in navigator) {
 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1JPlMcLhQ&libraries=places&callback=initMap">
 </script>
 
+<div id="friendsModal" class="modal hidden">
+  <div class="modalContent" id="modalContent"></div>
+</div>
+  
 </body>
 </html>
