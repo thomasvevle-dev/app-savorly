@@ -144,7 +144,10 @@ pointer-events:none;
   pointer-events:none;
   z-index:1;
 }
-
+.card.dimmed{
+  filter:brightness(0.6);
+}
+  
 /* DOTS */
 
 .photoDots{
@@ -343,7 +346,64 @@ touch-action: manipulation;
   margin:0 auto 12px;
 } 
 
+.reviewBox{
+  position:absolute;
+  top:45%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:80%;
+  padding:18px;
+  border-radius:20px;
 
+  background:linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.6),
+    rgba(0,0,0,0.85)
+  );
+
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.2);
+
+  z-index:200;
+  text-align:left;
+}
+
+.reviewBox .name{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+.reviewBox .rating{
+  font-size:14px;
+  margin-bottom:6px;
+  opacity:.8;
+}
+
+.reviewBox .text{
+  font-size:14px;
+  line-height:1.4;
+}
+
+.reviewBox.hidden{
+  display:none;
+}
+
+.reviewBox{
+  animation:fadeIn .2s ease;
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform:translate(-50%, -40%);
+  }
+  to{
+    opacity:1;
+    transform:translate(-50%, -50%);
+  }
+}  
+  
 </style>
 </head>
 
@@ -387,109 +447,116 @@ let imageCache={}
 
 const friends = [
 
-  {
-    name: "Jonas Berg",
-    likes: ["Himkok","Dinner","Kverneriet","Südøst","Savage","Fuglen","Nodee","F6"]
-  },
+let friends = [
 
-  {
-    name: "Emma Larsen",
-    likes: ["Savage","Bettola","Svanen","Le Benjamin","Vintage Kitchen","Fuglen","Chair"]
-  },
-
-  {
-    name: "Lucas Nilsen",
-    likes: ["Himkok","Alex Sushi","Fuglen","Chair","F6","Torggata Botaniske"]
-  },
-
-  {
-    name: "Sofie Hansen",
-    likes: ["Maaemo","Kontrast","Statholdergaarden","Ylajali","Hos Thea","Park 29"]
-  },
-
-  {
-    name: "Oliver Johansen",
-    likes: ["Kverneriet","Tilt Bar","Angst Bar","Bass Oslo","Posthallen Drinkhub"]
-  },
-
-  {
-    name: "Mathilde Olsen",
-    likes: ["Dinner","Nodee","Südøst","Andre til Høyre","Libertine Frogner","Eff Eff"]
-  },
-
-  {
-    name: "Henrik Kristiansen",
-    likes: ["Hot Shop","Vaaghals","Arakataka","Eff Eff","Kolonialen"]
-  },
-
-  {
-    name: "Ingrid Solberg",
-    likes: ["Le Benjamin","Kolonihagen","Fuglen Vinbar","Territoriet","Nektar Vinbar"]
-  },
-
-  {
-    name: "Markus Eriksen",
-    likes: ["Kverneriet","Tilt Bar","Posthallen Drinkhub","F6","Angst Bar"]
-  },
-
-  {
-    name: "Amalie Nygård",
-    likes: ["Maaemo","Smia Galleri","Stallen","Palmen","Grand Café"]
-  },
-
-  {
-    name: "Sebastian Halvorsen",
-    likes: ["Dinner","Südøst","Nodee","Pier 42","Savage"]
-  },
-
-  {
-    name: "Julie Andreassen",
-    likes: ["Vintage Kitchen","Vin Vin","Nektar Vinbar","Esaias Mat&Vinbar","Libertine Vannkunsten"]
-  },
-
-  {
-    name: "Thomas Gundersen",
-    likes: ["Himkok","Bettola","Svanen","Torggata Botaniske","Chair"]
-  },
-
-  {
-    name: "Kristine Dahl",
-    likes: ["Kontrast","Ylajali","Park 29","Hos Thea","Brasserie France"]
-  },
-
-  {
-    name: "Eirik Lund",
-    likes: ["Der Peppern Gror","Kverneriet","Tilt Bar","Angst Bar","Bass Oslo"]
-  },
-
-  // 🔥 NYE VENNER FOR DEKNING
-
-  {
-    name: "Andreas Haugen",
-    likes: ["Alex Sushi","Nodee","Ling Ling","Südøst","Savage"]
-  },
-
-  {
-    name: "Camilla Strand",
-    likes: ["Kolonihagen","Le Benjamin","Vintage Kitchen","Territoriet"]
-  },
-
-  {
-    name: "Daniel Sørensen",
-    likes: ["Himkok","F6","Chair","Posthallen Drinkhub","Bettola"]
-  },
-
-  {
-    name: "Helene Berg",
-    likes: ["Maaemo","Kontrast","Smia Galleri","Stallen"]
-  },
-
-  {
-    name: "Magnus Lie",
-    likes: ["Kverneriet","Tilt Bar","Angst Bar","Fuglen","Pier 42"]
+{
+  name: "Jonas Berg",
+  reviews: {
+    "Himkok": { rating: 5, text: "Uten tvil beste cocktailbaren i Oslo. Alltid god stemning, og bartenderne kan virkelig faget sitt." },
+    "Dinner": { rating: 4, text: "Veldig bra asiatisk mat, spesielt dumplings. Litt støyete, men verdt det." },
+    "Kverneriet": { rating: 5, text: "Favorittburgeren min i byen. Saftig, perfekt stekt og gode sides." },
+    "Südøst": { rating: 4, text: "Bra energi og fint sted å dra med venner. Maten er solid." },
+    "Savage": { rating: 5, text: "Perfekt kombinasjon av god mat og sosial vibe. Et sted man blir værende lenge." },
+    "Fuglen": { rating: 4, text: "Rolig og hyggelig. Perfekt for en litt roligere kveld." },
+    "Nodee": { rating: 4, text: "Fresh sushi og god service. Funker både for date og venner." },
+    "F6": { rating: 5, text: "Alltid liv. Litt kaotisk, men på en bra måte." }
   }
+},
 
-]
+{
+  name: "Emma Larsen",
+  reviews: {
+    "Savage": { rating: 5, text: "Elsker dette stedet. Veldig bra mat og perfekt til en lang middag med vin." },
+    "Bettola": { rating: 4, text: "Koselig og litt mer intimt. Bra sted å starte kvelden." },
+    "Svanen": { rating: 5, text: "Veldig classy. Føles litt som å være i en annen by." },
+    "Le Benjamin": { rating: 5, text: "Perfekt date-restaurant. Stemning, mat og service sitter." },
+    "Vintage Kitchen": { rating: 4, text: "Veldig god vin og hyggelig atmosfære." },
+    "Fuglen": { rating: 4, text: "Avslappet vibe. Fint sted å prate." },
+    "Chair": { rating: 3, text: "Helt greit, men mangler litt energi." }
+  }
+},
+
+{
+  name: "Lucas Nilsen",
+  reviews: {
+    "Himkok": { rating: 5, text: "Alltid en sikker vinner. Kreative cocktails og bra crowd." },
+    "Alex Sushi": { rating: 4, text: "God kvalitet, men litt dyrt for hva du får." },
+    "Fuglen": { rating: 4, text: "Bra sted å starte kvelden rolig." },
+    "Chair": { rating: 3, text: "OK stemning, men ikke noe jeg drar tilbake til ofte." },
+    "F6": { rating: 5, text: "Garantert fest. Perfekt hvis du vil ut og danse." },
+    "Torggata Botaniske": { rating: 4, text: "Chill sted med gode drinker." }
+  }
+},
+
+{
+  name: "Sofie Hansen",
+  reviews: {
+    "Maaemo": { rating: 5, text: "En helt unik opplevelse. Ikke bare mat, men kunst." },
+    "Kontrast": { rating: 5, text: "Utrolig bra råvarer og smaker. En favoritt." },
+    "Statholdergaarden": { rating: 4, text: "Klassisk fine dining. Litt formelt, men veldig bra." },
+    "Ylajali": { rating: 4, text: "Koselig og intimt. Perfekt for en rolig kveld." },
+    "Hos Thea": { rating: 4, text: "Veldig hyggelig atmosfære og god mat." },
+    "Park 29": { rating: 5, text: "Elsker dette stedet. Perfekt kombinasjon av alt." }
+  }
+},
+
+{
+  name: "Oliver Johansen",
+  reviews: {
+    "Kverneriet": { rating: 5, text: "Beste burgeren, uten diskusjon." },
+    "Tilt Bar": { rating: 4, text: "Gøy sted med spill og god stemning." },
+    "Angst Bar": { rating: 4, text: "Bra musikk og liv." },
+    "Bass Oslo": { rating: 5, text: "Full energi hele kvelden." },
+    "Posthallen Drinkhub": { rating: 4, text: "Bra utvalg av drinker og hyggelig vibe." }
+  }
+},
+
+{
+  name: "Mathilde Olsen",
+  reviews: {
+    "Dinner": { rating: 4, text: "God mat og hyggelig stemning. Perfekt for vennekveld." },
+    "Nodee": { rating: 4, text: "Stabil sushi. Kommer tilbake." },
+    "Südøst": { rating: 5, text: "Elsker energien her." },
+    "Andre til Høyre": { rating: 4, text: "Litt quirky, men veldig gøy." },
+    "Libertine Frogner": { rating: 5, text: "Favoritt vinbar. Perfekt for date." },
+    "Eff Eff": { rating: 4, text: "Koselig og sosialt." }
+  }
+},
+
+{
+  name: "Henrik Kristiansen",
+  reviews: {
+    "Hot Shop": { rating: 4, text: "Enkelt, men skikkelig bra mat." },
+    "Vaaghals": { rating: 4, text: "Bra nivå på alt." },
+    "Arakataka": { rating: 5, text: "En av de beste middagene jeg har hatt." },
+    "Eff Eff": { rating: 4, text: "Hyggelig sted med bra vibe." },
+    "Kolonialen": { rating: 3, text: "Greit, men ikke noe spesielt." }
+  }
+},
+
+{
+  name: "Ingrid Solberg",
+  reviews: {
+    "Le Benjamin": { rating: 5, text: "Min go-to date restaurant." },
+    "Kolonihagen": { rating: 4, text: "Koselig og avslappet." },
+    "Fuglen Vinbar": { rating: 4, text: "God vin og rolig stemning." },
+    "Territoriet": { rating: 5, text: "Perfekt vinutvalg." },
+    "Nektar Vinbar": { rating: 4, text: "Alltid hyggelig." }
+  }
+},
+
+{
+  name: "Markus Eriksen",
+  reviews: {
+    "Kverneriet": { rating: 5, text: "Alltid like bra." },
+    "Tilt Bar": { rating: 4, text: "Perfekt for en casual kveld." },
+    "Posthallen Drinkhub": { rating: 4, text: "Bra sted før byen." },
+    "F6": { rating: 5, text: "Ren fest." },
+    "Angst Bar": { rating: 4, text: "God stemning." }
+  }
+}
+
+] 
 let activeVibe = null
 
 function setVibe(v){
@@ -632,6 +699,7 @@ function createCard(item,isNext){
       <div class="rating"></div>
       <div class="vibe"></div>
       <div class="friends"></div>
+      <div class="reviewBox hidden"></div>
     </div>
 
     <div class="buttons">
@@ -651,6 +719,13 @@ function createCard(item,isNext){
     e.stopPropagation()
     undo()
   }
+  card.addEventListener("click", ()=>{
+  const box = card.querySelector(".reviewBox")
+  if(box){
+    box.classList.add("hidden")
+    card.classList.remove("dimmed") 
+  }
+})
 
   // BUTTONS
   card.querySelector(".buttons").addEventListener("click", e=>{
@@ -699,11 +774,9 @@ if(matchedFriends.length > 0){
   friendsEl.style.cursor = "pointer"
 
   friendsEl.onclick = (e)=>{
-    e.stopPropagation()
-    openFriendsSheet(matchedFriends)
-  }
-
-}
+  e.stopPropagation()
+  showReview(card, f, name)
+} 
 
     // VIBE (CHIPS)
     const vibeEl = card.querySelector(".vibe")
@@ -1181,7 +1254,40 @@ if ("serviceWorker" in navigator) {
       .catch(err => console.log("SW error", err))
   })
 }
-                     
+
+function showReview(card, friend, placeName){
+
+  const review = friend.reviews[placeName]
+  if(!review) return
+
+  const box = card.querySelector(".reviewBox")
+
+  // 🔥 TOGGLE
+  if(!box.classList.contains("hidden")){
+    box.classList.add("hidden")
+    card.classList.remove("dimmed")  
+    return
+  }
+
+  box.innerHTML = `
+    <div class="name">${friend.name}</div>
+    <div class="rating">Rating: ${review.rating}</div>
+    <div class="text">${review.text}</div>
+  `
+
+  box.classList.remove("hidden")
+  card.classList.add("dimmed")   
+}
+
+  box.innerHTML = `
+    <div class="name">${friend.name}</div>
+    <div class="rating">Rating: ${review.rating}</div>
+    <div class="text">${review.text}</div>
+  `
+
+  box.classList.remove("hidden")
+}
+  
 </script>
 
 <script async
