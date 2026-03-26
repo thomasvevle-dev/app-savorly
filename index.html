@@ -307,85 +307,111 @@ let currentType=""
 let placesService
 let imageCache={}
 
-let friends = [
+const friends = [
 
   {
     name: "Jonas Berg",
-    likes: ["Himkok","Dinner","Kverneriet","Südøst","Savage","Fuglen"]
+    likes: ["Himkok","Dinner","Kverneriet","Südøst","Savage","Fuglen","Nodee","F6"]
   },
 
   {
     name: "Emma Larsen",
-    likes: ["Savage","Bettola","Svanen","Le Benjamin","Vintage Kitchen"]
+    likes: ["Savage","Bettola","Svanen","Le Benjamin","Vintage Kitchen","Fuglen","Chair"]
   },
 
   {
     name: "Lucas Nilsen",
-    likes: ["Himkok","Alex Sushi","Fuglen","Chair","F6"]
+    likes: ["Himkok","Alex Sushi","Fuglen","Chair","F6","Torggata Botaniske"]
   },
 
   {
     name: "Sofie Hansen",
-    likes: ["Maaemo","Kontrast","Statholdergaarden","Ylajali"]
+    likes: ["Maaemo","Kontrast","Statholdergaarden","Ylajali","Hos Thea","Park 29"]
   },
 
   {
     name: "Oliver Johansen",
-    likes: ["Kverneriet","Tilt Bar","Angst Bar","Bass Oslo"]
+    likes: ["Kverneriet","Tilt Bar","Angst Bar","Bass Oslo","Posthallen Drinkhub"]
   },
 
   {
     name: "Mathilde Olsen",
-    likes: ["Dinner","Nodee","Südøst","Andre til Høyre","Libertine Frogner"]
+    likes: ["Dinner","Nodee","Südøst","Andre til Høyre","Libertine Frogner","Eff Eff"]
   },
 
   {
     name: "Henrik Kristiansen",
-    likes: ["Hot Shop","Vaaghals","Arakataka","Eff Eff"]
+    likes: ["Hot Shop","Vaaghals","Arakataka","Eff Eff","Kolonialen"]
   },
 
   {
     name: "Ingrid Solberg",
-    likes: ["Le Benjamin","Kolonihagen","Fuglen Vinbar","Territoriet"]
+    likes: ["Le Benjamin","Kolonihagen","Fuglen Vinbar","Territoriet","Nektar Vinbar"]
   },
 
   {
     name: "Markus Eriksen",
-    likes: ["Kverneriet","Tilt Bar","Posthallen Drinkhub","F6"]
+    likes: ["Kverneriet","Tilt Bar","Posthallen Drinkhub","F6","Angst Bar"]
   },
 
   {
     name: "Amalie Nygård",
-    likes: ["Maaemo","Smia Galleri","Stallen","Palmen"]
+    likes: ["Maaemo","Smia Galleri","Stallen","Palmen","Grand Café"]
   },
 
   {
     name: "Sebastian Halvorsen",
-    likes: ["Dinner","Südøst","Nodee","Pier 42"]
+    likes: ["Dinner","Südøst","Nodee","Pier 42","Savage"]
   },
 
   {
     name: "Julie Andreassen",
-    likes: ["Vintage Kitchen","Vin Vin","Nektar Vinbar","Esaias Mat&Vinbar"]
+    likes: ["Vintage Kitchen","Vin Vin","Nektar Vinbar","Esaias Mat&Vinbar","Libertine Vannkunsten"]
   },
 
   {
     name: "Thomas Gundersen",
-    likes: ["Himkok","Bettola","Svanen","Torggata Botaniske"]
+    likes: ["Himkok","Bettola","Svanen","Torggata Botaniske","Chair"]
   },
 
   {
     name: "Kristine Dahl",
-    likes: ["Kontrast","Ylajali","Park 29","Hos Thea"]
+    likes: ["Kontrast","Ylajali","Park 29","Hos Thea","Brasserie France"]
   },
 
   {
     name: "Eirik Lund",
-    likes: ["Der Peppern Gror","Kverneriet","Tilt Bar","Angst Bar"]
+    likes: ["Der Peppern Gror","Kverneriet","Tilt Bar","Angst Bar","Bass Oslo"]
+  },
+
+  // 🔥 NYE VENNER FOR DEKNING
+
+  {
+    name: "Andreas Haugen",
+    likes: ["Alex Sushi","Nodee","Ling Ling","Südøst","Savage"]
+  },
+
+  {
+    name: "Camilla Strand",
+    likes: ["Kolonihagen","Le Benjamin","Vintage Kitchen","Territoriet"]
+  },
+
+  {
+    name: "Daniel Sørensen",
+    likes: ["Himkok","F6","Chair","Posthallen Drinkhub","Bettola"]
+  },
+
+  {
+    name: "Helene Berg",
+    likes: ["Maaemo","Kontrast","Smia Galleri","Stallen"]
+  },
+
+  {
+    name: "Magnus Lie",
+    likes: ["Kverneriet","Tilt Bar","Angst Bar","Fuglen","Pier 42"]
   }
 
 ]
-
 let activeVibe = null
 
 function setVibe(v){
