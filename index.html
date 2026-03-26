@@ -1270,7 +1270,7 @@ function showReview(card, friend, placeName){
 
   const box = card.querySelector(".reviewBox")
 
-  // 🔥 TOGGLE
+  // TOGGLE
   if(!box.classList.contains("hidden")){
     box.classList.add("hidden")
     card.classList.remove("dimmed")  
@@ -1285,15 +1285,6 @@ function showReview(card, friend, placeName){
 
   box.classList.remove("hidden")
   card.classList.add("dimmed")   
-}
-
-  box.innerHTML = `
-    <div class="name">${friend.name}</div>
-    <div class="rating">Rating: ${review.rating}</div>
-    <div class="text">${review.text}</div>
-  `
-
-  box.classList.remove("hidden")
 }
   
 </script>
