@@ -67,10 +67,6 @@ background:#111;
 border:1px solid #333;
 }
 
-.hidden{
-  display:none !important;
-}
-
 /* CARD STACK */
 
 #deck{
@@ -83,7 +79,7 @@ border:1px solid #333;
   justify-content:center;
   align-items:center;
   z-index:10;
-  pointer-events:none;  
+  pointer-events:auto;  
 }
 
 .card{
@@ -97,7 +93,7 @@ overflow:hidden;
 background:black;
 transition: transform .25s ease-out;
 will-change: transform;
-pointer-events:none;
+pointer-events:auto;
 }
 
 .card.next{
@@ -266,6 +262,7 @@ touch-action: manipulation;
   margin-top:6px;
   color:#7dd3fc;
   text-shadow:0 2px 6px rgba(0,0,0,0.8);
+}
 
 .modal{
   position:fixed;
@@ -295,7 +292,7 @@ touch-action: manipulation;
 }
 
 .hidden{
-  display:none;
+{display:none !important;}
 }
 
 .sheet{
@@ -313,7 +310,8 @@ touch-action: manipulation;
 }
   
 .sheet.hidden{
-  display:none;
+  display:none !important;
+  pointer-events:none;
 }
  
 .sheetContent{
@@ -663,8 +661,10 @@ function createCard(item,isNext){
 
   enableSwipe(card)
 
-card.addEventListener("touchstart", ()=>{
-  closeFriendsSheet()
+card.addEventListener("touchstart", e=>{
+  if(!e.target.closest(".friends")){
+    closeFriendsSheet()
+  }
 })
   
   loadPlace(name).then(place=>{
@@ -714,9 +714,19 @@ if(matchedFriends.length > 0){
         }
 
         chip.onclick = (e)=>{
-          e.stopPropagation()
-          setVibe(v)
-        }
+  e.stopPropagation()
+
+  if(activeVibe === v){
+    activeVibe = null
+    list = data[currentType]
+  } else {
+    setVibe(v)
+    return
+  }
+
+  index = 0
+  buildDeck()
+}
 
         vibeEl.appendChild(chip)
       })
@@ -1032,7 +1042,7 @@ closeFriendsSheet()
   } 
   // 2. Fallback → Google
   else {
-    const query = encodeURIComponent(item.name + " Oslo booking")
+    const query = encodeURIComponent(item.name + " restaurant oslo booking")
     url = "https://www.google.com/search?q=" + query
   }
   
