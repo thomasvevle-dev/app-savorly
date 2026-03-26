@@ -545,10 +545,9 @@ function openCategory(type){
 
   index = 0
 
-  document.getElementById("home").style.display="none"
-
-  deck.style.display="flex"
-  deck.style.pointerEvents="auto"
+  document.getElementById("home").style.display = "none"
+  deck.style.display = "flex"
+  deck.style.pointerEvents = "auto"   // 🔥 VIKTIG
 
   buildDeck()
 }
@@ -569,7 +568,8 @@ buildDeck()
 }
 
 function buildDeck(){
-
+deck.style.pointerEvents = "auto"
+  
   deck.innerHTML = ""
 
   if(!list || list.length === 0) return
