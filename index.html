@@ -574,10 +574,19 @@ function createCard(item,isNext){
     const friendsEl = card.querySelector(".friends")
     const matchedFriends = getFriendsWhoLike(place.name || name)
 
-    if(matchedFriends.length > 0){
-      friendsEl.innerText =
-        "🔥 " + matchedFriends.map(f => f.name).join(", ")
-    }
+   if(matchedFriends.length > 0){
+  friendsEl.innerText =
+    "🔥 " + matchedFriends.length + " venner liker dette"
+
+  friendsEl.style.cursor = "pointer"
+
+  friendsEl.onclick = (e)=>{
+  e.stopPropagation()
+
+  alert(
+    matchedFriends.map(f => f.name).join("\n")
+  )
+}
 
     // VIBE (CHIPS)
     const vibeEl = card.querySelector(".vibe")
