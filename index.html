@@ -392,6 +392,29 @@ touch-action: manipulation;
   animation:fadeIn .2s ease;
 }
 
+.reviewHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:6px;
+}
+
+.dots{
+  display:flex;
+  gap:5px;
+}
+
+.dots .dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.4);
+}
+
+.dots .dot.active{
+  background:white;
+}  
+
 @keyframes fadeIn{
   from{
     opacity:0;
@@ -1253,25 +1276,38 @@ function showReview(card, friendsList, placeName){
   let box = card.querySelector(".reviewBox")
   if(!box) return
 
-  // 🔥 RESET EVENTS
+  // reset events
   box.replaceWith(box.cloneNode(true))
-  box = card.querySelector(".reviewBox")   // 🔥 bruk ny
+  box = card.querySelector(".reviewBox")
+
+  const validFriends = friendsList.filter(f => 
+    f.reviews && f.reviews[placeName]
+  )
+
+  if(validFriends.length === 0) return
 
   let currentIndex = 0
 
   function render(){
-    const f = friendsList[currentIndex]
-    const review = f.reviews?.[placeName]
-    if(!review) return
+    const f = validFriends[currentIndex]
+    const review = f.reviews[placeName]
 
     box.innerHTML = `
-      <div class="name">${f.name}</div>
+      <div class="reviewHeader">
+        <div class="name">${f.name}</div>
+        <div class="dots">
+          ${validFriends.map((_,i)=>
+            `<span class="dot ${i===currentIndex?"active":""}"></span>`
+          ).join("")}
+        </div>
+      </div>
+
       <div class="rating">Rating: ${review.rating}</div>
       <div class="text">${review.text}</div>
     `
   }
 
-  // 🔥 TOGGLE
+  // toggle
   if(!box.classList.contains("hidden")){
     box.classList.add("hidden")
     card.classList.remove("dimmed")
@@ -1283,29 +1319,14 @@ function showReview(card, friendsList, placeName){
   box.classList.remove("hidden")
   card.classList.add("dimmed")
 
-  // 🔥 SWIPE
-  let startX = 0
+  // 🔥 TAP = neste review
+  box.onclick = (e)=>{
+    e.stopPropagation()
 
-  box.addEventListener("touchstart", e=>{
-  e.stopPropagation()   // 🔥 STOPPER CARD SWIPE
-  startX = e.touches[0].clientX
-})
-
-box.addEventListener("touchend", e=>{
-  e.stopPropagation() 
-
-    let diff = e.changedTouches[0].clientX - startX
-    if(Math.abs(diff) < 30) return
-
-    if(diff < 0){
-      currentIndex = (currentIndex + 1) % friendsList.length
-    } else {
-      currentIndex =
-        (currentIndex - 1 + friendsList.length) % friendsList.length
-    }
-
+    currentIndex = (currentIndex + 1) % validFriends.length
     render()
-  })
+  }
+
 }
   
 </script>
