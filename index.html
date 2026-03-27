@@ -784,31 +784,7 @@ card.addEventListener("touchstart", e=>{
     card.querySelector(".name").innerText = place.name
     card.querySelector(".rating").innerText = "⭐ " + place.rating
 
-    // FRIENDS (REN)
-const friendsEl = card.querySelector(".friends")
-
-const matchedFriends = getFriendsWhoLike(name)
-
-if(matchedFriends.length > 0){
-
-  friendsEl.innerText =
-    "❤️ " + matchedFriends.length + " venner liker dette"
-
-  friendsEl.style.cursor = "pointer"
-
-  friendsEl.onclick = (e)=>{
-    e.stopPropagation()
-    showReview(card, matchedFriends, name)
-  }
-
-}
-    friendsEl.appendChild(span)
-
-  })
-
-}
-
-// VIBE (CHIPS)
+    // VIBE (CHIPS)
 const vibeEl = card.querySelector(".vibe")
 vibeEl.innerHTML = ""
 
@@ -841,6 +817,31 @@ vibeEl.innerHTML = ""
       })
     }
 
+
+    // FRIENDS (REN)
+const friendsEl = card.querySelector(".friends")
+
+const matchedFriends = getFriendsWhoLike(name)
+
+if(matchedFriends.length > 0){
+
+  friendsEl.innerText =
+    "❤️ " + matchedFriends.length + " venner liker dette"
+
+  friendsEl.style.cursor = "pointer"
+
+     friendsEl.onclick = (e)=>{
+      e.stopPropagation()
+      showReview(card, matchedFriends, name)
+    }
+
+  } // slutt på if(matchedFriends)
+
+}) // slutt på loadPlace.then
+
+} // slutt på createCard
+
+
     // TAP
     let tapStartX = 0
     let tapStartTime = 0
@@ -850,13 +851,6 @@ vibeEl.innerHTML = ""
       tapStartTime = Date.now()
     })
 
-    card.addEventListener("touchend", e=>{
-
-      if(
-  e.target.closest(".buttons") ||
-  e.target.closest(".chip") ||
-  e.target.closest(".friends")
-) return
 
       let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
       let time = Date.now() - tapStartTime
@@ -876,7 +870,8 @@ vibeEl.innerHTML = ""
 
         const dots = card.querySelectorAll(".dot")
         dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
-        
+
+       }) 
 }
 
 function openFriendsModal(friends){
@@ -1341,7 +1336,6 @@ function showReview(card, friendsList, placeName){
     render()
   })
 }
-}  
   
 </script>
 
