@@ -348,6 +348,7 @@ touch-action: manipulation;
 } 
 
 .reviewBox{
+  touch-action: pan-y;
   margin-bottom:8px;
 
   background:rgba(0,0,0,0.65);
@@ -1286,10 +1287,12 @@ function showReview(card, friendsList, placeName){
   let startX = 0
 
   box.addEventListener("touchstart", e=>{
-    startX = e.touches[0].clientX
-  })
+  e.stopPropagation()   // 🔥 STOPPER CARD SWIPE
+  startX = e.touches[0].clientX
+})
 
-  box.addEventListener("touchend", e=>{
+box.addEventListener("touchend", e=>{
+  e.stopPropagation() 
 
     let diff = e.changedTouches[0].clientX - startX
     if(Math.abs(diff) < 30) return
