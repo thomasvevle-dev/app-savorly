@@ -348,23 +348,20 @@ touch-action: manipulation;
 } 
 
 .reviewBox{
-  position:absolute;
-  left:20px;
-  right:20px;
+  margin-bottom:8px;  
 
-  top:40%;
-  transform:translateY(-40%) scale(.96);
+  background:rgba(0,0,0,0.65);
+  backdrop-filter: blur(10px);
 
-  background:rgba(0,0,0,0.75);
-  backdrop-filter: blur(12px);
+  padding:10px 12px;
+  border-radius:12px;
 
-  padding:16px;
-  border-radius:18px;
-
-  z-index:20;
+  font-size:13px;
+  line-height:1.4;
 
   opacity:0;
-  transition: all .3s cubic-bezier(.22,1,.36,1);
+  transform:translateY(10px);
+  transition: all .25s ease;
 }
 
 .reviewBox .name{
@@ -374,12 +371,13 @@ touch-action: manipulation;
 }
 
 .reviewBox .rating{
-  font-size:14px;
+  font-size:12px;
   margin-bottom:6px;
-  opacity:.8;
+  opacity:.7;
 }
 
 .reviewBox .text{
+  margin-top:4px;
   font-size:14px;
   line-height:1.4;
 }
@@ -389,9 +387,8 @@ touch-action: manipulation;
 }
  .reviewBox:not(.hidden){
   opacity:1;
-  transform:translateY(-50%) scale(1);
-} 
-
+  transform:translateY(0);
+}
 .reviewBox{
   animation:fadeIn .2s ease;
 }
@@ -697,13 +694,16 @@ function createCard(item,isNext){
     <div class="topLeft">←</div>
     <div class="topRight">↺</div>
 
-    <div class="info">
-      <div class="name">${name}</div>
-      <div class="rating"></div>
-      <div class="vibe"></div>
-      <div class="friends"></div>
-      <div class="reviewBox hidden"></div>
-    </div>
+   <div class="info">
+
+  <div class="reviewBox hidden"></div> 
+
+  <div class="name">${name}</div>
+  <div class="rating"></div>
+  <div class="vibe"></div>
+  <div class="friends"></div>
+
+</div>
 
     <div class="buttons">
       <div class="btn-dislike">✕</div>
