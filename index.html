@@ -348,7 +348,7 @@ touch-action: manipulation;
 } 
 
 .reviewBox{
-  margin-bottom:8px;  
+  margin-bottom:8px;
 
   background:rgba(0,0,0,0.65);
   backdrop-filter: blur(10px);
@@ -357,13 +357,11 @@ touch-action: manipulation;
   border-radius:12px;
 
   font-size:13px;
-  line-height:1.4;
 
   opacity:0;
-  transform:translateY(10px);
-  transition: all .25s ease;
+  transform:scale(0.9);          
+  transition: all .25s cubic-bezier(.2,.8,.2,1);
 }
-
 .reviewBox .name{
   font-size:16px;
   font-weight:600;
@@ -385,9 +383,9 @@ touch-action: manipulation;
 .reviewBox.hidden{
   display:none;
 }
- .reviewBox:not(.hidden){
+.reviewBox:not(.hidden){
   opacity:1;
-  transform:translateY(0);
+  transform:scale(1);            
 }
 .reviewBox{
   animation:fadeIn .2s ease;
@@ -722,13 +720,17 @@ function createCard(item,isNext){
     e.stopPropagation()
     undo()
   }
- card.addEventListener("click", (e)=>{
- if(
-  e.target.closest(".buttons") ||
-  e.target.closest(".chip") ||
-  e.target.closest(".friends") ||
-  e.target.closest(".reviewBox")
-) return
+card.addEventListener("touchend", e=>{
+
+  if(
+    e.target.closest(".buttons") ||
+    e.target.closest(".chip") ||
+    e.target.closest(".friends") ||
+    e.target.closest(".reviewBox")   // 🔥 HER
+  ) return
+
+  let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
+  let time = Date.now() - tapStartTime
 
   const box = card.querySelector(".reviewBox")
   if(box){
@@ -1281,17 +1283,63 @@ if ("serviceWorker" in navigator) {
 
 function showReview(card, friend, placeName){
 
-  const review = friend.reviews[placeName]
-  if(!review) return
-
   const box = card.querySelector(".reviewBox")
 
-  // TOGGLE
+  const matchedFriends = getFriendsWhoLike(placeName)
+  if(matchedFriends.length === 0) return
+
+  let currentReviewIndex = 0
+
+  function renderReview(){
+
+    const f = matchedFriends[currentReviewIndex]
+    const review = f.reviews?.[placeName]
+    if(!review) return
+
+    box.innerHTML = `
+      <div class="name">${f.name}</div>
+      <div class="rating">Rating: ${review.rating}</div>
+      <div class="text">${review.text}</div>
+    `
+  }
+
+  // 🔥 TOGGLE
   if(!box.classList.contains("hidden")){
     box.classList.add("hidden")
-    card.classList.remove("dimmed")  
+    card.classList.remove("dimmed")
     return
   }
+
+  renderReview()
+
+  box.classList.remove("hidden")
+  card.classList.add("dimmed")
+
+  // 🔥 SWIPE
+  let startX = 0
+
+  box.addEventListener("touchstart", e=>{
+    startX = e.touches[0].clientX
+  })
+
+  box.addEventListener("touchend", e=>{
+    let diff = e.changedTouches[0].clientX - startX
+
+    if(Math.abs(diff) < 30) return
+
+    if(diff < 0){
+      // swipe left → neste
+      currentReviewIndex = (currentReviewIndex + 1) % matchedFriends.length
+    } else {
+      // swipe right → forrige
+      currentReviewIndex =
+        (currentReviewIndex - 1 + matchedFriends.length) % matchedFriends.length
+    }
+
+    renderReview()
+  })
+
+}
 
   box.innerHTML = `
     <div class="name">${friend.name}</div>
