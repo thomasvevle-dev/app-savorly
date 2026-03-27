@@ -692,16 +692,13 @@ function createCard(item,isNext){
     <div class="topLeft">←</div>
     <div class="topRight">↺</div>
 
-   <div class="info">
-
-  <div class="reviewBox hidden"></div> 
-
-  <div class="name">${name}</div>
-  <div class="rating"></div>
-  <div class="vibe"></div>
-  <div class="friends"></div>
-
-</div>
+    <div class="info">
+      <div class="reviewBox hidden"></div> 
+      <div class="name">${name}</div>
+      <div class="rating"></div>
+      <div class="vibe"></div>
+      <div class="friends"></div>
+    </div>
 
     <div class="buttons">
       <div class="btn-dislike">✕</div>
@@ -720,36 +717,7 @@ function createCard(item,isNext){
     e.stopPropagation()
     undo()
   }
-card.addEventListener("touchend", e=>{
 
-  if(
-    e.target.closest(".buttons") ||
-    e.target.closest(".chip") ||
-    e.target.closest(".friends") ||
-    e.target.closest(".reviewBox")
-  ) return
-
-  let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
-  let time = Date.now() - tapStartTime
-
-  if(diffX < 15 && time < 250){
-
-    const rect = card.getBoundingClientRect()
-    const x = e.changedTouches[0].clientX - rect.left
-
-    if(x > rect.width / 2){
-      photoIndex = (photoIndex + 1) % photos.length
-    } else {
-      photoIndex = (photoIndex - 1 + photos.length) % photos.length
-    }
-
-    img.src = photos[photoIndex]
-
-    const dots = card.querySelectorAll(".dot")
-    dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
-  }
-
-})
   // BUTTONS
   card.querySelector(".buttons").addEventListener("click", e=>{
     const btn = e.target.closest("div")
@@ -765,12 +733,18 @@ card.addEventListener("touchend", e=>{
 
   enableSwipe(card)
 
-card.addEventListener("touchstart", e=>{
-  if(!e.target.closest(".friends")){
-    closeFriendsSheet()
-  }
-})
-  
+  let tapStartX = 0
+  let tapStartTime = 0
+
+  card.addEventListener("touchstart", e=>{
+    tapStartX = e.touches[0].clientX
+    tapStartTime = Date.now()
+
+    if(!e.target.closest(".friends")){
+      closeFriendsSheet()
+    }
+  })
+
   loadPlace(name).then(place=>{
 
     if(!card.isConnected) return
@@ -784,9 +758,40 @@ card.addEventListener("touchstart", e=>{
     card.querySelector(".name").innerText = place.name
     card.querySelector(".rating").innerText = "⭐ " + place.rating
 
-    // VIBE (CHIPS)
-const vibeEl = card.querySelector(".vibe")
-vibeEl.innerHTML = ""
+    // TAP (BILDE)
+    card.addEventListener("touchend", e=>{
+
+      if(
+        e.target.closest(".buttons") ||
+        e.target.closest(".chip") ||
+        e.target.closest(".friends") ||
+        e.target.closest(".reviewBox")
+      ) return
+
+      let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
+      let time = Date.now() - tapStartTime
+
+      if(diffX < 15 && time < 250){
+
+        const rect = card.getBoundingClientRect()
+        const x = e.changedTouches[0].clientX - rect.left
+
+        if(x > rect.width / 2){
+          photoIndex = (photoIndex + 1) % photos.length
+        } else {
+          photoIndex = (photoIndex - 1 + photos.length) % photos.length
+        }
+
+        img.src = photos[photoIndex]
+
+        const dots = card.querySelectorAll(".dot")
+        dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
+      }
+    })
+
+    // VIBE
+    const vibeEl = card.querySelector(".vibe")
+    vibeEl.innerHTML = ""
 
     if(item.vibe){
       item.vibe.forEach(v => {
@@ -799,48 +804,42 @@ vibeEl.innerHTML = ""
         }
 
         chip.onclick = (e)=>{
-  e.stopPropagation()
+          e.stopPropagation()
 
-  if(activeVibe === v){
-    activeVibe = null
-    list = data[currentType]
-  } else {
-    setVibe(v)
-    return
-  }
+          if(activeVibe === v){
+            activeVibe = null
+            list = data[currentType]
+          } else {
+            setVibe(v)
+            return
+          }
 
-  index = 0
-  buildDeck()
-}
+          index = 0
+          buildDeck()
+        }
 
         vibeEl.appendChild(chip)
       })
     }
 
+    // FRIENDS
+    const friendsEl = card.querySelector(".friends")
+    const matchedFriends = getFriendsWhoLike(name)
 
-    // FRIENDS (REN)
-const friendsEl = card.querySelector(".friends")
+    if(matchedFriends.length > 0){
+      friendsEl.innerText =
+        "❤️ " + matchedFriends.length + " venner liker dette"
 
-const matchedFriends = getFriendsWhoLike(name)
+      friendsEl.style.cursor = "pointer"
 
-if(matchedFriends.length > 0){
-
-  friendsEl.innerText =
-    "❤️ " + matchedFriends.length + " venner liker dette"
-
-  friendsEl.style.cursor = "pointer"
-
-     friendsEl.onclick = (e)=>{
-      e.stopPropagation()
-      showReview(card, matchedFriends, name)
+      friendsEl.onclick = (e)=>{
+        e.stopPropagation()
+        showReview(card, matchedFriends, name)
+      }
     }
 
-  } // slutt på if(matchedFriends)
-
-}) // slutt på loadPlace.then
-
-} // slutt på createCard
-
+  })
+}
 
     // TAP
     let tapStartX = 0
@@ -870,9 +869,8 @@ if(diffX < 15 && time < 250){
 
   const dots = card.querySelectorAll(".dot")
   dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
-    
+}    
 }) 
-}
 
 function openFriendsModal(friends){
   const modal = document.getElementById("friendsModal")
