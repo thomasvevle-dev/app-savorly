@@ -870,8 +870,9 @@ if(diffX < 15 && time < 250){
 
   const dots = card.querySelectorAll(".dot")
   dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
-
-}) // 🔥 lukker event listener riktig
+    
+}) 
+}
 
 function openFriendsModal(friends){
   const modal = document.getElementById("friendsModal")
