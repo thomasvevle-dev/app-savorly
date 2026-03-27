@@ -791,20 +791,17 @@ const matchedFriends = getFriendsWhoLike(name)
 
 if(matchedFriends.length > 0){
 
-  friendsEl.innerHTML = "❤️ "
+  friendsEl.innerText =
+    "❤️ " + matchedFriends.length + " venner liker dette"
 
-  matchedFriends.forEach(f => {
+  friendsEl.style.cursor = "pointer"
 
-    const span = document.createElement("span")
-    span.innerText = f.name
-    span.style.marginRight = "8px"
-    span.style.cursor = "pointer"
+  friendsEl.onclick = (e)=>{
+    e.stopPropagation()
+    showReview(card, matchedFriends, name)
+  }
 
-    span.onclick = (e)=>{
-      e.stopPropagation()
-      showReview(card, f, name)
-    }
-
+}
     friendsEl.appendChild(span)
 
   })
@@ -1292,18 +1289,19 @@ if ("serviceWorker" in navigator) {
   })
 }
 
-function showReview(card, friend, placeName){
+function showReview(card, friendsList, placeName){
 
-  const box = card.querySelector(".reviewBox")
+  let box = card.querySelector(".reviewBox")
+  if(!box) return
 
-  const matchedFriends = getFriendsWhoLike(placeName)
-  if(matchedFriends.length === 0) return
+  // 🔥 RESET EVENTS
+  box.replaceWith(box.cloneNode(true))
+  box = card.querySelector(".reviewBox")   // 🔥 bruk ny
 
-  let currentReviewIndex = 0
+  let currentIndex = 0
 
-  function renderReview(){
-
-    const f = matchedFriends[currentReviewIndex]
+  function render(){
+    const f = friendsList[currentIndex]
     const review = f.reviews?.[placeName]
     if(!review) return
 
@@ -1321,7 +1319,7 @@ function showReview(card, friend, placeName){
     return
   }
 
-  renderReview()
+  render()
 
   box.classList.remove("hidden")
   card.classList.add("dimmed")
@@ -1334,21 +1332,21 @@ function showReview(card, friend, placeName){
   })
 
   box.addEventListener("touchend", e=>{
-    let diff = e.changedTouches[0].clientX - startX
 
+    let diff = e.changedTouches[0].clientX - startX
     if(Math.abs(diff) < 30) return
 
     if(diff < 0){
-      // swipe left → neste
-      currentReviewIndex = (currentReviewIndex + 1) % matchedFriends.length
+      currentIndex = (currentIndex + 1) % friendsList.length
     } else {
-      // swipe right → forrige
-      currentReviewIndex =
-        (currentReviewIndex - 1 + matchedFriends.length) % matchedFriends.length
+      currentIndex =
+        (currentIndex - 1 + friendsList.length) % friendsList.length
     }
 
-    renderReview()
+    render()
   })
+
+}
 
   box.innerHTML = `
     <div class="name">${friend.name}</div>
