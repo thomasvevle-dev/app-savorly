@@ -841,36 +841,6 @@ function createCard(item,isNext){
   })
 }
 
-    // TAP
-    let tapStartX = 0
-    let tapStartTime = 0
-
-    card.addEventListener("touchstart", e=>{
-      tapStartX = e.touches[0].clientX
-      tapStartTime = Date.now()
-    })
-
-
-  let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
-let time = Date.now() - tapStartTime
-
-if(diffX < 15 && time < 250){
-
-  const rect = card.getBoundingClientRect()
-  const x = e.changedTouches[0].clientX - rect.left
-
-  if(x > rect.width / 2){
-    photoIndex = (photoIndex + 1) % photos.length
-  } else {
-    photoIndex = (photoIndex - 1 + photos.length) % photos.length
-  }
-
-  img.src = photos[photoIndex]
-
-  const dots = card.querySelectorAll(".dot")
-  dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
-}    
-}) 
 
 function openFriendsModal(friends){
   const modal = document.getElementById("friendsModal")
