@@ -726,19 +726,30 @@ card.addEventListener("touchend", e=>{
     e.target.closest(".buttons") ||
     e.target.closest(".chip") ||
     e.target.closest(".friends") ||
-    e.target.closest(".reviewBox")   // 🔥 HER
+    e.target.closest(".reviewBox")
   ) return
 
   let diffX = Math.abs(e.changedTouches[0].clientX - tapStartX)
   let time = Date.now() - tapStartTime
 
-  const box = card.querySelector(".reviewBox")
-  if(box){
-    box.classList.add("hidden")
-    card.classList.remove("dimmed") 
-  }
-})
+  if(diffX < 15 && time < 250){
 
+    const rect = card.getBoundingClientRect()
+    const x = e.changedTouches[0].clientX - rect.left
+
+    if(x > rect.width / 2){
+      photoIndex = (photoIndex + 1) % photos.length
+    } else {
+      photoIndex = (photoIndex - 1 + photos.length) % photos.length
+    }
+
+    img.src = photos[photoIndex]
+
+    const dots = card.querySelectorAll(".dot")
+    dots.forEach((d,i)=>d.classList.toggle("active", i === photoIndex))
+  }
+
+})
   // BUTTONS
   card.querySelector(".buttons").addEventListener("click", e=>{
     const btn = e.target.closest("div")
