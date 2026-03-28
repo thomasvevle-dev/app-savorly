@@ -1550,10 +1550,11 @@ function showReview(card, friendsList, placeName){
   openProfile(f)
 }
    
-  box.querySelector(".friendName").onclick = (e)=>{
-    e.stopPropagation()
-    openProfile(f)
-  }
+ box.querySelector(".friendName").onclick = (e)=>{
+  e.stopPropagation()
+  console.log("CLICK FUNKER")   // 🔥 TEST
+  openProfile(f)
+}
 }
 
   // toggle
