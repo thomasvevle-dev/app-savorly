@@ -1581,7 +1581,7 @@ function showReview(card, friendsList, placeName){
 
 function openProfile(friend){
 
-  console.log("OPEN PROFILE:", friend)
+  console.log("🔥 OPEN PROFILE RUNNER", friend)
 
   const overlay = document.getElementById("profileOverlay")
   if(!overlay){
@@ -1589,33 +1589,77 @@ function openProfile(friend){
     return
   }
 
+  // 🔥 FLYTT UT AV DECK (KRITISK)
+  document.body.appendChild(overlay)
+
+  // 🔥 FORCE SYNLIG
+  overlay.style.position = "fixed"
+  overlay.style.top = "0"
+  overlay.style.left = "0"
+  overlay.style.right = "0"
+  overlay.style.bottom = "0"
+  overlay.style.zIndex = "999999"
+  overlay.style.background = "black"
+  overlay.style.color = "white"
+  overlay.style.display = "block"
+  overlay.style.overflowY = "auto"
+  overlay.style.padding = "20px"
+
+  // 🔥 BUILD CONTENT
+  let reviewsHTML = ""
+
+  if(friend.reviews){
+    Object.entries(friend.reviews).forEach(([place, review])=>{
+      reviewsHTML += `
+        <div style="margin-bottom:20px">
+          <div style="font-weight:bold">${place}</div>
+          <div>⭐ ${review.rating}</div>
+          <div style="opacity:.8">${review.text}</div>
+        </div>
+      `
+    })
+  }
+
+  if(!reviewsHTML){
+    reviewsHTML = "<div>Ingen reviews enda</div>"
+  }
+
   overlay.innerHTML = `
-    <div style="
-      position:fixed;
-      top:0;
-      left:0;
-      right:0;
-      bottom:0;
-      background:black;
-      color:white;
-      z-index:99999;
-      padding:20px;
-    ">
-      <div id="closeProfile">← Tilbake</div>
-      <h1>${friend.name}</h1>
-      <div>Profil fungerer</div>
+    <div id="closeProfile" style="margin-bottom:20px; cursor:pointer;">
+      ← Tilbake
     </div>
+
+    <div style="font-size:24px; margin-bottom:20px;">
+      ${friend.name}
+    </div>
+
+    ${reviewsHTML}
   `
 
+  // 🔥 TILBAKE
   document.getElementById("closeProfile").onclick = ()=>{
-    overlay.innerHTML = ""
+    closeProfile()
+  }
+
+  // 🔥 SWIPE BACK
+  let startX = 0
+
+  overlay.ontouchstart = (e)=>{
+    startX = e.touches[0].clientX
+  }
+
+  overlay.ontouchend = (e)=>{
+    const diff = e.changedTouches[0].clientX - startX
+    if(diff > 80){
+      closeProfile()
+    }
   }
 }
 
 function closeProfile(){
   const overlay = document.getElementById("profileOverlay")
-
-  overlay.classList.remove("active")
+  overlay.style.display = "none"
+}
 
   setTimeout(()=>{
     overlay.classList.add("hidden")
@@ -1630,7 +1674,7 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1
 
 <div id="friendsSheet" class="sheet hidden">
   <div class="sheetContent" id="sheetContent"></div>
-  <div id="profileOverlay" class="profileOverlay hidden"></div>
+  <div id="profileOverlay" style="display:none;"></div>
 </div>
   
 </body>
