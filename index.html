@@ -1157,11 +1157,13 @@ card.addEventListener("touchstart",e=>{
 startX=e.touches[0].clientX
 })
 
-card.addEventListener("touchmove",e=>{
-currentX=e.touches[0].clientX
-const diff=currentX-startX
-card.style.transition="transform .25s ease"
-card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
+card.addEventListener("touchmove", e=>{
+  currentX = e.touches[0].clientX
+  let diff = currentX - startX
+  diff = diff * 0.9
+  let rotate = Math.max(-12, Math.min(12, diff / 20))
+  card.style.transition = "none"
+  card.style.transform = `translateX(${diff}px) rotate(${rotate}deg)`
 })
 
 card.addEventListener("touchend",(e)=>{
