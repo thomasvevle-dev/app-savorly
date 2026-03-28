@@ -424,7 +424,25 @@ touch-action: manipulation;
 
 .dots .dot.active{
   background:white;
-}  
+}
+
+.profile{
+  padding:20px;
+  overflow-y:auto;
+  height:100%;
+}
+
+.profileName{
+  font-size:28px;
+  margin-bottom:20px;
+}
+
+.profileItem{
+  margin-bottom:16px;
+  padding:12px;
+  background:#111;
+  border-radius:12px;
+}
   
 </style>
 </head>
@@ -991,8 +1009,6 @@ function createCard(item,isNext){
   })
 }
 
-  
-
 function openFriendsModal(friends){
   const modal = document.getElementById("friendsModal")
   const content = document.getElementById("modalContent")
@@ -1048,6 +1064,52 @@ function openFriendsSheet(friends){
 function closeFriendsSheet(){
   const sheet = document.getElementById("friendsSheet")
   sheet.classList.add("hidden")
+}  
+
+function openProfile(friend){
+
+  const deck = document.getElementById("deck")
+  deck.innerHTML = ""
+
+  const profile = document.createElement("div")
+  profile.className = "profile"
+
+  let reviewsHTML = ""
+
+  Object.entries(friend.reviews).forEach(([place, review])=>{
+    reviewsHTML += `
+      <div class="profileItem">
+        <div class="place">${place}</div>
+        <div class="rating">⭐ ${review.rating}</div>
+        <div class="text">${review.text}</div>
+      </div>
+    `
+  })
+
+  profile.innerHTML = `
+    <div class="profileName">${friend.name}</div>
+    ${reviewsHTML}
+  `
+
+  deck.appendChild(profile)
+}  
+
+function getMatches(myLikes){
+
+  return friends.map(f => {
+
+    const friendLikes = Object.keys(f.reviews || {})
+
+    const overlap = friendLikes.filter(place =>
+      myLikes.includes(place)
+    )
+
+    return {
+      friend: f,
+      score: overlap.length
+    }
+
+  }).sort((a,b)=>b.score-a.score)
 }  
   
 /* FAVORITES */
@@ -1253,6 +1315,13 @@ closeFriendsSheet()
   deck.style.pointerEvents = "none"
 
   document.getElementById("home").style.display = "flex"
+
+  const matches = getMatches(favorites[currentType])
+
+matches.slice(0,3).forEach(m=>{
+console.log(m.friend.name, m.score)
+  
+})
 }
 
 function navigate(name){
@@ -1419,24 +1488,30 @@ function showReview(card, friendsList, placeName){
 
   let currentIndex = 0
 
-  function render(){
-    const f = validFriends[currentIndex]
-    const review = f.reviews[placeName]
+ function render(){
 
-    box.innerHTML = `
-      <div class="reviewHeader">
-        <div class="name">${f.name}</div>
-        <div class="dots">
-          ${validFriends.map((_,i)=>
-            `<span class="dot ${i===currentIndex?"active":""}"></span>`
-          ).join("")}
-        </div>
+  const f = validFriends[currentIndex]
+  const review = f.reviews[placeName]
+
+  box.innerHTML = `
+    <div class="reviewHeader">
+      <div class="name friendName">${f.name}</div>
+      <div class="dots">
+        ${validFriends.map((_,i)=>
+          `<span class="dot ${i===currentIndex?"active":""}"></span>`
+        ).join("")}
       </div>
+    </div>
 
-      <div class="rating">Rating: ${review.rating}</div>
-      <div class="text">${review.text}</div>
-    `
+    <div class="rating">Rating: ${review.rating}</div>
+    <div class="text">${review.text}</div>
+  `
+
+  box.querySelector(".friendName").onclick = (e)=>{
+    e.stopPropagation()
+    openProfile(f)
   }
+}
 
   // toggle
   if(!box.classList.contains("hidden")){
