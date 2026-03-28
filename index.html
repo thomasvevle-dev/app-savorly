@@ -459,6 +459,8 @@ touch-action: manipulation;
 
 <script>
 
+let activeVibe = null  
+  
 let data
 let list=[]
 let index=0
@@ -700,8 +702,7 @@ function ensureMinReviews(){
 
 }
 ensureMinReviews()
-  
-let activeVibe = null
+
 
 function setVibe(v){
   activeVibe = v
