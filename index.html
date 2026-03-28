@@ -1580,23 +1580,29 @@ function showReview(card, friendsList, placeName){
 }
 
 function openProfile(friend){
-console.log("OPEN PROFILE:", friend)
+
+  console.log("OPEN PROFILE:", friend)
+
   const overlay = document.getElementById("profileOverlay")
-if(!overlay){
-  console.log("❌ profileOverlay ikke funnet")
-  return
-}
+  if(!overlay) return
+
   let reviewsHTML = ""
 
-  Object.entries(friend.reviews).forEach(([place, review])=>{
-    reviewsHTML += `
-      <div class="profileItem">
-        <div>${place}</div>
-        <div>⭐ ${review.rating}</div>
-        <div>${review.text}</div>
-      </div>
-    `
-  })
+  if(friend.reviews){
+    Object.entries(friend.reviews).forEach(([place, review])=>{
+      reviewsHTML += `
+        <div class="profileItem">
+          <div>${place}</div>
+          <div>⭐ ${review.rating}</div>
+          <div>${review.text}</div>
+        </div>
+      `
+    })
+  }
+
+  if(!reviewsHTML){
+    reviewsHTML = "<div>Ingen reviews enda</div>"
+  }
 
   overlay.innerHTML = `
     <div class="profileBack">← Tilbake</div>
@@ -1609,6 +1615,7 @@ if(!overlay){
   setTimeout(()=>{
     overlay.classList.add("active")
   },10)
+}
 
   // 🔥 tilbakeknapp
   overlay.querySelector(".profileBack").onclick = ()=>{
