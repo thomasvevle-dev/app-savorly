@@ -1581,7 +1581,10 @@ function showReview(card, friendsList, placeName){
 function openProfile(friend){
 
   const overlay = document.getElementById("profileOverlay")
-
+if(!overlay){
+  console.log("❌ profileOverlay ikke funnet")
+  return
+}
   let reviewsHTML = ""
 
   Object.entries(friend.reviews).forEach(([place, review])=>{
