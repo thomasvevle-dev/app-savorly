@@ -91,15 +91,16 @@ height:92%;
 border-radius:26px;
 overflow:hidden;
 background:black;
-transition: transform .25s ease-out;
+transition: transform .3s ease, opacity .3s ease;
 will-change: transform;
 pointer-events:auto;
 }
 
 .card.next{
-transform:scale(.96) translateY(10px);
-opacity:.6;
-z-index:-1;
+  transform: scale(.98);
+  opacity: 0.85;
+  z-index: 0;
+  transition: all .3s ease;
 }
 
 .card img{
@@ -1159,7 +1160,7 @@ startX=e.touches[0].clientX
 card.addEventListener("touchmove",e=>{
 currentX=e.touches[0].clientX
 const diff=currentX-startX
-card.style.transition="transform 0s"
+card.style.transition="transform .25s ease"
 card.style.transform="translateX("+diff+"px) rotate("+(diff/12)+"deg)"
 })
 
@@ -1227,7 +1228,9 @@ if(index >= list.length){
   index = 0
 }
 
-buildDeck()
+setTimeout(()=>{
+  buildDeck()
+}, 50)
 
 }
 
