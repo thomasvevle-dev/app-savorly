@@ -701,7 +701,6 @@ function ensureMinReviews(){
   })
 
 }
-ensureMinReviews()
 
 function setVibe(v){
   activeVibe = v
@@ -723,8 +722,11 @@ cocktailbars:JSON.parse(localStorage.getItem("fav-cocktailbars")||"[]")
 const deck=document.getElementById("deck")
 
 async function loadData(){
-  const res=await fetch("data/places.json")
-  data=await res.json()
+
+  const res = await fetch("data/places.json")
+  data = await res.json()
+
+  ensureMinReviews()
 
   renderFavorites()
 
