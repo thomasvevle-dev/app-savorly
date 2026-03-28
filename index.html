@@ -1585,7 +1585,11 @@ console.log("🔥 OPEN PROFILE RUNNER")
 
   const overlay = document.getElementById("profileOverlay")
   if(!overlay) return
-
+overlay.style.display = "block"
+overlay.style.transform = "translateX(0)"
+overlay.style.zIndex = "99999"
+overlay.style.background = "black"
+  
   let reviewsHTML = ""
 
   if(friend.reviews){
