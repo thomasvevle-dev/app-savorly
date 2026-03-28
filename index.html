@@ -194,6 +194,7 @@ padding:10px 12px;
   left:24px;
   right:24px;
   z-index:10;
+  overflow:visible;
 }
 
 .name{
@@ -349,21 +350,22 @@ touch-action: manipulation;
 } 
 
 .reviewBox{
-  touch-action: pan-y;
-  margin-bottom:8px;
-
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:40px;
   background:rgba(0,0,0,0.65);
   backdrop-filter: blur(10px);
-
   padding:10px 12px;
   border-radius:12px;
-
   font-size:13px;
-
   opacity:0;
-  transform:scale(0.9);          
+  transform: translateY(10px) scale(0.95);
+  transform-origin: bottom left;
   transition: all .25s cubic-bezier(.2,.8,.2,1);
+  pointer-events:auto;
 }
+  
 .reviewBox .name{
   font-size:16px;
   font-weight:600;
@@ -387,9 +389,10 @@ touch-action: manipulation;
 }
 .reviewBox:not(.hidden){
   opacity:1;
-  transform:scale(1);            
+  transform: translateY(0) scale(1);
 }
 .reviewBox{
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   animation:fadeIn .2s ease;
 }
 
