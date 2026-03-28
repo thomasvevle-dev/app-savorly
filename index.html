@@ -1615,14 +1615,13 @@ function openProfile(friend){
   setTimeout(()=>{
     overlay.classList.add("active")
   },10)
-}
 
-  // 🔥 tilbakeknapp
+  // 🔥 tilbakeknapp (MÅ være inne i funksjonen)
   overlay.querySelector(".profileBack").onclick = ()=>{
     closeProfile()
   }
 
-  // 🔥 swipe tilbake
+  // 🔥 swipe tilbake (MÅ være inne i funksjonen)
   let startX = 0
 
   overlay.addEventListener("touchstart", e=>{
@@ -1635,6 +1634,7 @@ function openProfile(friend){
       closeProfile()
     }
   })
+}
 
 function closeProfile(){
   const overlay = document.getElementById("profileOverlay")
