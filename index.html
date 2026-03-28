@@ -1635,60 +1635,6 @@ console.log("🔥 OPEN PROFILE RUNNER")
     }
   })
 }
-  console.log("OPEN PROFILE:", friend)
-
-  const overlay = document.getElementById("profileOverlay")
-  if(!overlay) return
-
-  let reviewsHTML = ""
-
-  if(friend.reviews){
-    Object.entries(friend.reviews).forEach(([place, review])=>{
-      reviewsHTML += `
-        <div class="profileItem">
-          <div>${place}</div>
-          <div>⭐ ${review.rating}</div>
-          <div>${review.text}</div>
-        </div>
-      `
-    })
-  }
-
-  if(!reviewsHTML){
-    reviewsHTML = "<div>Ingen reviews enda</div>"
-  }
-
-  overlay.innerHTML = `
-    <div class="profileBack">← Tilbake</div>
-    <div class="profileName">${friend.name}</div>
-    ${reviewsHTML}
-  `
-
-  overlay.classList.remove("hidden")
-
-  setTimeout(()=>{
-    overlay.classList.add("active")
-  },10)
-
-  // 🔥 tilbakeknapp (MÅ være inne i funksjonen)
-  overlay.querySelector(".profileBack").onclick = ()=>{
-    closeProfile()
-  }
-
-  // 🔥 swipe tilbake (MÅ være inne i funksjonen)
-  let startX = 0
-
-  overlay.addEventListener("touchstart", e=>{
-    startX = e.touches[0].clientX
-  })
-
-  overlay.addEventListener("touchend", e=>{
-    const diff = e.changedTouches[0].clientX - startX
-    if(diff > 80){
-      closeProfile()
-    }
-  })
-}
 
 function closeProfile(){
   const overlay = document.getElementById("profileOverlay")
