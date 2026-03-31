@@ -732,6 +732,32 @@ let friends = [
 
 ]
 
+function enrichData(){
+
+  Object.keys(data).forEach(type => {
+
+    data[type].forEach(item => {
+
+      if(type === "restaurants"){
+        if(!item.cuisine){
+          item.cuisine = ["europeisk"]
+        }
+      }
+
+      if(!item.price){
+        item.price = "$$"
+      }
+
+      if(!item.distance){
+        item.distance = 3
+      }
+
+    })
+
+  })
+
+}
+  
 function ensureMinReviews(){
 
   const allPlaces = [
