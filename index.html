@@ -489,7 +489,15 @@ touch-action: manipulation;
 <body>
 
 <div id="home">
-
+<div onclick="openSettings()" style="
+  position:absolute;
+  top:20px;
+  right:20px;
+  font-size:22px;
+  cursor:pointer;
+">
+⚙️
+</div>
 <img src="logo.png" class="logo">
 
 <div class="cat" onclick="openCategory('restaurants')">Restaurant</div>
@@ -517,6 +525,11 @@ touch-action: manipulation;
 <script>
 
 let activeVibe = null  
+let settings = {
+  distance: 10,
+  price: ["$","$$","$$$"],
+  cuisine: []
+}  
   
 let data
 let list=[]
@@ -770,6 +783,34 @@ function setVibe(v){
   buildDeck()
 }
 
+function applyFilters(){
+
+  let base = data[currentType] || []
+
+  return base.filter(item => {
+
+    if(activeVibe && !item.vibe?.includes(activeVibe)){
+      return false
+    }
+
+    if(settings.price.length && !settings.price.includes(item.price)){
+      return false
+    }
+
+    if(settings.cuisine.length){
+      if(!item.cuisine || !item.cuisine.some(c => settings.cuisine.includes(c))){
+        return false
+      }
+    }
+
+    if(item.distance && item.distance > settings.distance){
+      return false
+    }
+
+    return true
+  })
+}  
+
 let favorites={
 restaurants:JSON.parse(localStorage.getItem("fav-restaurants")||"[]"),
 winebars:JSON.parse(localStorage.getItem("fav-winebars")||"[]"),
@@ -817,7 +858,7 @@ function openCategory(type){
   currentType = type
   activeVibe = null
 
-  list = (data[type] || [])
+  list = applyFilters()
 
   index = 0
 
@@ -878,6 +919,78 @@ loadPlace(next.name)
 
 }
 
+function openSettings(){
+
+  const panel = document.getElementById("settingsPanel")
+
+  panel.innerHTML = `
+    <div style="
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      background:#111;
+      padding:20px;
+      border-top-left-radius:20px;
+      border-top-right-radius:20px;
+      z-index:9999;
+    ">
+
+      <h3>Innstillinger</h3>
+
+      <div>
+        Avstand: ${settings.distance} km
+        <input type="range" min="1" max="50"
+          value="${settings.distance}"
+          onchange="settings.distance=this.value">
+      </div>
+
+      <div style="margin-top:10px;">
+        Pris:
+        <button onclick="togglePrice('$')">$</button>
+        <button onclick="togglePrice('$$')">$$</button>
+        <button onclick="togglePrice('$$$')">$$$</button>
+      </div>
+
+      <div style="margin-top:10px;">
+        Kjøkken:
+        <button onclick="toggleCuisine('italiensk')">Italiensk</button>
+        <button onclick="toggleCuisine('fransk')">Fransk</button>
+        <button onclick="toggleCuisine('asiatisk')">Asiatisk</button>
+      </div>
+
+      <div style="margin-top:20px;" onclick="closeSettings()">Lukk</div>
+
+    </div>
+  `
+
+  panel.classList.remove("hidden")
+}
+
+function togglePrice(p){
+  if(settings.price.includes(p)){
+    settings.price = settings.price.filter(x => x !== p)
+  } else {
+    settings.price.push(p)
+  }
+}
+
+function toggleCuisine(c){
+  if(settings.cuisine.includes(c)){
+    settings.cuisine = settings.cuisine.filter(x => x !== c)
+  } else {
+    settings.cuisine.push(c)
+  }
+}
+
+function closeSettings(){
+  document.getElementById("settingsPanel").classList.add("hidden")
+
+  index = 0
+  list = applyFilters()
+  buildDeck()
+}  
+  
 function createCard(item,isNext){
 
   if(!item || !item.name) return
@@ -1015,7 +1128,7 @@ function createCard(item,isNext){
 
           if(activeVibe === v){
             activeVibe = null
-            list = data[currentType]
+            list = applyFilters()
           } else {
             setVibe(v)
             return
@@ -1670,6 +1783,7 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy4OMXPl7a5ySsEVM9-iQuTb1
 <div id="friendsSheet" class="sheet hidden">
   <div class="sheetContent" id="sheetContent"></div>
   <div id="profileOverlay" style="display:none;"></div>
+  <div id="settingsPanel" class="hidden"></div>
 </div>
   
 </body>
